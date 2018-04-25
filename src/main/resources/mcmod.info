@@ -1,0 +1,16 @@
+[
+{
+  "modid": "rebind",
+  "name": "ReBind",
+  "description": "Ability to remap internal controls (Esc, F1, F3, F4).",
+  "version": "1.0",
+  "mcversion": "1.11.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["AustereTony"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
