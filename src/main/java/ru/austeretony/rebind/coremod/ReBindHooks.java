@@ -20,8 +20,8 @@ public class ReBindHooks {
 		return ConfigurationRegistry.rebindDebugMenu ? KeyRegistry.getKeyBinding(KeyRegistry.DEBUG_MENU).getKeyCode() : ConfigurationRegistry.defaultDebugMenuKey;
 	}
 	
-	public static int getSwitchShaderKeyCode() {
+	public static int getDisableShaderKeyCode() {
 		
-		return ConfigurationRegistry.rebingSwitchShader ? KeyRegistry.getKeyBinding(KeyRegistry.SWITCH_SHADER).getKeyCode() : ConfigurationRegistry.defaultSwitchShaderKey;
+		return ConfigurationRegistry.rebingDisableShader ? KeyRegistry.getKeyBinding(KeyRegistry.DISABLE_SHADER).getKeyCode() : ConfigurationRegistry.defaultDisableShaderKey;
 	}
 }

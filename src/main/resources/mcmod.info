@@ -4,7 +4,7 @@
   "name": "ReBind",
   "description": "Ability to remap internal controls (Esc, F1, F3, F4).",
   "version": "1.0",
-  "mcversion": "1.9.4",
+  "mcversion": "1.7.10",
   "url": "",
   "updateUrl": "",
   "authorList": ["AustereTony"],

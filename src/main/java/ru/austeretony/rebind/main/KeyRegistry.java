@@ -3,10 +3,10 @@ package ru.austeretony.rebind.main;
 import java.util.HashMap;
 import java.util.Map;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class KeyRegistry {
@@ -17,7 +17,7 @@ public class KeyRegistry {
 	QUIT = 0,
 	HIDE_HUD = 1,
 	DEBUG_MENU = 2,
-	SWITCH_SHADER = 3;
+	DISABLE_SHADER = 3;
 	
 	public static void registerKeys() {
 		
@@ -30,8 +30,8 @@ public class KeyRegistry {
 		if (ConfigurationRegistry.rebindDebugMenu)
 		registerKeyBinding("key.debugMenu", DEBUG_MENU, ConfigurationRegistry.defaultDebugMenuKey, "key.categories.misc");
 		
-		if (ConfigurationRegistry.rebingSwitchShader)
-		registerKeyBinding("key.switchShader", SWITCH_SHADER, ConfigurationRegistry.defaultSwitchShaderKey, "key.categories.misc");
+		if (ConfigurationRegistry.rebingDisableShader)
+		registerKeyBinding("key.disableShader", DISABLE_SHADER, ConfigurationRegistry.defaultDisableShaderKey, "key.categories.misc");
 	}
 
 	private static void registerKeyBinding(String name, int index, int keyCode, String category) {

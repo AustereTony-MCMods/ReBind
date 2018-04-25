@@ -23,35 +23,35 @@ public class ReBindClassTransformer implements IClassTransformer {
     	
     	switch (name) {
     	
-			case "bcd":					
+			case "bao":					
 				return patchMinecraft(basicClass, true);
 		
 			case "net.minecraft.client.Minecraft":							
 	    		return patchMinecraft(basicClass, false);	
 	    		
-			case "bez":					
+			case "bdw":					
 				return patchGuiScreen(basicClass, true, false);
 		
 			case "net.minecraft.client.gui.GuiScreen":							
 	    		return patchGuiScreen(basicClass, false, false);	
 	    		
-			case "bfr":					
+			case "bex":					
 				return patchGuiScreen(basicClass, true, true);
 		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
-	    		return patchGuiScreen(basicClass, false, true);	
+	    		return patchGuiScreen(basicClass, false, true);
     	}
     	
 		return basicClass;
     }
-
+    
 	private byte[] patchMinecraft(byte[] basicClass, boolean obfuscated) {
 		        
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "az" : "runTickKeyboard";
+	 	String targetMethodName = obfuscated ? "p" : "runTick";
 	 	
         int 
         bipushCount = 0,
@@ -77,38 +77,38 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	bipushCount++;
                     	
-                    	if (bipushCount == 2 || bipushCount == 4 || bipushCount == 6 || bipushCount == 10) {
+                    	if (bipushCount == 4 || bipushCount == 6 || bipushCount == 9 || bipushCount == 11 || bipushCount == 13 || bipushCount == 17 || bipushCount == 19 || bipushCount == 21 || bipushCount == 23 || bipushCount == 25) {
                     		
                             methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDebugMenuKeyCode", "()I", false)); 
                     		
                     		iteratorNode.remove();
                     		
-                    		if (bipushCount == 10) {
+                    		if (bipushCount == 25) {
                     			
                     			break; 
                     		}
                     	}
                     	
-                    	if (bipushCount == 5) {
+                    	if (bipushCount == 7) {
                     		
-                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getSwitchShaderKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDisableShaderKeyCode", "()I", false)); 
                     		
                     		iteratorNode.remove();
                     	}
-                    	
-                    	if (bipushCount == 7) {
+                    	                   	
+                    	if (bipushCount == 24) {
                         	                                                   	
                             methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getHideHUDKeyCode", "()I", false)); 
                             
                             iteratorNode.remove();               
                         } 
-                    }
+                    }                                                                       
                     
                     if (currentNode.getOpcode() == Opcodes.ICONST_1) {
                     	
                     	iconstCount++;
                     	
-                    	if (iconstCount == 2) {
+                    	if (iconstCount == 4) {
                     		
                             methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
                     		
@@ -121,7 +121,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 		}
 		
-	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    ClassWriter writer = new ClassWriter(0);	    
 	    classNode.accept(writer);
 	    
         LOGGER.info("<Minecraft> transformation successful!");   
@@ -138,10 +138,10 @@ public class ReBindClassTransformer implements IClassTransformer {
 	 	String targetMethodName = obfuscated ? "a" : "keyTyped";
                 
 	 	if (!isContainer)
-	 		LOGGER.info("<GuiScreen> transformation started...");   
+        LOGGER.info("<GuiScreen> transformation started...");   
 	 	else
-	 		LOGGER.info("<GuiContainer> transformation started...");   
-        
+	    LOGGER.info("<GuiContainer> transformation started...");   
+	 		
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("(CI)V")) {
@@ -170,13 +170,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 		}
 		
-	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    ClassWriter writer = new ClassWriter(0);	    
 	    classNode.accept(writer);
 	    
-	    if (!isContainer)
-	    	LOGGER.info("<GuiScreen> transformation successful!");   
-	    else
-	    	LOGGER.info("<GuiContainer> transformation successful!");   
+	 	if (!isContainer)
+	 		LOGGER.info("<GuiScreen> transformation successful!");  
+	 	else
+	        LOGGER.info("<GuiContainer> transformation successful!");  
         
         return writer.toByteArray();				
 	}

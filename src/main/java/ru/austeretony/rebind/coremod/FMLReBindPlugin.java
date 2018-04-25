@@ -2,8 +2,8 @@ package ru.austeretony.rebind.coremod;
 
 import java.util.Map;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 @TransformerExclusions({"ru.austeretony.rebind.coremod"})
 public class FMLReBindPlugin implements IFMLLoadingPlugin {

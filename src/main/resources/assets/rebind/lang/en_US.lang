@@ -1,14 +1,14 @@
 key.exit=Quit
 key.hideHUD=Hide HUD
 key.debugMenu=Debug Screen
-key.switchShader=Switch Shader
+key.disableShader=Disable Shader
 
 config.rebindQuit=Is "Quit"(Esc) should be added to controls?
 config.rebindHideGUI=Is "Hide GUI"(F1) should be added to controls?
 config.rebindDebugMenu=Is "Debug Screen"(F3) should be added to controls?
-config.rebindSwitchShader=Is "Switch Shader"(F4) should be added to controls?
+config.rebindDisableShader=Is "Disable Shader"(F4) should be added to controls?
 
 config.defaultQuitKey=Defines default "Quit"(Esc) key code.
 config.defaultHideGUIKey=Defines default "Hide GUI"(F1) key code.
 config.defaultDebugMenuKey=Defines default "Debug Screen"(F3) key code.
-config.defaultSwitchShaderKey=Defines default "Switch Shader"(F4) key code.
+config.defaultDisableShaderKey=Defines default "Disable Shader"(F4) key code.
