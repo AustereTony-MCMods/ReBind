@@ -23,19 +23,19 @@ public class ReBindClassTransformer implements IClassTransformer {
     	
     	switch (name) {
     	
-			case "bcx":					
+			case "bcd":					
 				return patchMinecraft(basicClass, true);
 		
 			case "net.minecraft.client.Minecraft":							
 	    		return patchMinecraft(basicClass, false);	
 	    		
-			case "bft":					
+			case "bez":					
 				return patchGuiScreen(basicClass, true, false);
 		
 			case "net.minecraft.client.gui.GuiScreen":							
 	    		return patchGuiScreen(basicClass, false, false);	
 	    		
-			case "bgl":					
+			case "bfr":					
 				return patchGuiScreen(basicClass, true, true);
 		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
