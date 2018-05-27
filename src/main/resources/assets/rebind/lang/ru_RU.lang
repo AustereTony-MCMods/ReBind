@@ -2,13 +2,3 @@
 key.hideHUD=Спрятать HUD
 key.debugMenu=Экран Отладки
 key.switchShader=Сменить Шейдер
-
-config.rebindQuit=Добавить кнопку "Выход"(Esc) в настройки?
-config.rebindHideGUI=Добавить кнопку "Спрятать HUD"(F1) в настройки?
-config.rebindDebugMenu=Добавить кнопку "Экран Отладки"(F3) в настройки?
-config.rebindSwitchShader=Добавить кнопку "Сменить Шейдер"(F4) в настройки?
-
-config.defaultQuitKey=Определяет код по умолчанию для клавиши "Выход"(Esc).
-config.defaultHideGUIKey=Определяет код по умолчанию для клавиши "Спрятать HUD"(F1).
-config.defaultDebugMenuKey=Определяет код по умолчанию для клавиши "Экран Отладки"(F3).
-config.defaultSwitchShaderKey=Определяет код по умолчанию для клавиши "Сменить Шейдер"(F4).

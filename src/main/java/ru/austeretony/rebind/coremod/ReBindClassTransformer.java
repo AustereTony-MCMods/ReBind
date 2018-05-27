@@ -65,23 +65,23 @@ public class ReBindClassTransformer implements IClassTransformer {
 				
 		        LOGGER.info("Target method found.");   
 								
-                AbstractInsnNode currentNode = null;
+                AbstractInsnNode currentInsn = null;
                 
-                Iterator<AbstractInsnNode> iteratorNode = methodNode.instructions.iterator();
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
-                while (iteratorNode.hasNext()) {
+                while (insnIterator.hasNext()) {
                 	
-                    currentNode = iteratorNode.next(); 
+                    currentInsn = insnIterator.next(); 
                     
-                    if (currentNode.getOpcode() == Opcodes.BIPUSH) {
+                    if (currentInsn.getOpcode() == Opcodes.BIPUSH) {
                     	
                     	bipushCount++;
                     	
                     	if (bipushCount == 2 || bipushCount == 4 || bipushCount == 6 || bipushCount == 10) {
                     		
-                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDebugMenuKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDebugMenuKeyCode", "()I", false)); 
                     		
-                    		iteratorNode.remove();
+                    		insnIterator.remove();
                     		
                     		if (bipushCount == 10) {
                     			
@@ -91,28 +91,28 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	if (bipushCount == 5) {
                     		
-                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getSwitchShaderKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getSwitchShaderKeyCode", "()I", false)); 
                     		
-                    		iteratorNode.remove();
+                    		insnIterator.remove();
                     	}
                     	
                     	if (bipushCount == 7) {
                         	                                                   	
-                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getHideHUDKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getHideHUDKeyCode", "()I", false)); 
                             
-                            iteratorNode.remove();               
+                            insnIterator.remove();               
                         } 
                     }
                     
-                    if (currentNode.getOpcode() == Opcodes.ICONST_1) {
+                    if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
                     	
                     	iconstCount++;
                     	
                     	if (iconstCount == 2) {
                     		
-                            methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
                     		
-                    		iteratorNode.remove();
+                    		insnIterator.remove();
                     	}
                     }
                 }
@@ -148,19 +148,19 @@ public class ReBindClassTransformer implements IClassTransformer {
 				
 		        LOGGER.info("Target method found.");   
 								
-                AbstractInsnNode currentNode = null;
+                AbstractInsnNode currentInsn = null;
                 
-                Iterator<AbstractInsnNode> iteratorNode = methodNode.instructions.iterator();
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
-                while (iteratorNode.hasNext()) {
+                while (insnIterator.hasNext()) {
                 	
-                    currentNode = iteratorNode.next(); 
+                    currentInsn = insnIterator.next(); 
                     
-                    if (currentNode.getOpcode() == Opcodes.ICONST_1) {
+                    if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
                     		
-                        methodNode.instructions.insert(currentNode.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
+                        methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
                     		
-                    	iteratorNode.remove();
+                    	insnIterator.remove();
                     	
                     	break;
                     }

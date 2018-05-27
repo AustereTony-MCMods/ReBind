@@ -1,27 +1,27 @@
 package ru.austeretony.rebind.coremod;
 
-import ru.austeretony.rebind.main.ConfigurationRegistry;
 import ru.austeretony.rebind.main.KeyRegistry;
+import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
 	
 	public static int getQuitKeyCode() {
 		
-		return ConfigurationRegistry.rebindQuit ? KeyRegistry.getKeyBinding(KeyRegistry.QUIT).getKeyCode() : ConfigurationRegistry.defaultQuitKey;
+		return ReBindMain.CONFIG_LOADER.enableQuit ? KeyRegistry.getKeyBinding(KeyRegistry.QUIT).getKeyCode() : ReBindMain.CONFIG_LOADER.keyCodeQuit;
 	}
 
 	public static int getHideHUDKeyCode() {
 		
-		return ConfigurationRegistry.rebindHideGUI ? KeyRegistry.getKeyBinding(KeyRegistry.HIDE_HUD).getKeyCode() : ConfigurationRegistry.defaultHideGUIKey;
+		return ReBindMain.CONFIG_LOADER.enableHideGUI ? KeyRegistry.getKeyBinding(KeyRegistry.HIDE_HUD).getKeyCode() : ReBindMain.CONFIG_LOADER.keyCodeHideGUI;
 	}
 	
 	public static int getDebugMenuKeyCode() {
 		
-		return ConfigurationRegistry.rebindDebugMenu ? KeyRegistry.getKeyBinding(KeyRegistry.DEBUG_MENU).getKeyCode() : ConfigurationRegistry.defaultDebugMenuKey;
+		return ReBindMain.CONFIG_LOADER.enableDebugMenu ? KeyRegistry.getKeyBinding(KeyRegistry.DEBUG_MENU).getKeyCode() : ReBindMain.CONFIG_LOADER.keyCodeDebugMenu;
 	}
 	
 	public static int getSwitchShaderKeyCode() {
 		
-		return ConfigurationRegistry.rebingSwitchShader ? KeyRegistry.getKeyBinding(KeyRegistry.SWITCH_SHADER).getKeyCode() : ConfigurationRegistry.defaultSwitchShaderKey;
+		return ReBindMain.CONFIG_LOADER.enableSwitchShader ? KeyRegistry.getKeyBinding(KeyRegistry.SWITCH_SHADER).getKeyCode() : ReBindMain.CONFIG_LOADER.keyCodeSwitchShader;
 	}
 }

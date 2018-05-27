@@ -7,6 +7,7 @@ import com.google.common.eventbus.EventBus;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
+import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindModContainer extends DummyModContainer {
 
@@ -18,7 +19,7 @@ public class ReBindModContainer extends DummyModContainer {
 
 		 meta.modId = "rebindcore";
 		 meta.name = "ReBind Core";
-		 meta.version = "1.0"; 
+		 meta.version = ReBindMain.COREMOD_VERSION; 
 		 meta.credits = "";
 		 meta.authorList = Arrays.asList("AustereTony");
 		 meta.description = "Coremod for ReBind modification.";
@@ -31,6 +32,7 @@ public class ReBindModContainer extends DummyModContainer {
 	 public boolean registerBus(EventBus bus, LoadController controller) {
 
 		 bus.register(this);
+		 
 		 return true;
 	 }
 }
