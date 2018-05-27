@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package ru.austeretony.rebind.coremod;
 
 import java.util.Map;
@@ -36,42 +35,3 @@ public class FMLReBindPlugin implements IFMLLoadingPlugin {
         return null;
     }
 }
-=======
-package ru.austeretony.rebind.coremod;
-
-import java.util.Map;
-
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
-
-@TransformerExclusions({"ru.austeretony.rebind.coremod"})
-public class FMLReBindPlugin implements IFMLLoadingPlugin {
-		
-    @Override
-    public String[] getASMTransformerClass() {
-    	
-        return new String[] {"ru.austeretony.rebind.coremod.ReBindClassTransformer"};
-    }
-
-    @Override
-    public String getModContainerClass() {
-    	
-        return "ru.austeretony.rebind.coremod.ReBindModContainer";
-    }
-
-    @Override
-    public String getSetupClass() {
-    	
-        return null;
-    }
-
-    @Override
-    public void injectData(Map<String, Object> data) {}
-
-    @Override
-    public String getAccessTransformerClass() {
-    	
-        return null;
-    }
-}
->>>>>>> f6fa39ce2f08d82c35365a74a37763b417079fd3
