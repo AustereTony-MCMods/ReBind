@@ -1,5 +1,4 @@
 # ReBind
+Ability to disable, remap and hide any controls (including Esc, F1, F3, F4). Esc, F1, F3, F4 will be added to "Misc" section after modification installation. This mod is clientside.
 
-Ability to remap internal controls (Esc, F1, F3, F4). This controls will be added to "Misc" section after modification installation. This mod is clientside.
-
-Via config file you can define which keys should be added to controls (see rebind.cfg in game directory). Also there are opportunity to set default key codes for those controls. Set key code to zero and disable appropriate key addition if you want fully disable this key ingame.
+Use config.json (open with Notepad++ for example) to manage controls (open jar with any archiver and go to /assets/rebind/config/). This file allows you to set default key codes for any key, remove it from controls and even fully disable key. File contains tips.
