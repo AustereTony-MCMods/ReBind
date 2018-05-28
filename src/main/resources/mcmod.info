@@ -3,7 +3,7 @@
   "modid": "rebind",
   "name": "ReBind",
   "description": "Ability to disable, remap and hide any controls (including Esc, F1, F3, F4).",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "mcversion": "1.10.2",
   "url": "",
   "updateUrl": "",
