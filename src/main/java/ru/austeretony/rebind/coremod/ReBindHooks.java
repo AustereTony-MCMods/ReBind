@@ -1,9 +1,27 @@
 package ru.austeretony.rebind.coremod;
 
+import net.minecraft.nbt.NBTTagCompound;
 import ru.austeretony.rebind.main.KeyRegistry;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
+	
+	public static boolean loadControlsFromOptions(NBTTagCompound optionsTagCompound) {
+		
+		boolean wasLoadedBefore = optionsTagCompound.getKeySet().contains("key_key.quit");
+		
+		if (wasLoadedBefore) {
+			
+			return true;
+		}
+		
+		else if (ReBindMain.CONFIG_LOADER.enableControlsRewriting) {
+			
+			return false;
+		}
+										
+		return true;
+	}
 	
 	public static int getQuitKeyCode() {
 		
