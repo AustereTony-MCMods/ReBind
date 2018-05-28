@@ -2,7 +2,10 @@ package ru.austeretony.rebind.main;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -20,15 +23,8 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.0.0",
-    COREMOD_VERSION = "1.0.0", 
-    	    
-    CATEGORY_GAMEPLAY = "key.categories.gameplay",
-    CATEGORY_MOVEMENT = "key.categories.movement",
-    CATEGORY_INVENTORY = "key.categories.inventory",
-    CATEGORY_MULTIPLAYER = "key.categories.multiplayer",
-    CATEGORY_MISC = "key.categories.misc",
-    CATEGORY_STREAM = "key.categories.stream";
+    VERSION = "2.1.0",
+    COREMOD_VERSION = "1.1.0";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
     
@@ -44,21 +40,22 @@ public class ReBindMain {
     @EventHandler
     public void init(FMLInitializationEvent event) {
     	
-    	if (event.getSide() == Side.CLIENT)	{    	
+    	if (event.getSide() == Side.CLIENT)	{    
     		
-    		this.clearKeyBindings();
-
-    		this.modifyKeyBindings();
+    		GameSettings gameSettings = Minecraft.getMinecraft().gameSettings;
     		
-    		KeyRegistry.registerInternalKeys();
+    		this.clearVanillaKeyBindings(gameSettings);
+    		this.updateKeyBindings(gameSettings);   		
     		
-    		this.removeUnusedCategories();
+    		KeyRegistry.registerInternalVanillaKeys();
+    		
+    		this.removeUnusedCategories(gameSettings);
     	}
     }
     
     @SideOnly(Side.CLIENT)
-    private void clearKeyBindings() {
-    	
+    private void clearVanillaKeyBindings(GameSettings gameSettings) {
+    	    	
 		try {
 			
 			Field[] fields = KeyBinding.class.getDeclaredFields();
@@ -69,13 +66,49 @@ public class ReBindMain {
 				
 					fields[i].setAccessible(true);
 							
-					List list = (List) fields[i].get(null);
-					
-					list.clear();
+					List<KeyBinding> bindingsArray = (List<KeyBinding>) fields[i].get(null);
 										
+					//Mouse
+												
+					bindingsArray.remove(gameSettings.keyBindAttack);												
+					bindingsArray.remove(gameSettings.keyBindUseItem);												
+					bindingsArray.remove(gameSettings.keyBindPickBlock);
+					
+					//Keyboard
+							
+					bindingsArray.remove(gameSettings.keyBindForward);							
+					bindingsArray.remove(gameSettings.keyBindLeft);							
+					bindingsArray.remove(gameSettings.keyBindBack);							
+					bindingsArray.remove(gameSettings.keyBindRight);							
+					bindingsArray.remove(gameSettings.keyBindJump);							
+					bindingsArray.remove(gameSettings.keyBindSneak);							
+					bindingsArray.remove(gameSettings.keyBindSprint);							
+					bindingsArray.remove(gameSettings.keyBindDrop);							
+					bindingsArray.remove(gameSettings.keyBindInventory);							
+					bindingsArray.remove(gameSettings.keyBindChat);							
+					bindingsArray.remove(gameSettings.keyBindPlayerList);							
+					bindingsArray.remove(gameSettings.keyBindCommand);							
+					bindingsArray.remove(gameSettings.keyBindScreenshot);						
+					bindingsArray.remove(gameSettings.keyBindTogglePerspective);						
+					bindingsArray.remove(gameSettings.keyBindSmoothCamera);							
+					bindingsArray.remove(gameSettings.field_152395_am);						
+					bindingsArray.remove(gameSettings.field_152396_an);							
+					bindingsArray.remove(gameSettings.field_152397_ao);							
+					bindingsArray.remove(gameSettings.field_152398_ap);							
+					bindingsArray.remove(gameSettings.field_152399_aq);							
+					bindingsArray.remove(gameSettings.keyBindsHotbar[0]);									
+					bindingsArray.remove(gameSettings.keyBindsHotbar[1]);								
+					bindingsArray.remove(gameSettings.keyBindsHotbar[2]);											
+					bindingsArray.remove(gameSettings.keyBindsHotbar[3]);										
+					bindingsArray.remove(gameSettings.keyBindsHotbar[4]);										
+					bindingsArray.remove(gameSettings.keyBindsHotbar[5]);									
+					bindingsArray.remove(gameSettings.keyBindsHotbar[6]);										
+					bindingsArray.remove(gameSettings.keyBindsHotbar[7]);											
+					bindingsArray.remove(gameSettings.keyBindsHotbar[8]);
+					
 					break;
 				}
-			}	
+			}
 		} 
 		
 		catch (SecurityException exception) {
@@ -92,227 +125,246 @@ public class ReBindMain {
 		
 			exception.printStackTrace();		
 		}
-		
-		KeyBinding.getKeybinds().clear();
-		
+			
+    	KeyBinding.getKeybinds().remove("key.categories.gameplay");
+    	KeyBinding.getKeybinds().remove("key.categories.movement");
+    	KeyBinding.getKeybinds().remove("key.categories.multiplayer");   	
+    	KeyBinding.getKeybinds().remove("key.categories.misc");    	
+    	KeyBinding.getKeybinds().remove("key.categories.inventory");
+    	KeyBinding.getKeybinds().remove("key.categories.stream");
+    	
 		KeyBinding.resetKeyBindingArrayAndHash();
     }
     
     @SideOnly(Side.CLIENT)
-	private void modifyKeyBindings() {
-		
-		List<KeyBinding> modifiedKeys = new ArrayList<KeyBinding>();
-		
-		GameSettings gameSettings = Minecraft.getMinecraft().gameSettings;
-				
+    private void updateKeyBindings(GameSettings gameSettings) {
+    	
+		List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(gameSettings.keyBindings));
+
 		//Mouse
-				
-		gameSettings.keyBindAttack = new KeyBinding("key.attack", this.CONFIG_LOADER.keyCodeAttack, this.CATEGORY_GAMEPLAY);
 		
-		if (this.CONFIG_LOADER.enableAttack)
-		modifiedKeys.add(gameSettings.keyBindAttack);
-				
-		gameSettings.keyBindUseItem = new KeyBinding("key.use", this.CONFIG_LOADER.keyCodeUseItem, this.CATEGORY_GAMEPLAY);
-		
-		if (this.CONFIG_LOADER.enableUseItem)
-		modifiedKeys.add(gameSettings.keyBindUseItem);
-				
-		gameSettings.keyBindPickBlock = new KeyBinding("key.pickItem", this.CONFIG_LOADER.keyCodePickBlock, this.CATEGORY_GAMEPLAY);
-		
-		if (this.CONFIG_LOADER.enablePickBlock)
-		modifiedKeys.add(gameSettings.keyBindPickBlock);
+		bindingsList.remove(gameSettings.keyBindAttack);												
+		bindingsList.remove(gameSettings.keyBindUseItem);												
+		bindingsList.remove(gameSettings.keyBindPickBlock);
 		
 		//Keyboard
 				
-		gameSettings.keyBindForward = new KeyBinding("key.forward", this.CONFIG_LOADER.keyCodeForward, this.CATEGORY_MOVEMENT);
+		bindingsList.remove(gameSettings.keyBindForward);							
+		bindingsList.remove(gameSettings.keyBindLeft);							
+		bindingsList.remove(gameSettings.keyBindBack);							
+		bindingsList.remove(gameSettings.keyBindRight);							
+		bindingsList.remove(gameSettings.keyBindJump);							
+		bindingsList.remove(gameSettings.keyBindSneak);							
+		bindingsList.remove(gameSettings.keyBindSprint);							
+		bindingsList.remove(gameSettings.keyBindDrop);							
+		bindingsList.remove(gameSettings.keyBindInventory);							
+		bindingsList.remove(gameSettings.keyBindChat);							
+		bindingsList.remove(gameSettings.keyBindPlayerList);							
+		bindingsList.remove(gameSettings.keyBindCommand);							
+		bindingsList.remove(gameSettings.keyBindScreenshot);						
+		bindingsList.remove(gameSettings.keyBindTogglePerspective);						
+		bindingsList.remove(gameSettings.keyBindSmoothCamera);							
+		bindingsList.remove(gameSettings.field_152395_am);		
+		bindingsList.remove(gameSettings.field_152396_an);							
+		bindingsList.remove(gameSettings.field_152397_ao);							
+		bindingsList.remove(gameSettings.field_152398_ap);							
+		bindingsList.remove(gameSettings.field_152399_aq);		
+		bindingsList.remove(gameSettings.keyBindsHotbar[0]);									
+		bindingsList.remove(gameSettings.keyBindsHotbar[1]);								
+		bindingsList.remove(gameSettings.keyBindsHotbar[2]);											
+		bindingsList.remove(gameSettings.keyBindsHotbar[3]);										
+		bindingsList.remove(gameSettings.keyBindsHotbar[4]);										
+		bindingsList.remove(gameSettings.keyBindsHotbar[5]);									
+		bindingsList.remove(gameSettings.keyBindsHotbar[6]);										
+		bindingsList.remove(gameSettings.keyBindsHotbar[7]);											
+		bindingsList.remove(gameSettings.keyBindsHotbar[8]);
+		
+		List<KeyBinding> updatedBindingsList = new ArrayList<KeyBinding>();
+						
+		//Mouse
+				
+		gameSettings.keyBindAttack = new KeyBinding("key.attack", CONFIG_LOADER.keyCodeAttack, getCat(CONFIG_LOADER.categoryAttack));
+		
+		if (this.CONFIG_LOADER.enableAttack)
+		updatedBindingsList.add(gameSettings.keyBindAttack);
+				
+		gameSettings.keyBindUseItem = new KeyBinding("key.use", CONFIG_LOADER.keyCodeUseItem, getCat(CONFIG_LOADER.categoryUseItem));
+		
+		if (this.CONFIG_LOADER.enableUseItem)
+		updatedBindingsList.add(gameSettings.keyBindUseItem);
+				
+		gameSettings.keyBindPickBlock = new KeyBinding("key.pickItem", CONFIG_LOADER.keyCodePickBlock, getCat(CONFIG_LOADER.categoryPickBlock));
+		
+		if (this.CONFIG_LOADER.enablePickBlock)
+		updatedBindingsList.add(gameSettings.keyBindPickBlock);
+		
+		//Keyboard
+				
+		gameSettings.keyBindForward = new KeyBinding("key.forward", CONFIG_LOADER.keyCodeForward, getCat(CONFIG_LOADER.categoryForward));
 		
 		if (this.CONFIG_LOADER.enableForward)
-		modifiedKeys.add(gameSettings.keyBindForward);
+		updatedBindingsList.add(gameSettings.keyBindForward);
 				
-		gameSettings.keyBindLeft = new KeyBinding("key.left", this.CONFIG_LOADER.keyCodeLeft, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindLeft = new KeyBinding("key.left", CONFIG_LOADER.keyCodeLeft, getCat(CONFIG_LOADER.categoryLeft));
 		
 		if (this.CONFIG_LOADER.enableLeft)
-		modifiedKeys.add(gameSettings.keyBindLeft);
+		updatedBindingsList.add(gameSettings.keyBindLeft);
 				
-		gameSettings.keyBindBack = new KeyBinding("key.back", this.CONFIG_LOADER.keyCodeBack, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindBack = new KeyBinding("key.back", CONFIG_LOADER.keyCodeBack, getCat(CONFIG_LOADER.categoryBack));
 		
 		if (this.CONFIG_LOADER.enableBack)
-		modifiedKeys.add(gameSettings.keyBindBack);
+		updatedBindingsList.add(gameSettings.keyBindBack);
 				
-		gameSettings.keyBindRight = new KeyBinding("key.right", this.CONFIG_LOADER.keyCodeRight, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindRight = new KeyBinding("key.right", CONFIG_LOADER.keyCodeRight, getCat(CONFIG_LOADER.categoryRight));
 		
 		if (this.CONFIG_LOADER.enableRight)
-		modifiedKeys.add(gameSettings.keyBindRight);
+		updatedBindingsList.add(gameSettings.keyBindRight);
 				
-		gameSettings.keyBindJump = new KeyBinding("key.jump", this.CONFIG_LOADER.keyCodeJump, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindJump = new KeyBinding("key.jump", CONFIG_LOADER.keyCodeJump, getCat(CONFIG_LOADER.categoryJump));
 
 		if (this.CONFIG_LOADER.enableJump)
-		modifiedKeys.add(gameSettings.keyBindJump);
+		updatedBindingsList.add(gameSettings.keyBindJump);
 				
-		gameSettings.keyBindSneak = new KeyBinding("key.sneak", this.CONFIG_LOADER.keyCodeSneak, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindSneak = new KeyBinding("key.sneak", CONFIG_LOADER.keyCodeSneak, getCat(CONFIG_LOADER.categorySneak));
 
 		if (this.CONFIG_LOADER.enableSneak)
-		modifiedKeys.add(gameSettings.keyBindSneak);
+		updatedBindingsList.add(gameSettings.keyBindSneak);
 				
-		gameSettings.keyBindSprint = new KeyBinding("key.sprint", this.CONFIG_LOADER.keyCodeSprint, this.CATEGORY_MOVEMENT);
+		gameSettings.keyBindSprint = new KeyBinding("key.sprint", CONFIG_LOADER.keyCodeSprint, getCat(CONFIG_LOADER.categorySprint));
 
 		if (this.CONFIG_LOADER.enableSprint)
-		modifiedKeys.add(gameSettings.keyBindSprint);
+		updatedBindingsList.add(gameSettings.keyBindSprint);
 				
-		gameSettings.keyBindDrop = new KeyBinding("key.drop", this.CONFIG_LOADER.keyCodeDrop, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindDrop = new KeyBinding("key.drop", CONFIG_LOADER.keyCodeDrop, getCat(CONFIG_LOADER.categoryDrop));
 
 		if (this.CONFIG_LOADER.enableDrop)
-		modifiedKeys.add(gameSettings.keyBindDrop);
+		updatedBindingsList.add(gameSettings.keyBindDrop);
 				
-		gameSettings.keyBindInventory = new KeyBinding("key.inventory", this.CONFIG_LOADER.keyCodeInventory, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindInventory = new KeyBinding("key.inventory", CONFIG_LOADER.keyCodeInventory, getCat(CONFIG_LOADER.categoryInventory));
 
 		if (this.CONFIG_LOADER.enableInventory)
-		modifiedKeys.add(gameSettings.keyBindInventory);
+		updatedBindingsList.add(gameSettings.keyBindInventory);
 				
-		gameSettings.keyBindChat = new KeyBinding("key.chat", this.CONFIG_LOADER.keyCodeChat, this.CATEGORY_MULTIPLAYER);
+		gameSettings.keyBindChat = new KeyBinding("key.chat", CONFIG_LOADER.keyCodeChat, getCat(CONFIG_LOADER.categoryChat));
 
 		if (this.CONFIG_LOADER.enableChat)
-		modifiedKeys.add(gameSettings.keyBindChat);
+		updatedBindingsList.add(gameSettings.keyBindChat);
 				
-		gameSettings.keyBindPlayerList = new KeyBinding("key.playerlist", this.CONFIG_LOADER.keyCodePlayerList, this.CATEGORY_MULTIPLAYER);
+		gameSettings.keyBindPlayerList = new KeyBinding("key.playerlist", CONFIG_LOADER.keyCodePlayerList, getCat(CONFIG_LOADER.categoryPlayerList));
 
 		if (this.CONFIG_LOADER.enablePlayerList)
-		modifiedKeys.add(gameSettings.keyBindPlayerList);
+		updatedBindingsList.add(gameSettings.keyBindPlayerList);
 				
-		gameSettings.keyBindCommand = new KeyBinding("key.command", this.CONFIG_LOADER.keyCodeCommand, this.CATEGORY_MULTIPLAYER);
+		gameSettings.keyBindCommand = new KeyBinding("key.command", CONFIG_LOADER.keyCodeCommand, getCat(CONFIG_LOADER.categoryCommand));
 
 		if (this.CONFIG_LOADER.enableCommand)
-		modifiedKeys.add(gameSettings.keyBindCommand);
+		updatedBindingsList.add(gameSettings.keyBindCommand);
 				
-		gameSettings.keyBindScreenshot = new KeyBinding("key.screenshot", this.CONFIG_LOADER.keyCodeScreenshot, this.CATEGORY_MISC);
+		gameSettings.keyBindScreenshot = new KeyBinding("key.screenshot", CONFIG_LOADER.keyCodeScreenshot, getCat(CONFIG_LOADER.categoryScreenshot));
 
 		if (this.CONFIG_LOADER.enableScreenshot)
-		modifiedKeys.add(gameSettings.keyBindScreenshot);
+		updatedBindingsList.add(gameSettings.keyBindScreenshot);
 				
-		gameSettings.keyBindTogglePerspective = new KeyBinding("key.togglePerspective", this.CONFIG_LOADER.keyCodeTogglePerspective, this.CATEGORY_MISC);
+		gameSettings.keyBindTogglePerspective = new KeyBinding("key.togglePerspective", CONFIG_LOADER.keyCodeTogglePerspective, getCat(CONFIG_LOADER.categoryTogglePerspective));
 
 		if (this.CONFIG_LOADER.enableTogglePerspective)
-		modifiedKeys.add(gameSettings.keyBindTogglePerspective);
+		updatedBindingsList.add(gameSettings.keyBindTogglePerspective);
 				
-		gameSettings.keyBindSmoothCamera = new KeyBinding("key.smoothCamera", this.CONFIG_LOADER.keyCodeSmoothCamera, this.CATEGORY_MISC);
+		gameSettings.keyBindSmoothCamera = new KeyBinding("key.smoothCamera", CONFIG_LOADER.keyCodeSmoothCamera, getCat(CONFIG_LOADER.categorySmoothCamera));
 
 		if (this.CONFIG_LOADER.enableSmoothCamera)
-		modifiedKeys.add(gameSettings.keyBindSmoothCamera);
+		updatedBindingsList.add(gameSettings.keyBindSmoothCamera);
 				
-		gameSettings.field_152395_am = new KeyBinding("key.fullscreen", this.CONFIG_LOADER.keyCodeFullscreen, this.CATEGORY_MISC);
+		gameSettings.field_152395_am = new KeyBinding("key.fullscreen", CONFIG_LOADER.keyCodeFullscreen, getCat(CONFIG_LOADER.categoryFullscreen));
 
 		if (this.CONFIG_LOADER.enableFullscreen)
-		modifiedKeys.add(gameSettings.field_152395_am);
+		updatedBindingsList.add(gameSettings.field_152395_am);
 		
-		gameSettings.field_152396_an = new KeyBinding("key.streamStartStop", this.CONFIG_LOADER.keyCodeStreamStartStop, this.CATEGORY_STREAM);
+		gameSettings.field_152396_an = new KeyBinding("key.streamStartStop", CONFIG_LOADER.keyCodeStreamStartStop, getCat(CONFIG_LOADER.categoryStreamStartStop));
 
 		if (this.CONFIG_LOADER.enableStreamStartStop)
-		modifiedKeys.add(gameSettings.field_152396_an);
+		updatedBindingsList.add(gameSettings.field_152396_an);
 		
-		gameSettings.field_152397_ao = new KeyBinding("key.streamPauseUnpause", this.CONFIG_LOADER.keyCodeStreamPauseUnpause, this.CATEGORY_STREAM);
+		gameSettings.field_152397_ao = new KeyBinding("key.streamPauseUnpause", CONFIG_LOADER.keyCodeStreamPauseUnpause, getCat(CONFIG_LOADER.categoryStreamPauseUnpause));
 
 		if (this.CONFIG_LOADER.enableStreamPauseUnpause)
-		modifiedKeys.add(gameSettings.field_152397_ao);
+		updatedBindingsList.add(gameSettings.field_152397_ao);
 		
-		gameSettings.field_152398_ap = new KeyBinding("key.streamCommercial", this.CONFIG_LOADER.keyCodeStreamCommercial, this.CATEGORY_STREAM);
+		gameSettings.field_152398_ap = new KeyBinding("key.streamCommercial", CONFIG_LOADER.keyCodeStreamCommercial, getCat(CONFIG_LOADER.categoryStreamCommercial));
 
 		if (this.CONFIG_LOADER.enableStreamCommercial)
-		modifiedKeys.add(gameSettings.field_152398_ap);
+		updatedBindingsList.add(gameSettings.field_152398_ap);
 		
-		gameSettings.field_152399_aq = new KeyBinding("key.streamToggleMic", this.CONFIG_LOADER.keyCodeStreamToggleMic, this.CATEGORY_STREAM);
+		gameSettings.field_152399_aq = new KeyBinding("key.streamToggleMic", CONFIG_LOADER.keyCodeStreamToggleMic, getCat(CONFIG_LOADER.categoryStreamToggleMic));
 
 		if (this.CONFIG_LOADER.enableStreamToggleMic)
-		modifiedKeys.add(gameSettings.field_152399_aq);
+		updatedBindingsList.add(gameSettings.field_152399_aq);
 						
-		gameSettings.keyBindsHotbar[0] = new KeyBinding("key.hotbar.1", this.CONFIG_LOADER.keyCodeHotbar1, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[0] = new KeyBinding("key.hotbar.1", CONFIG_LOADER.keyCodeHotbar1, getCat(CONFIG_LOADER.categoryHotbar1));
 				
 		if (this.CONFIG_LOADER.enableHotbar1)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[0]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[0]);
 				
-		gameSettings.keyBindsHotbar[1] = new KeyBinding("key.hotbar.2", this.CONFIG_LOADER.keyCodeHotbar2, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[1] = new KeyBinding("key.hotbar.2", CONFIG_LOADER.keyCodeHotbar2, getCat(CONFIG_LOADER.categoryHotbar2));
 		
 		if (this.CONFIG_LOADER.enableHotbar2)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[1]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[1]);
 		
-		gameSettings.keyBindsHotbar[2] = new KeyBinding("key.hotbar.3", this.CONFIG_LOADER.keyCodeHotbar3, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[2] = new KeyBinding("key.hotbar.3", CONFIG_LOADER.keyCodeHotbar3, getCat(CONFIG_LOADER.categoryHotbar3));
 		
 		if (this.CONFIG_LOADER.enableHotbar3)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[2]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[2]);
 					
-		gameSettings.keyBindsHotbar[3] = new KeyBinding("key.hotbar.4", this.CONFIG_LOADER.keyCodeHotbar4, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[3] = new KeyBinding("key.hotbar.4", CONFIG_LOADER.keyCodeHotbar4, getCat(CONFIG_LOADER.categoryHotbar4));
 		
 		if (this.CONFIG_LOADER.enableHotbar4)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[3]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[3]);
 					
-		gameSettings.keyBindsHotbar[4] = new KeyBinding("key.hotbar.5", this.CONFIG_LOADER.keyCodeHotbar5, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[4] = new KeyBinding("key.hotbar.5", CONFIG_LOADER.keyCodeHotbar5, getCat(CONFIG_LOADER.categoryHotbar5));
 		
 		if (this.CONFIG_LOADER.enableHotbar5)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[4]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[4]);
 					
-		gameSettings.keyBindsHotbar[5] = new KeyBinding("key.hotbar.6", this.CONFIG_LOADER.keyCodeHotbar6, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[5] = new KeyBinding("key.hotbar.6", CONFIG_LOADER.keyCodeHotbar6, getCat(CONFIG_LOADER.categoryHotbar6));
 		
 		if (this.CONFIG_LOADER.enableHotbar6)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[5]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[5]);
 					
-		gameSettings.keyBindsHotbar[6] = new KeyBinding("key.hotbar.7", this.CONFIG_LOADER.keyCodeHotbar7, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[6] = new KeyBinding("key.hotbar.7", CONFIG_LOADER.keyCodeHotbar7, getCat(CONFIG_LOADER.categoryHotbar7));
 		
 		if (this.CONFIG_LOADER.enableHotbar7)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[6]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[6]);
 					
-		gameSettings.keyBindsHotbar[7] = new KeyBinding("key.hotbar.8", this.CONFIG_LOADER.keyCodeHotbar8, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[7] = new KeyBinding("key.hotbar.8", CONFIG_LOADER.keyCodeHotbar8, getCat(CONFIG_LOADER.categoryHotbar8));
 		
 		if (this.CONFIG_LOADER.enableHotbar8)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[7]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[7]);
 					
-		gameSettings.keyBindsHotbar[8] = new KeyBinding("key.hotbar.9", this.CONFIG_LOADER.keyCodeHotbar9, this.CATEGORY_INVENTORY);
+		gameSettings.keyBindsHotbar[8] = new KeyBinding("key.hotbar.9", CONFIG_LOADER.keyCodeHotbar9, getCat(CONFIG_LOADER.categoryHotbar9));
 		
 		if (this.CONFIG_LOADER.enableHotbar9)			
-		modifiedKeys.add(gameSettings.keyBindsHotbar[8]);
+		updatedBindingsList.add(gameSettings.keyBindsHotbar[8]);
 		
-		KeyBinding[] newKeys = modifiedKeys.toArray(new KeyBinding[modifiedKeys.size()]);
-		
-		gameSettings.keyBindings = newKeys;
+		updatedBindingsList.addAll(bindingsList);
+				
+		gameSettings.keyBindings = updatedBindingsList.toArray(new KeyBinding[updatedBindingsList.size()]);
 	}
     
     @SideOnly(Side.CLIENT)
-    private void removeUnusedCategories() {
+    private void removeUnusedCategories(GameSettings gameSettings) {
     	
-    	if (!this.CONFIG_LOADER.enableAttack && !this.CONFIG_LOADER.enableUseItem && !this.CONFIG_LOADER.enablePickBlock) {
-    		
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_GAMEPLAY);
-    	}
+    	Set<String> occurrences = new HashSet<String>();
+    	    	    	
+		for (KeyBinding keyBinding : gameSettings.keyBindings) {
+							
+			occurrences.add(keyBinding.getKeyCategory());
+		}
+		
+		KeyBinding.getKeybinds().retainAll(occurrences);
+    }
+    
+    public static String getCat(String categoryName) {
     	
-    	if (!this.CONFIG_LOADER.enableForward && !this.CONFIG_LOADER.enableLeft && !this.CONFIG_LOADER.enableBack 
-    			&& !this.CONFIG_LOADER.enableRight && !this.CONFIG_LOADER.enableJump && !this.CONFIG_LOADER.enableSneak 
-    			&& !this.CONFIG_LOADER.enableSprint) {
-    		
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_MOVEMENT);
-    	}
-    	
-    	if (!this.CONFIG_LOADER.enableChat && !this.CONFIG_LOADER.enablePlayerList && !this.CONFIG_LOADER.enableCommand) {
-    		
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_MULTIPLAYER);
-    	}
-    	
-    	if (!this.CONFIG_LOADER.enableScreenshot && !this.CONFIG_LOADER.enableFullscreen && !this.CONFIG_LOADER.enableTogglePerspective 
-    			&& !this.CONFIG_LOADER.enableSmoothCamera && !this.CONFIG_LOADER.enableHideGUI && !this.CONFIG_LOADER.enableQuit 
-    			&& !this.CONFIG_LOADER.enableDebugMenu && !this.CONFIG_LOADER.enableDisableShader) {
-    		
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_MISC);
-    	}
-    	
-    	if (!this.CONFIG_LOADER.enableDrop && !this.CONFIG_LOADER.enableInventory && !this.CONFIG_LOADER.enableHotbar1 
-    			&& !this.CONFIG_LOADER.enableHotbar2 && !this.CONFIG_LOADER.enableHotbar3 && !this.CONFIG_LOADER.enableHotbar4 
-    			&& !this.CONFIG_LOADER.enableHotbar5 && !this.CONFIG_LOADER.enableHotbar6 && !this.CONFIG_LOADER.enableHotbar7 
-    			&& !this.CONFIG_LOADER.enableHotbar8 && !this.CONFIG_LOADER.enableHotbar9) {
-
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_INVENTORY);
-    	}
-    	
-    	if (!this.CONFIG_LOADER.enableStreamStartStop && !this.CONFIG_LOADER.enableStreamPauseUnpause && !this.CONFIG_LOADER.enableStreamCommercial 
-    			&& !this.CONFIG_LOADER.enableStreamToggleMic) {
-    		
-    		KeyBinding.getKeybinds().remove(this.CATEGORY_STREAM);
-    	}
+    	return "key.categories." + categoryName;
     }
 }

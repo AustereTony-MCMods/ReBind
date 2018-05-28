@@ -9,8 +9,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -22,6 +26,12 @@ public class ReBindClassTransformer implements IClassTransformer {
     public byte[] transform(String name, String transformedName, byte[] basicClass) {    	
     	
     	switch (name) {
+    	
+			case "bbj":					
+				return patchGameSettings(basicClass, true);
+
+			case "net.minecraft.client.settings.GameSettings":							
+				return patchGameSettings(basicClass, false);
     	
 			case "bao":					
 				return patchMinecraft(basicClass, true);
@@ -45,6 +55,62 @@ public class ReBindClassTransformer implements IClassTransformer {
 		return basicClass;
     }
     
+	private byte[] patchGameSettings(byte[] basicClass, boolean obfuscated) {
+		
+	    ClassNode classNode = new ClassNode();
+	    ClassReader classReader = new ClassReader(basicClass);
+	    classReader.accept(classNode, 0);
+	    
+	 	String 
+	 	targetMethodName = obfuscated ? "a" : "loadOptions",
+	    optionsFileFieldName = obfuscated ? "aX" : "optionsFile",
+	    gameSettingsClassName = obfuscated ? "bbj" : "net/minecraft/client/settings/GameSettings",
+	 	fileClassName = "java/io/File";
+	 		    
+        boolean isSuccessful = false;
+	 		    
+	    for (MethodNode methodNode : classNode.methods) {
+	    	
+			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
+												
+	            AbstractInsnNode currentInsn = null;
+	            
+	            Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+	           
+	            while (insnIterator.hasNext()) {
+	            	
+	                currentInsn = insnIterator.next(); 
+	                	                
+	                if (currentInsn.getOpcode() == Opcodes.IF_ICMPGE) {
+	          		
+                    	InsnList nodesList = new InsnList();
+                    	
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, gameSettingsClassName, optionsFileFieldName, "L" + fileClassName + ";"));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "loadOptionsControls", "(L" + fileClassName + ";)Z", false));
+                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+                    	
+                        methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious().getPrevious().getPrevious().getPrevious().getPrevious(), nodesList); 
+                        	                        
+                        break;
+	                }
+	            }	
+	            
+                isSuccessful = true;
+	            
+	            break;
+			}
+	    }
+
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    classNode.accept(writer);
+	    
+	    if (isSuccessful)
+	    LOGGER.info("<GameSettings.class> transformed!");   
+	    	    
+	    return writer.toByteArray();	
+	}
+    
 	private byte[] patchMinecraft(byte[] basicClass, boolean obfuscated) {
 		        
 	    ClassNode classNode = new ClassNode();
@@ -56,15 +122,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         int 
         bipushCount = 0,
         iconstCount = 0;
-                
-        LOGGER.info("<Minecraft> transformation started...");   
         
+        boolean isSuccessful = false;
+                        
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
-				
-		        LOGGER.info("Target method found.");   
-								
+												
                 AbstractInsnNode currentInsn = null;
                 
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
@@ -116,6 +180,8 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	}
                     }
                 }
+                
+                isSuccessful = true;
 				
 				break;
 			}
@@ -124,8 +190,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    ClassWriter writer = new ClassWriter(0);	    
 	    classNode.accept(writer);
 	    
-        LOGGER.info("<Minecraft> transformation successful!");   
-        
+	    if (isSuccessful)
+	    LOGGER.info("<Minecraft.class> transformed!");
+	            
         return writer.toByteArray();				
 	}
 	
@@ -135,19 +202,14 @@ public class ReBindClassTransformer implements IClassTransformer {
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "a" : "keyTyped";
-                
-	 	if (!isContainer)
-        LOGGER.info("<GuiScreen> transformation started...");   
-	 	else
-	    LOGGER.info("<GuiContainer> transformation started...");   
+	 	String targetMethodName = obfuscated ? "a" : "keyTyped";  
+	 	
+        boolean isSuccessful = false;
 	 		
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("(CI)V")) {
-				
-		        LOGGER.info("Target method found.");   
-								
+												
                 AbstractInsnNode currentInsn = null;
                 
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
@@ -165,6 +227,8 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	break;
                     }
                 }
+                
+                isSuccessful = true;
 				
 				break;
 			}
@@ -173,10 +237,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    ClassWriter writer = new ClassWriter(0);	    
 	    classNode.accept(writer);
 	    
-	 	if (!isContainer)
-	 		LOGGER.info("<GuiScreen> transformation successful!");  
-	 	else
-	        LOGGER.info("<GuiContainer> transformation successful!");  
+	    if (isSuccessful) {
+
+	    	if (!isContainer) 
+	    	LOGGER.info("<GuiScreen.class> transformed!");   
+	    	else
+	    	LOGGER.info("<GuiContainer.class> transformed!"); 
+	    }
         
         return writer.toByteArray();				
 	}

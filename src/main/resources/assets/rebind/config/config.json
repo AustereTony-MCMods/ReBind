@@ -1,261 +1,311 @@
 {
-"_comment_0": "allowed codes: 1 - 223 (keyboard), -100 - -85 (mouse). visit https://minecraft.gamepedia.com/Key_codes for more info.",
-"_comment_1": "set /key_code/ to dezired value and it will be used as default.",
-"_comment_2": "set /enabled/ to false to remove key from controls menu.",
-"_comment_3": "set /key_code/ to 0 (zero) and /enabled/ to false to disable key and remove key from controls.",
+"_comment_0": "/category/ defines the section which key uses in controls.",
+"_comment_1": "vanilla sections: gameplay, movement, inventory, multiplayer, misc, stream.",
 
-"_comment_4": "*****mouse*****",
+"_comment_2": "/key_code/ defines the default key code for key.",
+"_comment_3": "allowed codes: 1 - 223 (keyboard), -100 - -85 (mouse), visit https://minecraft.gamepedia.com/Key_codes for more info.",
+
+"_comment_4": "/enabled/ flag defines key visibility in controls.",
+"_comment_5": "set it to false to remove key from controls.",
+
+"_comment_6": "set /key_code/ to desired value and /enabled/ to false and it will be unchangeable by player.",
+"_comment_7": "set /key_code/ to 0 (zero) and /enabled/ to false to remove key from game.",
+
+"rewrite_controls": {
+
+    "_comment_0": "rewrite controls with this config settings on first mod load.",   
+    "_comment_1": "default - enabled: true",      
+    "enabled": true
+},
+
+"_comment_8": "*****mouse*****",
 
 "attack": { 
 
-    "_comment": "default - key code: -100 (BUTTON0 - left click), enabled: true",   
+    "_comment": "default - category: gameplay, key code: -100 (BUTTON0 - left click), enabled: true", 
+    "category": "gameplay",   
     "key_code": -100, 
     "enabled": true
 },
 
 "use_item": { 
 
-    "_comment": "default - key code: -99 (BUTTON1 - right click), enabled: true",
+    "_comment": "default - category: gameplay, key code: -99 (BUTTON1 - right click), enabled: true", 
+    "category": "gameplay",
     "key_code": -99, 
     "enabled": true
 },
 
 "pick_block": { 
 
-    "_comment": "default - key code: -99 (BUTTON2 - middle click), enabled: true",
+    "_comment": "default - category: gameplay, key code: -99 (BUTTON2 - middle click), enabled: true", 
+    "category": "gameplay",
     "key_code": -98, 
     "enabled": true
 },
 
-"_comment_5": "*****keyboard*****",
+"_comment_9": "*****keyboard*****",
 
 "forward": { 
 
-    "_comment": "default - key code: 17 (W), enabled: true",
+    "_comment": "default - category: movement, key code: 17 (W), enabled: true", 
+    "category": "movement",
     "key_code": 17, 
     "enabled": true
 },
 
 "left": { 
 
-    "_comment": "default - key code: 30 (A), enabled: true",
+    "_comment": "default - category: movement, key code: 30 (A), enabled: true", 
+    "category": "movement",
     "key_code": 30, 
     "enabled": true
 },
 
 "back": { 
 
-    "_comment": "default - key code: 31 (S), enabled: true",
+    "_comment": "default - category: movement, key code: 31 (S), enabled: true", 
+    "category": "movement",
     "key_code": 31, 
     "enabled": true
 },
 
 "right": { 
 
-    "_comment": "default - key code: 32 (D), enabled: true",
+    "_comment": "default - category: movement, key code: 32 (D), enabled: true", 
+    "category": "movement",
     "key_code": 32, 
     "enabled": true
 },
 
 "jump": { 
 
-    "_comment": "default - key code: 57 (SPACE), enabled: true",
+    "_comment": "default - category: movement, key code: 57 (SPACE), enabled: true", 
+    "category": "movement",
     "key_code": 57, 
     "enabled": true
 },
 
 "sneak": { 
 
-    "_comment": "default - key code: 42 (LSHIFT - left shift), enabled: true",
+    "_comment": "default - category: movement, key code: 42 (LSHIFT - left shift), enabled: true", 
+    "category": "movement",
     "key_code": 42, 
     "enabled": true
 },
 
 "sprint": { 
 
-    "_comment": "default - key code: 29 (LCONTROL - left control), enabled: true",
+    "_comment": "default - category: movement, key code: 29 (LCONTROL - left control), enabled: true", 
+    "category": "movement",
     "key_code": 29, 
     "enabled": true
 },
 
 "inventory": { 
 
-    "_comment": "default - key code: 18 (E), enabled: true",
+    "_comment": "default - category: inventory, key code: 18 (E), enabled: true", 
+    "category": "inventory",
     "key_code": 18, 
     "enabled": true
 },
 
 "drop": { 
 
-    "_comment": "default - key code: 16 (Q), enabled: true",
-    "key_code": 0, 
-    "enabled": false
+    "_comment": "default - category: inventory, key code: 16 (Q), enabled: true", 
+    "category": "inventory",
+    "key_code": 16, 
+    "enabled": true
 },
 
 "chat": { 
 
-    "_comment": "default - key code: 20 (T), enabled: true",
+    "_comment": "default - category: multiplayer, key code: 20 (T), enabled: true", 
+    "category": "multiplayer",
     "key_code": 20, 
     "enabled": true
 },
 
 "player_list": { 
 
-    "_comment": "default - key code: 15 (TAB - tab), enabled: true",
+    "_comment": "default - category: multiplayer, key code: 15 (TAB - tab), enabled: true", 
+    "category": "multiplayer",
     "key_code": 15, 
     "enabled": true
 },
 
 "command": { 
 
-    "_comment": "default - key code: 53 (SLASH - /), enabled: true",
+    "_comment": "default - category: multiplayer, key code: 53 (SLASH - /), enabled: true", 
+    "category": "multiplayer",
     "key_code": 53, 
     "enabled": true
 },
 
 "screenshot": { 
 
-    "_comment": "default - key code: 60 (F2), enabled: true",
+    "_comment": "default - category: misc, key code: 60 (F2), enabled: true", 
+    "category": "misc",
     "key_code": 60, 
     "enabled": true
 },
 
 "toggle_perspective": { 
 
-    "_comment": "default - key code: 63 (F5), enabled: true",
+    "_comment": "default - category: misc, key code: 63 (F5), enabled: true", 
+    "category": "misc",
     "key_code": 63, 
     "enabled": true
 },
 
 "smooth_camera": { 
 
-    "_comment": "default - key code: 0 (NONE), enabled: true",
+    "_comment": "default - category: misc, key code: 0 (NONE), enabled: true", 
+    "category": "misc",
     "key_code": 0, 
     "enabled": true
 },
 
 "stream_start_stop": { 
 
-    "_comment": "default - key code: 64 (F6), enabled: true",
+    "_comment": "default - category: stream, key code: 64 (F6), enabled: true",
+    "category": "stream",
     "key_code": 64, 
     "enabled": true
 },
 
 "stream_pause_unpause": { 
 
-    "_comment": "default - key code: 65 (F7), enabled: true",
+    "_comment": "default - category: stream, key code: 65 (F7), enabled: true",
+    "category": "stream",
     "key_code": 65, 
     "enabled": true
 },
 
 "stream_commercial": { 
 
-    "_comment": "default - key code: 0 (NONE), enabled: true",
+    "_comment": "default - category: stream, key code: 0 (NONE), enabled: true",
+    "category": "stream",
     "key_code": 0, 
     "enabled": true
 },
 
 "stream_toggle_mic": { 
 
-    "_comment": "default - key code: 0 (NONE), enabled: true",
+    "_comment": "default - category: stream, key code: 0 (NONE), enabled: true",
+    "category": "stream",
     "key_code": 0, 
     "enabled": true
 },
 
 "fullscreen": { 
 
-    "_comment": "default - key code: 87 (F11), enabled: true",
+    "_comment": "default - category: misc, key code: 87 (F11), enabled: true", 
+    "category": "misc",
     "key_code": 87, 
     "enabled": true
 },
 
 "hotbar_1": { 
 
-    "_comment": "default - key code: 2 (1), enabled: true",
+    "_comment": "default - category: inventory, key code: 2 (1), enabled: true", 
+    "category": "inventory",
     "key_code": 2, 
     "enabled": true
 },
 
 "hotbar_2": { 
 
-    "_comment": "default - key code: 3 (2), enabled: true",
+    "_comment": "default - category: inventory, key code: 3 (2), enabled: true", 
+    "category": "inventory",
     "key_code": 3, 
     "enabled": true
 },
 
 "hotbar_3": { 
 
-    "_comment": "default - key code: 4 (3), enabled: true",
+    "_comment": "default - category: inventory, key code: 4 (3), enabled: true", 
+    "category": "inventory",
     "key_code": 4, 
     "enabled": true
 },
 
 "hotbar_4": { 
 
-    "_comment": "default - key code: 5 (4), enabled: true",
+    "_comment": "default - category: inventory, key code: 5 (4), enabled: true", 
+    "category": "inventory",
     "key_code": 5, 
     "enabled": true
 },
 
 "hotbar_5": { 
 
-    "_comment": "default - key code: 6 (5), enabled: true",
+    "_comment": "default - category: inventory, key code: 6 (5), enabled: true", 
+    "category": "inventory",
     "key_code": 6, 
     "enabled": true
 },
 
 "hotbar_6": { 
 
-    "_comment": "default - key code: 7 (6), enabled: true",
+    "_comment": "default - category: inventory, key code: 7 (6), enabled: true", 
+    "category": "inventory",
     "key_code": 7, 
     "enabled": true
 },
 
 "hotbar_7": { 
 
-    "_comment": "default - key code: 8 (7), enabled: true",
+    "_comment": "default - category: inventory, key code: 8 (7), enabled: true", 
+    "category": "inventory",
     "key_code": 8, 
     "enabled": true
 },
 
 "hotbar_8": { 
 
-    "_comment": "default - key code: 9 (8), enabled: true",
+    "_comment": "default - category: inventory, key code: 9 (8), enabled: true", 
+    "category": "inventory",
     "key_code": 9, 
     "enabled": true
 },
 
 "hotbar_9": { 
 
-    "_comment": "default - key code: 10 (9), enabled: true",
+    "_comment": "default - category: inventory, key code: 10 (9), enabled: true", 
+    "category": "inventory",
     "key_code": 10, 
     "enabled": true
 },
 
 "quit": { 
 
-    "_comment": "default - key code: 1 (ESC - escape), enabled: true",
+    "_comment": "default - category: misc, key code: 1 (ESC - escape), enabled: true", 
+    "category": "misc",
     "key_code": 1, 
     "enabled": true
 },
 
 "hide_gui": { 
 
-    "_comment": "default - key code: 59 (F1), enabled: true",
+    "_comment": "default - category: misc, key code: 59 (F1), enabled: true", 
+    "category": "misc",
     "key_code": 59, 
     "enabled": true
 },
 
 "debug_menu": { 
 
-    "_comment": "default - key code: 61 (F3), enabled: true",
+    "_comment": "default - category: misc, key code: 61 (F3), enabled: true", 
+    "category": "misc",
     "key_code": 61, 
     "enabled": true
 },
 
 "disable_shader": { 
 
-    "_comment": "default - key code: 62 (F4), enabled: true",
+    "_comment": "default - category: misc, key code: 62 (F4), enabled: true", 
+    "category": "misc",
     "key_code": 62, 
     "enabled": true
 }
