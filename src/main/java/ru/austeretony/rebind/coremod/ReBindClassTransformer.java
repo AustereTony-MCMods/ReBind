@@ -20,7 +20,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 public class ReBindClassTransformer implements IClassTransformer {
 
-	public static final Logger LOGGER = LogManager.getLogger("ReBind");
+	public static final Logger LOGGER = LogManager.getLogger("ReBind Core");
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {    	
@@ -33,6 +33,12 @@ public class ReBindClassTransformer implements IClassTransformer {
 			case "net.minecraft.client.settings.GameSettings":							
 				return patchGameSettings(basicClass, false);
     	
+			case "bfo":					
+				return patchGuiKeyBindingList(basicClass, true);
+
+			case "net.minecraft.client.gui.GuiKeyBindingList":							
+				return patchGuiKeyBindingList(basicClass, false);	
+				
 			case "bcd":					
 				return patchMinecraft(basicClass, true);
 		
@@ -93,7 +99,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	                    	
 	                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 	                    	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, gameSettingsClassName, optionsFileFieldName, "L" + fileClassName + ";"));
-	                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "loadOptionsControls", "(L" + fileClassName + ";)Z", false));
+	                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "loadControlsFromOptionsFile", "(L" + fileClassName + ";)Z", false));
 	                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn.getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext()).label));
 	                    	
 	                        methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
@@ -116,6 +122,61 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    LOGGER.info("<GameSettings.class> transformed!");   
 	    	    
 	    return writer.toByteArray();	
+	}
+	
+	private byte[] patchGuiKeyBindingList(byte[] basicClass, boolean obfuscated) {
+        
+	    ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(basicClass);
+        classReader.accept(classNode, 0);
+        
+	 	String 
+	 	guiKeyBindingsListClassName = obfuscated ? "bfo" : "net/minecraft/client/gui/GuiKeyBindingList",
+	 	keyBindingClassName = obfuscated ? "bca" : "net/minecraft/client/settings/KeyBinding",
+	 	guiControlsClassName = obfuscated ? "bfp" : "net/minecraft/client/gui/GuiControls",
+	 	minecraftClassName = obfuscated ? "bcd" : "net/minecraft/client/Minecraft";
+        
+        boolean isSuccessful = false;
+                        
+		for (MethodNode methodNode : classNode.methods) {
+			
+			if (methodNode.desc.equals("(L" + guiControlsClassName + ";L" + minecraftClassName + ";)V")) {
+												
+                AbstractInsnNode currentInsn = null;
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (currentInsn.getOpcode() == Opcodes.ACONST_NULL) {                   	
+                    	
+                    	InsnList nodesList = new InsnList();
+                    	
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "sortKeyBindings", "([L" + keyBindingClassName + ";)[L" + keyBindingClassName + ";", false));
+                    	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));
+                    	
+                    	methodNode.instructions.insertBefore(currentInsn, nodesList); 
+                    
+                    	break;
+                    }
+                }
+                
+                isSuccessful = true;
+                
+				break;
+			}
+		}
+		
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    classNode.accept(writer);
+	    
+	    if (isSuccessful)
+        LOGGER.info("<GuiKeyBindingList.class> transformed!");   
+	            
+        return writer.toByteArray();				
 	}
 
 	private byte[] patchMinecraft(byte[] basicClass, boolean obfuscated) {

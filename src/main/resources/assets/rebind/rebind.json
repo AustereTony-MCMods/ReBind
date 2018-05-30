@@ -1,0 +1,45 @@
+{
+"rewrite_controls": { "enabled": true},
+
+"controls": 
+[
+{"attack": { "name": "attack", "category": "gameplay", "key_code": -100, "enabled": true}},
+{"use_item": { "name": "use", "category": "gameplay", "key_code": -99, "enabled": true}},
+{"pick_block": { "name": "pickItem", "category": "gameplay", "key_code": -98, "enabled": true}},
+
+{"forward": { "name": "forward", "category": "movement", "key_code": 17, "enabled": true}},
+{"left": { "name": "left", "category": "movement", "key_code": 30, "enabled": true}},
+{"back": { "name": "back", "category": "movement", "key_code": 31, "enabled": true}},
+{"right": { "name": "right", "category": "movement", "key_code": 32, "enabled": true}},
+{"jump": { "name": "jump", "category": "movement", "key_code": 57, "enabled": true}},
+{"sneak": { "name": "sneak", "category": "movement", "key_code": 42, "enabled": true}},
+{"sprint": { "name": "sprint", "category": "movement", "key_code": 29, "enabled": true}},
+
+{"inventory": { "name": "inventory", "category": "inventory", "key_code": 18, "enabled": true}},
+{"hotbar_1": { "name": "hotbar.1", "category": "inventory", "key_code": 2, "enabled": true}},
+{"hotbar_2": { "name": "hotbar.2", "category": "inventory", "key_code": 3, "enabled": true}},
+{"hotbar_3": { "name": "hotbar.3", "category": "inventory", "key_code": 4, "enabled": true}},
+{"hotbar_4": { "name": "hotbar.4", "category": "inventory", "key_code": 5, "enabled": true}},
+{"hotbar_5": { "name": "hotbar.5", "category": "inventory", "key_code": 6, "enabled": true}},
+{"hotbar_6": { "name": "hotbar.6", "category": "inventory", "key_code": 7, "enabled": true}},
+{"hotbar_7": { "name": "hotbar.7", "category": "inventory", "key_code": 8, "enabled": true}},
+{"hotbar_8": { "name": "hotbar.8", "category": "inventory", "key_code": 9, "enabled": true}},
+{"hotbar_9": { "name": "hotbar.9", "category": "inventory", "key_code": 10, "enabled": true}},
+{"drop": { "name": "drop", "category": "inventory", "key_code": 16, "enabled": true}},
+{"swap_hands": { "name": "swapHands", "category": "inventory", "key_code": 33, "enabled": true}},
+
+{"quit": { "name": "quit", "category": "misc", "key_code": 1, "enabled": true}},
+{"hide_hud": { "name": "hideHUD", "category": "misc", "key_code": 59, "enabled": true}},
+{"screenshot": { "name": "screenshot", "category": "misc", "key_code": 60, "enabled": true}},
+{"debug_screen": { "name": "debugScreen", "category": "misc", "key_code": 61, "enabled": true}},
+{"switch_shader": { "name": "switchShader", "category": "misc", "key_code": 62, "enabled": true}},
+{"toggle_perspective": { "name": "togglePerspective", "category": "misc", "key_code": 63, "enabled": true}},
+{"fullscreen": { "name": "fullscreen", "category": "misc", "key_code": 87, "enabled": true}},
+{"smooth_camera": { "name": "smoothCamera", "category": "misc", "key_code": 0, "enabled": true}},
+{"spectator_outlines": { "name": "spectatorOutlines", "category": "misc", "key_code": 0, "enabled": true}},
+
+{"chat": { "name": "chat", "category": "multiplayer", "key_code": 20, "enabled": true}},
+{"command": { "name": "command", "category": "multiplayer", "key_code": 53, "enabled": true}},
+{"playerlist": { "name": "playerlist", "category": "multiplayer", "key_code": 15, "enabled": true}}
+]
+}
