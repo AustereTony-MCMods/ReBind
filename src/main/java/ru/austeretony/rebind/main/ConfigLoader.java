@@ -3,7 +3,10 @@ package ru.austeretony.rebind.main;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -14,271 +17,180 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ConfigLoader {
 	
-	public String
-	categoryAttack,
-	categoryUseItem, 
-	categoryPickBlock, 
+	public boolean enableControlsRewriting;
 	
-	categoryForward,
-	categoryLeft,
-	categoryBack,
-	categoryRight,
-	categoryJump,
-	categorySneak,
-	categorySprint,
-	categoryInventory,
-	categorySwapHands,
-	categoryDrop,
-	categoryChat,
-	categoryPlayerList,
-	categoryCommand,
-	categoryScreenshot,
-	categoryTogglePerspective,
-	categorySmoothCamera,
-	categoryFullscreen,
-	categorySpectatorOutlines,
-	categoryHotbar1,
-	categoryHotbar2,
-	categoryHotbar3,
-	categoryHotbar4,
-	categoryHotbar5, 
-	categoryHotbar6,
-	categoryHotbar7,
-	categoryHotbar8,
-	categoryHotbar9,
-	categoryQuit, 
-	categoryHideGUI, 
-	categoryDebugMenu, 
-	categorySwitchShader;
+	public KeyBindingProperty
+	propertyAttack,
+	propertyUseItem, 
+	propertyPickBlock, 
 	
-	public int 
-	keyCodeAttack, 
-	keyCodeUseItem, 
-	keyCodePickBlock, 
+	propertyForward,
+	propertyLeft,
+	propertyBack,
+	propertyRight,
+	propertyJump,
+	propertySneak,
+	propertySprint,
+	propertyInventory,
+	propertySwapHands,
+	propertyDrop,
+	propertyChat,
+	propertyPlayerList,
+	propertyCommand,
+	propertyScreenshot,
+	propertyTogglePerspective,
+	propertySmoothCamera,
+	propertyFullscreen,
+	propertySpectatorOutlines,
+	propertyHotbar1,
+	propertyHotbar2,
+	propertyHotbar3,
+	propertyHotbar4,
+	propertyHotbar5, 
+	propertyHotbar6,
+	propertyHotbar7,
+	propertyHotbar8,
+	propertyHotbar9,
+	propertyQuit, 
+	propertyHideGUI, 
+	propertyDebugMenu, 
+	propertySwitchShader;
 	
-	keyCodeForward,
-	keyCodeLeft,
-	keyCodeBack,
-	keyCodeRight,
-	keyCodeJump,
-	keyCodeSneak,
-	keyCodeSprint,
-	keyCodeInventory,
-	keyCodeSwapHands,
-	keyCodeDrop,
-	keyCodeChat,
-	keyCodePlayerList,
-	keyCodeCommand,
-	keyCodeScreenshot,
-	keyCodeTogglePerspective,
-	keyCodeSmoothCamera,
-	keyCodeFullscreen,
-	keyCodeSpectatorOutlines,
-	keyCodeHotbar1,
-	keyCodeHotbar2,
-	keyCodeHotbar3,
-	keyCodeHotbar4,
-	keyCodeHotbar5, 
-	keyCodeHotbar6,
-	keyCodeHotbar7,
-	keyCodeHotbar8,
-	keyCodeHotbar9,
-	keyCodeQuit, 
-	keyCodeHideGUI, 
-	keyCodeDebugMenu, 
-	keyCodeSwitchShader;
-	
-	public boolean 
-	enableControlsRewriting,
-	
-	enableAttack, 
-	enableUseItem, 
-	enablePickBlock, 
-	
-	enableForward,
-	enableLeft,
-	enableBack,
-	enableRight,
-	enableJump,
-	enableSneak,
-	enableSprint,
-	enableInventory,
-	enableSwapHands,
-	enableDrop,
-	enableChat,
-	enablePlayerList,
-	enableCommand,
-	enableScreenshot,
-	enableTogglePerspective,
-	enableSmoothCamera,
-	enableFullscreen,
-	enableSpectatorOutlines,
-	enableHotbar1,
-	enableHotbar2,
-	enableHotbar3,
-	enableHotbar4,
-	enableHotbar5, 
-	enableHotbar6,
-	enableHotbar7,
-	enableHotbar8,
-	enableHotbar9,
-	enableQuit, 
-	enableHideGUI, 
-	enableDebugMenu, 
-	enableSwitchShader;
+    public final List<KeyBindingProperty> orderedProperties = new ArrayList<KeyBindingProperty>();
 	
 	@SideOnly(Side.CLIENT)
 	public void loadConfiguration() {
 		
-        try {
+        try {       	        	      
         	
-        	InputStream inputStream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(ReBindMain.MODID, "config/config.json")).getInputStream();
+        	InputStream inputStream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(ReBindMain.MODID, "rebind.json")).getInputStream();
 
             JsonObject configFile = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));
-                    	
-            enableControlsRewriting = configFile.get("rewrite_controls").getAsJsonObject().get("enabled").getAsBoolean();
             
-            //Mouse
+            this.enableControlsRewriting = configFile.get("rewrite_controls").getAsJsonObject().get("enabled").getAsBoolean();
             
-            categoryAttack = configFile.get("attack").getAsJsonObject().get("category").getAsString();
-            keyCodeAttack = configFile.get("attack").getAsJsonObject().get("key_code").getAsInt();
-            enableAttack = configFile.get("attack").getAsJsonObject().get("enabled").getAsBoolean();
+            List<JsonObject> props = new ArrayList<JsonObject>();
             
-            categoryUseItem = configFile.get("use_item").getAsJsonObject().get("category").getAsString();
-            keyCodeUseItem = configFile.get("use_item").getAsJsonObject().get("key_code").getAsInt();
-            enableUseItem = configFile.get("use_item").getAsJsonObject().get("enabled").getAsBoolean();
+            for (JsonElement jsonElement : configFile.get("controls").getAsJsonArray()) {
+            	
+        		props.add(jsonElement.getAsJsonObject());
+            }
             
-            categoryPickBlock = configFile.get("pick_block").getAsJsonObject().get("category").getAsString();
-            keyCodePickBlock = configFile.get("pick_block").getAsJsonObject().get("key_code").getAsInt();
-            enablePickBlock = configFile.get("pick_block").getAsJsonObject().get("enabled").getAsBoolean();
-                                  
-            //Keyboard
+            KeyBindingProperty currentProperty = null;
             
-            categoryForward = configFile.get("forward").getAsJsonObject().get("category").getAsString();
-            keyCodeForward = configFile.get("forward").getAsJsonObject().get("key_code").getAsInt();
-            enableForward = configFile.get("forward").getAsJsonObject().get("enabled").getAsBoolean();
+            for (JsonObject jsonObj : props) {
+            	
+            	//Mouse
+        		
+        		if (jsonObj.has("attack"))
+        		currentProperty = this.propertyAttack = new KeyBindingProperty(jsonObj.get("attack").getAsJsonObject().get("name").getAsString(), jsonObj.get("attack").getAsJsonObject().get("category").getAsString(), jsonObj.get("attack").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("attack").getAsJsonObject().get("enabled").getAsBoolean());     
+        		
+        		if (jsonObj.has("use_item"))
+        		currentProperty = this.propertyUseItem = new KeyBindingProperty(jsonObj.get("use_item").getAsJsonObject().get("name").getAsString(), jsonObj.get("use_item").getAsJsonObject().get("category").getAsString(), jsonObj.get("use_item").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("use_item").getAsJsonObject().get("enabled").getAsBoolean());     
+        		
+        		if (jsonObj.has("pick_block"))
+        		currentProperty = this.propertyPickBlock = new KeyBindingProperty(jsonObj.get("pick_block").getAsJsonObject().get("name").getAsString(), jsonObj.get("pick_block").getAsJsonObject().get("category").getAsString(), jsonObj.get("pick_block").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("pick_block").getAsJsonObject().get("enabled").getAsBoolean());     
             
-            categoryLeft = configFile.get("left").getAsJsonObject().get("category").getAsString();
-            keyCodeLeft = configFile.get("left").getAsJsonObject().get("key_code").getAsInt();
-            enableLeft = configFile.get("left").getAsJsonObject().get("enabled").getAsBoolean();
+        		//Keyboard
+        		
+        		if (jsonObj.has("forward"))
+        		currentProperty = this.propertyForward = new KeyBindingProperty(jsonObj.get("forward").getAsJsonObject().get("name").getAsString(), jsonObj.get("forward").getAsJsonObject().get("category").getAsString(), jsonObj.get("forward").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("forward").getAsJsonObject().get("enabled").getAsBoolean()); 
             
-            categoryBack = configFile.get("back").getAsJsonObject().get("category").getAsString();
-            keyCodeBack = configFile.get("back").getAsJsonObject().get("key_code").getAsInt();
-            enableBack = configFile.get("back").getAsJsonObject().get("enabled").getAsBoolean();
+        		if (jsonObj.has("left"))
+        		currentProperty = this.propertyLeft = new KeyBindingProperty(jsonObj.get("left").getAsJsonObject().get("name").getAsString(), jsonObj.get("left").getAsJsonObject().get("category").getAsString(), jsonObj.get("left").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("left").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("back"))
+        		currentProperty = this.propertyBack = new KeyBindingProperty(jsonObj.get("back").getAsJsonObject().get("name").getAsString(), jsonObj.get("back").getAsJsonObject().get("category").getAsString(), jsonObj.get("back").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("back").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("right"))
+        		currentProperty = this.propertyRight = new KeyBindingProperty(jsonObj.get("right").getAsJsonObject().get("name").getAsString(), jsonObj.get("right").getAsJsonObject().get("category").getAsString(), jsonObj.get("right").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("right").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("jump"))
+        		currentProperty = this.propertyJump = new KeyBindingProperty(jsonObj.get("jump").getAsJsonObject().get("name").getAsString(), jsonObj.get("jump").getAsJsonObject().get("category").getAsString(), jsonObj.get("jump").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("jump").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("sneak"))
+        		currentProperty = this.propertySneak = new KeyBindingProperty(jsonObj.get("sneak").getAsJsonObject().get("name").getAsString(), jsonObj.get("sneak").getAsJsonObject().get("category").getAsString(), jsonObj.get("sneak").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("sneak").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("sprint"))
+        		currentProperty = this.propertySprint = new KeyBindingProperty(jsonObj.get("sprint").getAsJsonObject().get("name").getAsString(), jsonObj.get("sprint").getAsJsonObject().get("category").getAsString(), jsonObj.get("sprint").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("sprint").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("inventory"))
+        		currentProperty = this.propertyInventory = new KeyBindingProperty(jsonObj.get("inventory").getAsJsonObject().get("name").getAsString(), jsonObj.get("inventory").getAsJsonObject().get("category").getAsString(), jsonObj.get("inventory").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("inventory").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("swap_hands"))
+        		currentProperty = this.propertySwapHands = new KeyBindingProperty(jsonObj.get("swap_hands").getAsJsonObject().get("name").getAsString(), jsonObj.get("swap_hands").getAsJsonObject().get("category").getAsString(), jsonObj.get("swap_hands").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("swap_hands").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("drop"))
+        		currentProperty = this.propertyDrop = new KeyBindingProperty(jsonObj.get("drop").getAsJsonObject().get("name").getAsString(), jsonObj.get("drop").getAsJsonObject().get("category").getAsString(), jsonObj.get("drop").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("drop").getAsJsonObject().get("enabled").getAsBoolean());           
+        		
+        		if (jsonObj.has("chat"))
+        		currentProperty = this.propertyChat = new KeyBindingProperty(jsonObj.get("chat").getAsJsonObject().get("name").getAsString(), jsonObj.get("chat").getAsJsonObject().get("category").getAsString(), jsonObj.get("chat").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("chat").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("playerlist"))
+        		currentProperty = this.propertyPlayerList = new KeyBindingProperty(jsonObj.get("playerlist").getAsJsonObject().get("name").getAsString(), jsonObj.get("playerlist").getAsJsonObject().get("category").getAsString(), jsonObj.get("playerlist").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("playerlist").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("command"))
+        		currentProperty = this.propertyCommand = new KeyBindingProperty(jsonObj.get("command").getAsJsonObject().get("name").getAsString(), jsonObj.get("command").getAsJsonObject().get("category").getAsString(), jsonObj.get("command").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("command").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("screenshot"))
+        		currentProperty = this.propertyScreenshot = new KeyBindingProperty(jsonObj.get("screenshot").getAsJsonObject().get("name").getAsString(), jsonObj.get("screenshot").getAsJsonObject().get("category").getAsString(), jsonObj.get("screenshot").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("screenshot").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("toggle_perspective"))
+        		currentProperty = this.propertyTogglePerspective = new KeyBindingProperty(jsonObj.get("toggle_perspective").getAsJsonObject().get("name").getAsString(), jsonObj.get("toggle_perspective").getAsJsonObject().get("category").getAsString(), jsonObj.get("toggle_perspective").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("toggle_perspective").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("smooth_camera"))
+        		currentProperty = this.propertySmoothCamera = new KeyBindingProperty(jsonObj.get("smooth_camera").getAsJsonObject().get("name").getAsString(), jsonObj.get("smooth_camera").getAsJsonObject().get("category").getAsString(), jsonObj.get("smooth_camera").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("smooth_camera").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("fullscreen"))
+        		currentProperty = this.propertyFullscreen = new KeyBindingProperty(jsonObj.get("fullscreen").getAsJsonObject().get("name").getAsString(), jsonObj.get("fullscreen").getAsJsonObject().get("category").getAsString(), jsonObj.get("fullscreen").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("fullscreen").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("spectator_outlines"))
+        		currentProperty = this.propertySpectatorOutlines = new KeyBindingProperty(jsonObj.get("spectator_outlines").getAsJsonObject().get("name").getAsString(), jsonObj.get("spectator_outlines").getAsJsonObject().get("category").getAsString(), jsonObj.get("spectator_outlines").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("spectator_outlines").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("hotbar_1"))
+        		currentProperty = this.propertyHotbar1 = new KeyBindingProperty(jsonObj.get("hotbar_1").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_1").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_1").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_1").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("hotbar_2"))
+        		currentProperty = this.propertyHotbar2 = new KeyBindingProperty(jsonObj.get("hotbar_2").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_2").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_2").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_2").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("hotbar_3"))
+        		currentProperty = this.propertyHotbar3 = new KeyBindingProperty(jsonObj.get("hotbar_3").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_3").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_3").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_3").getAsJsonObject().get("enabled").getAsBoolean()); 
+        		
+        		if (jsonObj.has("hotbar_4"))
+        		currentProperty = this.propertyHotbar4 = new KeyBindingProperty(jsonObj.get("hotbar_4").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_4").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_4").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_4").getAsJsonObject().get("enabled").getAsBoolean()); 		
             
-            categoryRight = configFile.get("right").getAsJsonObject().get("category").getAsString();
-            keyCodeRight = configFile.get("right").getAsJsonObject().get("key_code").getAsInt();
-            enableRight = configFile.get("right").getAsJsonObject().get("enabled").getAsBoolean();
+        		if (jsonObj.has("hotbar_5"))
+        		currentProperty = this.propertyHotbar5 = new KeyBindingProperty(jsonObj.get("hotbar_5").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_5").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_5").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_5").getAsJsonObject().get("enabled").getAsBoolean()); 
+            		
+            	if (jsonObj.has("hotbar_6"))
+            	currentProperty = this.propertyHotbar6 = new KeyBindingProperty(jsonObj.get("hotbar_6").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_6").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_6").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_6").getAsJsonObject().get("enabled").getAsBoolean()); 
+            		
+            	if (jsonObj.has("hotbar_7"))
+            	currentProperty = this.propertyHotbar7 = new KeyBindingProperty(jsonObj.get("hotbar_7").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_7").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_7").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_7").getAsJsonObject().get("enabled").getAsBoolean()); 
+            		
+            	if (jsonObj.has("hotbar_8"))
+            	currentProperty = this.propertyHotbar8 = new KeyBindingProperty(jsonObj.get("hotbar_8").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_8").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_8").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_8").getAsJsonObject().get("enabled").getAsBoolean()); 	
+            		
+            	if (jsonObj.has("hotbar_9"))
+            	currentProperty = this.propertyHotbar9 = new KeyBindingProperty(jsonObj.get("hotbar_9").getAsJsonObject().get("name").getAsString(), jsonObj.get("hotbar_9").getAsJsonObject().get("category").getAsString(), jsonObj.get("hotbar_9").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hotbar_9").getAsJsonObject().get("enabled").getAsBoolean()); 
+                		
+                if (jsonObj.has("quit"))
+                currentProperty = this.propertyQuit = new KeyBindingProperty(jsonObj.get("quit").getAsJsonObject().get("name").getAsString(), jsonObj.get("quit").getAsJsonObject().get("category").getAsString(), jsonObj.get("quit").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("quit").getAsJsonObject().get("enabled").getAsBoolean()); 
+                		
+                if (jsonObj.has("hide_hud"))
+                currentProperty = this.propertyHideGUI = new KeyBindingProperty(jsonObj.get("hide_hud").getAsJsonObject().get("name").getAsString(), jsonObj.get("hide_hud").getAsJsonObject().get("category").getAsString(), jsonObj.get("hide_hud").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("hide_hud").getAsJsonObject().get("enabled").getAsBoolean()); 
+                		
+                if (jsonObj.has("debug_screen"))
+                currentProperty = this.propertyDebugMenu = new KeyBindingProperty(jsonObj.get("debug_screen").getAsJsonObject().get("name").getAsString(), jsonObj.get("debug_screen").getAsJsonObject().get("category").getAsString(), jsonObj.get("debug_screen").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("debug_screen").getAsJsonObject().get("enabled").getAsBoolean()); 	
             
-            categoryJump = configFile.get("jump").getAsJsonObject().get("category").getAsString();
-            keyCodeJump = configFile.get("jump").getAsJsonObject().get("key_code").getAsInt();
-            enableJump = configFile.get("jump").getAsJsonObject().get("enabled").getAsBoolean();
+                if (jsonObj.has("switch_shader"))
+                currentProperty = this.propertySwitchShader = new KeyBindingProperty(jsonObj.get("switch_shader").getAsJsonObject().get("name").getAsString(), jsonObj.get("switch_shader").getAsJsonObject().get("category").getAsString(), jsonObj.get("switch_shader").getAsJsonObject().get("key_code").getAsInt(), props.indexOf(jsonObj), jsonObj.get("switch_shader").getAsJsonObject().get("enabled").getAsBoolean()); 
             
-            categorySneak = configFile.get("sneak").getAsJsonObject().get("category").getAsString();
-            keyCodeSneak = configFile.get("sneak").getAsJsonObject().get("key_code").getAsInt();
-            enableSneak = configFile.get("sneak").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categorySprint = configFile.get("sprint").getAsJsonObject().get("category").getAsString();
-            keyCodeSprint = configFile.get("sprint").getAsJsonObject().get("key_code").getAsInt();
-            enableSprint = configFile.get("sprint").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryInventory = configFile.get("inventory").getAsJsonObject().get("category").getAsString();
-            keyCodeInventory = configFile.get("inventory").getAsJsonObject().get("key_code").getAsInt();
-            enableInventory = configFile.get("inventory").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categorySwapHands = configFile.get("swap_hands").getAsJsonObject().get("category").getAsString();
-            keyCodeSwapHands = configFile.get("swap_hands").getAsJsonObject().get("key_code").getAsInt();
-            enableSwapHands = configFile.get("swap_hands").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryDrop = configFile.get("drop").getAsJsonObject().get("category").getAsString();
-            keyCodeDrop = configFile.get("drop").getAsJsonObject().get("key_code").getAsInt();
-            enableDrop = configFile.get("drop").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryChat = configFile.get("chat").getAsJsonObject().get("category").getAsString();
-            keyCodeChat = configFile.get("chat").getAsJsonObject().get("key_code").getAsInt();
-            enableChat = configFile.get("chat").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryPlayerList = configFile.get("player_list").getAsJsonObject().get("category").getAsString();
-            keyCodePlayerList = configFile.get("player_list").getAsJsonObject().get("key_code").getAsInt();
-            enablePlayerList = configFile.get("player_list").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryCommand = configFile.get("command").getAsJsonObject().get("category").getAsString();
-            keyCodeCommand = configFile.get("command").getAsJsonObject().get("key_code").getAsInt();
-            enableCommand = configFile.get("command").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryScreenshot = configFile.get("screenshot").getAsJsonObject().get("category").getAsString();
-            keyCodeScreenshot = configFile.get("screenshot").getAsJsonObject().get("key_code").getAsInt();
-            enableScreenshot = configFile.get("screenshot").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryTogglePerspective = configFile.get("toggle_perspective").getAsJsonObject().get("category").getAsString();
-            keyCodeTogglePerspective = configFile.get("toggle_perspective").getAsJsonObject().get("key_code").getAsInt();
-            enableTogglePerspective = configFile.get("toggle_perspective").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categorySmoothCamera = configFile.get("smooth_camera").getAsJsonObject().get("category").getAsString();
-            keyCodeSmoothCamera = configFile.get("smooth_camera").getAsJsonObject().get("key_code").getAsInt();
-            enableSmoothCamera = configFile.get("smooth_camera").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryFullscreen = configFile.get("fullscreen").getAsJsonObject().get("category").getAsString();
-            keyCodeFullscreen = configFile.get("fullscreen").getAsJsonObject().get("key_code").getAsInt();
-            enableFullscreen = configFile.get("fullscreen").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categorySpectatorOutlines = configFile.get("spectator_outlines").getAsJsonObject().get("category").getAsString();
-            keyCodeSpectatorOutlines = configFile.get("spectator_outlines").getAsJsonObject().get("key_code").getAsInt();
-            enableSpectatorOutlines = configFile.get("spectator_outlines").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar1 = configFile.get("hotbar_1").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar1 = configFile.get("hotbar_1").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar1 = configFile.get("hotbar_1").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar2 = configFile.get("hotbar_2").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar2 = configFile.get("hotbar_2").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar2 = configFile.get("hotbar_2").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar3 = configFile.get("hotbar_3").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar3 = configFile.get("hotbar_3").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar3 = configFile.get("hotbar_3").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar4 = configFile.get("hotbar_4").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar4 = configFile.get("hotbar_4").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar4 = configFile.get("hotbar_4").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar5 = configFile.get("hotbar_5").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar5 = configFile.get("hotbar_5").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar5 = configFile.get("hotbar_5").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar6 = configFile.get("hotbar_6").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar6 = configFile.get("hotbar_6").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar6 = configFile.get("hotbar_6").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar7 = configFile.get("hotbar_7").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar7 = configFile.get("hotbar_7").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar7 = configFile.get("hotbar_7").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar8 = configFile.get("hotbar_8").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar8 = configFile.get("hotbar_8").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar8 = configFile.get("hotbar_8").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHotbar9 = configFile.get("hotbar_9").getAsJsonObject().get("category").getAsString();
-            keyCodeHotbar9 = configFile.get("hotbar_9").getAsJsonObject().get("key_code").getAsInt();
-            enableHotbar9 = configFile.get("hotbar_9").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryQuit = configFile.get("quit").getAsJsonObject().get("category").getAsString();
-            keyCodeQuit = configFile.get("quit").getAsJsonObject().get("key_code").getAsInt();
-            enableQuit = configFile.get("quit").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryHideGUI = configFile.get("hide_gui").getAsJsonObject().get("category").getAsString();
-            keyCodeHideGUI = configFile.get("hide_gui").getAsJsonObject().get("key_code").getAsInt();
-            enableHideGUI = configFile.get("hide_gui").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categoryDebugMenu = configFile.get("debug_menu").getAsJsonObject().get("category").getAsString();
-            keyCodeDebugMenu = configFile.get("debug_menu").getAsJsonObject().get("key_code").getAsInt();
-            enableDebugMenu = configFile.get("debug_menu").getAsJsonObject().get("enabled").getAsBoolean();
-            
-            categorySwitchShader = configFile.get("switch_shader").getAsJsonObject().get("category").getAsString();
-            keyCodeSwitchShader = configFile.get("switch_shader").getAsJsonObject().get("key_code").getAsInt();
-            enableSwitchShader = configFile.get("switch_shader").getAsJsonObject().get("enabled").getAsBoolean();
-                        
-            inputStream.close();
+                if (currentProperty.isEnabled())
+                this.orderedProperties.add(currentProperty);
+            }
+                		            
+            inputStream.close();        
         }
         
         catch (IOException exception) {
