@@ -9,6 +9,7 @@ import java.util.Set;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -23,17 +24,23 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.1.0",
-    COREMOD_VERSION = "1.1.0";
+    VERSION = "2.2.0",
+    COREMOD_VERSION = "1.2.0";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
+    
+    @SideOnly(Side.CLIENT)
+    public KeyBinding keyBindQuit, keyBindHideHUD, keyBindDebugScreen, keyBindDisableShader;
+    
+    @Instance(MODID)
+    public static ReBindMain instance;
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
     			        
         if (event.getSide() == Side.CLIENT)	{
         	
-        	this.CONFIG_LOADER.loadConfiguration();     
+        	CONFIG_LOADER.loadConfiguration();     
         }
     }
 
@@ -46,9 +53,6 @@ public class ReBindMain {
     		
     		this.clearVanillaKeyBindings(gameSettings);
     		this.updateKeyBindings(gameSettings);   		
-    		
-    		KeyRegistry.registerInternalVanillaKeys();
-    		
     		this.removeUnusedCategories(gameSettings);
     	}
     }
@@ -91,7 +95,7 @@ public class ReBindMain {
 					bindingsArray.remove(gameSettings.keyBindScreenshot);						
 					bindingsArray.remove(gameSettings.keyBindTogglePerspective);						
 					bindingsArray.remove(gameSettings.keyBindSmoothCamera);							
-					bindingsArray.remove(gameSettings.field_152395_am);						
+					bindingsArray.remove(gameSettings.field_152395_am);			
 					bindingsArray.remove(gameSettings.field_152396_an);							
 					bindingsArray.remove(gameSettings.field_152397_ao);							
 					bindingsArray.remove(gameSettings.field_152398_ap);							
@@ -164,11 +168,11 @@ public class ReBindMain {
 		bindingsList.remove(gameSettings.keyBindScreenshot);						
 		bindingsList.remove(gameSettings.keyBindTogglePerspective);						
 		bindingsList.remove(gameSettings.keyBindSmoothCamera);							
-		bindingsList.remove(gameSettings.field_152395_am);		
+		bindingsList.remove(gameSettings.field_152395_am);	
 		bindingsList.remove(gameSettings.field_152396_an);							
 		bindingsList.remove(gameSettings.field_152397_ao);							
 		bindingsList.remove(gameSettings.field_152398_ap);							
-		bindingsList.remove(gameSettings.field_152399_aq);		
+		bindingsList.remove(gameSettings.field_152399_aq);	
 		bindingsList.remove(gameSettings.keyBindsHotbar[0]);									
 		bindingsList.remove(gameSettings.keyBindsHotbar[1]);								
 		bindingsList.remove(gameSettings.keyBindsHotbar[2]);											
@@ -183,167 +187,187 @@ public class ReBindMain {
 						
 		//Mouse
 				
-		gameSettings.keyBindAttack = new KeyBinding("key.attack", CONFIG_LOADER.keyCodeAttack, getCat(CONFIG_LOADER.categoryAttack));
+		gameSettings.keyBindAttack = new KeyBinding(getName(CONFIG_LOADER.propertyAttack.getName()), CONFIG_LOADER.propertyAttack.getKeyCode(), getCategory(CONFIG_LOADER.propertyAttack.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableAttack)
+		if (CONFIG_LOADER.propertyAttack.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindAttack);
 				
-		gameSettings.keyBindUseItem = new KeyBinding("key.use", CONFIG_LOADER.keyCodeUseItem, getCat(CONFIG_LOADER.categoryUseItem));
+		gameSettings.keyBindUseItem = new KeyBinding(getName(CONFIG_LOADER.propertyUseItem.getName()), CONFIG_LOADER.propertyUseItem.getKeyCode(), getCategory(CONFIG_LOADER.propertyUseItem.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableUseItem)
+		if (CONFIG_LOADER.propertyUseItem.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindUseItem);
 				
-		gameSettings.keyBindPickBlock = new KeyBinding("key.pickItem", CONFIG_LOADER.keyCodePickBlock, getCat(CONFIG_LOADER.categoryPickBlock));
+		gameSettings.keyBindPickBlock = new KeyBinding(getName(CONFIG_LOADER.propertyPickBlock.getName()), CONFIG_LOADER.propertyPickBlock.getKeyCode(), getCategory(CONFIG_LOADER.propertyPickBlock.getCategory()));
 		
-		if (this.CONFIG_LOADER.enablePickBlock)
+		if (CONFIG_LOADER.propertyPickBlock.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindPickBlock);
 		
 		//Keyboard
 				
-		gameSettings.keyBindForward = new KeyBinding("key.forward", CONFIG_LOADER.keyCodeForward, getCat(CONFIG_LOADER.categoryForward));
+		gameSettings.keyBindForward = new KeyBinding(getName(CONFIG_LOADER.propertyForward.getName()), CONFIG_LOADER.propertyForward.getKeyCode(), getCategory(CONFIG_LOADER.propertyForward.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableForward)
+		if (CONFIG_LOADER.propertyForward.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindForward);
 				
-		gameSettings.keyBindLeft = new KeyBinding("key.left", CONFIG_LOADER.keyCodeLeft, getCat(CONFIG_LOADER.categoryLeft));
+		gameSettings.keyBindLeft = new KeyBinding(getName(CONFIG_LOADER.propertyLeft.getName()), CONFIG_LOADER.propertyLeft.getKeyCode(), getCategory(CONFIG_LOADER.propertyLeft.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableLeft)
+		if (CONFIG_LOADER.propertyLeft.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindLeft);
 				
-		gameSettings.keyBindBack = new KeyBinding("key.back", CONFIG_LOADER.keyCodeBack, getCat(CONFIG_LOADER.categoryBack));
+		gameSettings.keyBindBack = new KeyBinding(getName(CONFIG_LOADER.propertyBack.getName()), CONFIG_LOADER.propertyBack.getKeyCode(), getCategory(CONFIG_LOADER.propertyBack.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableBack)
+		if (CONFIG_LOADER.propertyBack.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindBack);
 				
-		gameSettings.keyBindRight = new KeyBinding("key.right", CONFIG_LOADER.keyCodeRight, getCat(CONFIG_LOADER.categoryRight));
+		gameSettings.keyBindRight = new KeyBinding(getName(CONFIG_LOADER.propertyRight.getName()), CONFIG_LOADER.propertyRight.getKeyCode(), getCategory(CONFIG_LOADER.propertyRight.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableRight)
+		if (CONFIG_LOADER.propertyRight.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindRight);
 				
-		gameSettings.keyBindJump = new KeyBinding("key.jump", CONFIG_LOADER.keyCodeJump, getCat(CONFIG_LOADER.categoryJump));
+		gameSettings.keyBindJump = new KeyBinding(getName(CONFIG_LOADER.propertyJump.getName()), CONFIG_LOADER.propertyJump.getKeyCode(), getCategory(CONFIG_LOADER.propertyJump.getCategory()));
 
-		if (this.CONFIG_LOADER.enableJump)
+		if (CONFIG_LOADER.propertyJump.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindJump);
 				
-		gameSettings.keyBindSneak = new KeyBinding("key.sneak", CONFIG_LOADER.keyCodeSneak, getCat(CONFIG_LOADER.categorySneak));
+		gameSettings.keyBindSneak = new KeyBinding(getName(CONFIG_LOADER.propertySneak.getName()), CONFIG_LOADER.propertySneak.getKeyCode(), getCategory(CONFIG_LOADER.propertySneak.getCategory()));
 
-		if (this.CONFIG_LOADER.enableSneak)
+		if (CONFIG_LOADER.propertySneak.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindSneak);
 				
-		gameSettings.keyBindSprint = new KeyBinding("key.sprint", CONFIG_LOADER.keyCodeSprint, getCat(CONFIG_LOADER.categorySprint));
+		gameSettings.keyBindSprint = new KeyBinding(getName(CONFIG_LOADER.propertySprint.getName()), CONFIG_LOADER.propertySprint.getKeyCode(), getCategory(CONFIG_LOADER.propertySprint.getCategory()));
 
-		if (this.CONFIG_LOADER.enableSprint)
+		if (CONFIG_LOADER.propertySprint.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindSprint);
 				
-		gameSettings.keyBindDrop = new KeyBinding("key.drop", CONFIG_LOADER.keyCodeDrop, getCat(CONFIG_LOADER.categoryDrop));
+		gameSettings.keyBindDrop = new KeyBinding(getName(CONFIG_LOADER.propertyDrop.getName()), CONFIG_LOADER.propertyDrop.getKeyCode(), getCategory(CONFIG_LOADER.propertyDrop.getCategory()));
 
-		if (this.CONFIG_LOADER.enableDrop)
-		updatedBindingsList.add(gameSettings.keyBindDrop);
+		if (CONFIG_LOADER.propertyDrop.isEnabled())
+		updatedBindingsList.add(gameSettings.keyBindDrop);		
 				
-		gameSettings.keyBindInventory = new KeyBinding("key.inventory", CONFIG_LOADER.keyCodeInventory, getCat(CONFIG_LOADER.categoryInventory));
+		gameSettings.keyBindInventory = new KeyBinding(getName(CONFIG_LOADER.propertyInventory.getName()), CONFIG_LOADER.propertyInventory.getKeyCode(), getCategory(CONFIG_LOADER.propertyInventory.getCategory()));
 
-		if (this.CONFIG_LOADER.enableInventory)
+		if (CONFIG_LOADER.propertyInventory.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindInventory);
 				
-		gameSettings.keyBindChat = new KeyBinding("key.chat", CONFIG_LOADER.keyCodeChat, getCat(CONFIG_LOADER.categoryChat));
+		gameSettings.keyBindChat = new KeyBinding(getName(CONFIG_LOADER.propertyChat.getName()), CONFIG_LOADER.propertyChat.getKeyCode(), getCategory(CONFIG_LOADER.propertyChat.getCategory()));
 
-		if (this.CONFIG_LOADER.enableChat)
+		if (CONFIG_LOADER.propertyChat.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindChat);
 				
-		gameSettings.keyBindPlayerList = new KeyBinding("key.playerlist", CONFIG_LOADER.keyCodePlayerList, getCat(CONFIG_LOADER.categoryPlayerList));
+		gameSettings.keyBindPlayerList = new KeyBinding(getName(CONFIG_LOADER.propertyPlayerList.getName()), CONFIG_LOADER.propertyPlayerList.getKeyCode(), getCategory(CONFIG_LOADER.propertyPlayerList.getCategory()));
 
-		if (this.CONFIG_LOADER.enablePlayerList)
+		if (CONFIG_LOADER.propertyPlayerList.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindPlayerList);
 				
-		gameSettings.keyBindCommand = new KeyBinding("key.command", CONFIG_LOADER.keyCodeCommand, getCat(CONFIG_LOADER.categoryCommand));
+		gameSettings.keyBindCommand = new KeyBinding(getName(CONFIG_LOADER.propertyCommand.getName()), CONFIG_LOADER.propertyCommand.getKeyCode(), getCategory(CONFIG_LOADER.propertyCommand.getCategory()));
 
-		if (this.CONFIG_LOADER.enableCommand)
+		if (CONFIG_LOADER.propertyCommand.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindCommand);
 				
-		gameSettings.keyBindScreenshot = new KeyBinding("key.screenshot", CONFIG_LOADER.keyCodeScreenshot, getCat(CONFIG_LOADER.categoryScreenshot));
+		gameSettings.keyBindScreenshot = new KeyBinding(getName(CONFIG_LOADER.propertyScreenshot.getName()), CONFIG_LOADER.propertyScreenshot.getKeyCode(), getCategory(CONFIG_LOADER.propertyScreenshot.getCategory()));
 
-		if (this.CONFIG_LOADER.enableScreenshot)
+		if (CONFIG_LOADER.propertyScreenshot.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindScreenshot);
 				
-		gameSettings.keyBindTogglePerspective = new KeyBinding("key.togglePerspective", CONFIG_LOADER.keyCodeTogglePerspective, getCat(CONFIG_LOADER.categoryTogglePerspective));
+		gameSettings.keyBindTogglePerspective = new KeyBinding(getName(CONFIG_LOADER.propertyTogglePerspective.getName()), CONFIG_LOADER.propertyTogglePerspective.getKeyCode(), getCategory(CONFIG_LOADER.propertyTogglePerspective.getCategory()));
 
-		if (this.CONFIG_LOADER.enableTogglePerspective)
+		if (CONFIG_LOADER.propertyTogglePerspective.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindTogglePerspective);
 				
-		gameSettings.keyBindSmoothCamera = new KeyBinding("key.smoothCamera", CONFIG_LOADER.keyCodeSmoothCamera, getCat(CONFIG_LOADER.categorySmoothCamera));
+		gameSettings.keyBindSmoothCamera = new KeyBinding(getName(CONFIG_LOADER.propertySmoothCamera.getName()), CONFIG_LOADER.propertySmoothCamera.getKeyCode(), getCategory(CONFIG_LOADER.propertySmoothCamera.getCategory()));
 
-		if (this.CONFIG_LOADER.enableSmoothCamera)
+		if (CONFIG_LOADER.propertySmoothCamera.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindSmoothCamera);
 				
-		gameSettings.field_152395_am = new KeyBinding("key.fullscreen", CONFIG_LOADER.keyCodeFullscreen, getCat(CONFIG_LOADER.categoryFullscreen));
+		gameSettings.field_152395_am = new KeyBinding(getName(CONFIG_LOADER.propertyFullscreen.getName()), CONFIG_LOADER.propertyFullscreen.getKeyCode(), getCategory(CONFIG_LOADER.propertyFullscreen.getCategory()));
 
-		if (this.CONFIG_LOADER.enableFullscreen)
+		if (CONFIG_LOADER.propertyFullscreen.isEnabled())
 		updatedBindingsList.add(gameSettings.field_152395_am);
-		
-		gameSettings.field_152396_an = new KeyBinding("key.streamStartStop", CONFIG_LOADER.keyCodeStreamStartStop, getCat(CONFIG_LOADER.categoryStreamStartStop));
+				
+		gameSettings.field_152396_an = new KeyBinding(getName(CONFIG_LOADER.propertyStreamStartStop.getName()), CONFIG_LOADER.propertyStreamStartStop.getKeyCode(), getCategory(CONFIG_LOADER.propertyStreamStartStop.getCategory()));
 
-		if (this.CONFIG_LOADER.enableStreamStartStop)
+		if (CONFIG_LOADER.propertyStreamStartStop.isEnabled())
 		updatedBindingsList.add(gameSettings.field_152396_an);
 		
-		gameSettings.field_152397_ao = new KeyBinding("key.streamPauseUnpause", CONFIG_LOADER.keyCodeStreamPauseUnpause, getCat(CONFIG_LOADER.categoryStreamPauseUnpause));
+		gameSettings.field_152397_ao = new KeyBinding(getName(CONFIG_LOADER.propertyStreamPauseUnpause.getName()), CONFIG_LOADER.propertyStreamPauseUnpause.getKeyCode(), getCategory(CONFIG_LOADER.propertyStreamPauseUnpause.getCategory()));
 
-		if (this.CONFIG_LOADER.enableStreamPauseUnpause)
+		if (CONFIG_LOADER.propertyStreamPauseUnpause.isEnabled())
 		updatedBindingsList.add(gameSettings.field_152397_ao);
 		
-		gameSettings.field_152398_ap = new KeyBinding("key.streamCommercial", CONFIG_LOADER.keyCodeStreamCommercial, getCat(CONFIG_LOADER.categoryStreamCommercial));
+		gameSettings.field_152398_ap = new KeyBinding(getName(CONFIG_LOADER.propertyStreamCommercial.getName()), CONFIG_LOADER.propertyStreamCommercial.getKeyCode(), getCategory(CONFIG_LOADER.propertyStreamCommercial.getCategory()));
 
-		if (this.CONFIG_LOADER.enableStreamCommercial)
+		if (CONFIG_LOADER.propertyStreamCommercial.isEnabled())
 		updatedBindingsList.add(gameSettings.field_152398_ap);
 		
-		gameSettings.field_152399_aq = new KeyBinding("key.streamToggleMic", CONFIG_LOADER.keyCodeStreamToggleMic, getCat(CONFIG_LOADER.categoryStreamToggleMic));
+		gameSettings.field_152399_aq = new KeyBinding(getName(CONFIG_LOADER.propertyStreamToggleMic.getName()), CONFIG_LOADER.propertyStreamToggleMic.getKeyCode(), getCategory(CONFIG_LOADER.propertyStreamToggleMic.getCategory()));
 
-		if (this.CONFIG_LOADER.enableStreamToggleMic)
+		if (CONFIG_LOADER.propertyStreamToggleMic.isEnabled())
 		updatedBindingsList.add(gameSettings.field_152399_aq);
 						
-		gameSettings.keyBindsHotbar[0] = new KeyBinding("key.hotbar.1", CONFIG_LOADER.keyCodeHotbar1, getCat(CONFIG_LOADER.categoryHotbar1));
+		gameSettings.keyBindsHotbar[0] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar1.getName()), CONFIG_LOADER.propertyHotbar1.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar1.getCategory()));
 				
-		if (this.CONFIG_LOADER.enableHotbar1)			
+		if (CONFIG_LOADER.propertyHotbar1.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[0]);
 				
-		gameSettings.keyBindsHotbar[1] = new KeyBinding("key.hotbar.2", CONFIG_LOADER.keyCodeHotbar2, getCat(CONFIG_LOADER.categoryHotbar2));
+		gameSettings.keyBindsHotbar[1] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar2.getName()), CONFIG_LOADER.propertyHotbar2.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar2.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar2)			
+		if (CONFIG_LOADER.propertyHotbar2.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[1]);
 		
-		gameSettings.keyBindsHotbar[2] = new KeyBinding("key.hotbar.3", CONFIG_LOADER.keyCodeHotbar3, getCat(CONFIG_LOADER.categoryHotbar3));
+		gameSettings.keyBindsHotbar[2] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar3.getName()), CONFIG_LOADER.propertyHotbar3.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar3.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar3)			
+		if (CONFIG_LOADER.propertyHotbar3.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[2]);
 					
-		gameSettings.keyBindsHotbar[3] = new KeyBinding("key.hotbar.4", CONFIG_LOADER.keyCodeHotbar4, getCat(CONFIG_LOADER.categoryHotbar4));
+		gameSettings.keyBindsHotbar[3] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar4.getName()), CONFIG_LOADER.propertyHotbar4.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar4.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar4)			
+		if (CONFIG_LOADER.propertyHotbar4.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[3]);
 					
-		gameSettings.keyBindsHotbar[4] = new KeyBinding("key.hotbar.5", CONFIG_LOADER.keyCodeHotbar5, getCat(CONFIG_LOADER.categoryHotbar5));
+		gameSettings.keyBindsHotbar[4] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar5.getName()), CONFIG_LOADER.propertyHotbar5.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar5.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar5)			
+		if (CONFIG_LOADER.propertyHotbar5.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[4]);
 					
-		gameSettings.keyBindsHotbar[5] = new KeyBinding("key.hotbar.6", CONFIG_LOADER.keyCodeHotbar6, getCat(CONFIG_LOADER.categoryHotbar6));
+		gameSettings.keyBindsHotbar[5] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar6.getName()), CONFIG_LOADER.propertyHotbar6.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar6.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar6)			
+		if (CONFIG_LOADER.propertyHotbar6.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[5]);
 					
-		gameSettings.keyBindsHotbar[6] = new KeyBinding("key.hotbar.7", CONFIG_LOADER.keyCodeHotbar7, getCat(CONFIG_LOADER.categoryHotbar7));
+		gameSettings.keyBindsHotbar[6] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar7.getName()), CONFIG_LOADER.propertyHotbar7.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar7.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar7)			
+		if (CONFIG_LOADER.propertyHotbar7.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[6]);
 					
-		gameSettings.keyBindsHotbar[7] = new KeyBinding("key.hotbar.8", CONFIG_LOADER.keyCodeHotbar8, getCat(CONFIG_LOADER.categoryHotbar8));
+		gameSettings.keyBindsHotbar[7] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar8.getName()), CONFIG_LOADER.propertyHotbar8.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar8.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar8)			
+		if (CONFIG_LOADER.propertyHotbar8.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[7]);
 					
-		gameSettings.keyBindsHotbar[8] = new KeyBinding("key.hotbar.9", CONFIG_LOADER.keyCodeHotbar9, getCat(CONFIG_LOADER.categoryHotbar9));
+		gameSettings.keyBindsHotbar[8] = new KeyBinding(getName(CONFIG_LOADER.propertyHotbar9.getName()), CONFIG_LOADER.propertyHotbar9.getKeyCode(), getCategory(CONFIG_LOADER.propertyHotbar9.getCategory()));
 		
-		if (this.CONFIG_LOADER.enableHotbar9)			
+		if (CONFIG_LOADER.propertyHotbar9.isEnabled())
 		updatedBindingsList.add(gameSettings.keyBindsHotbar[8]);
+		
+		this.keyBindQuit = new KeyBinding(getName(CONFIG_LOADER.propertyQuit.getName()), CONFIG_LOADER.propertyQuit.getKeyCode(), getCategory(CONFIG_LOADER.propertyQuit.getCategory()));
+		
+		if (CONFIG_LOADER.propertyQuit.isEnabled())
+		updatedBindingsList.add(this.keyBindQuit);
+					
+		this.keyBindHideHUD = new KeyBinding(getName(CONFIG_LOADER.propertyHideGUI.getName()), CONFIG_LOADER.propertyHideGUI.getKeyCode(), getCategory(CONFIG_LOADER.propertyHideGUI.getCategory()));
+		
+		if (CONFIG_LOADER.propertyHideGUI.isEnabled())
+		updatedBindingsList.add(this.keyBindHideHUD);
+					
+		this.keyBindDebugScreen = new KeyBinding(getName(CONFIG_LOADER.propertyDebugMenu.getName()), CONFIG_LOADER.propertyDebugMenu.getKeyCode(), getCategory(CONFIG_LOADER.propertyDebugMenu.getCategory()));
+		
+		if (CONFIG_LOADER.propertyDebugMenu.isEnabled())
+		updatedBindingsList.add(this.keyBindDebugScreen);
+					
+		this.keyBindDisableShader = new KeyBinding(getName(CONFIG_LOADER.propertyDisableShader.getName()), CONFIG_LOADER.propertyDisableShader.getKeyCode(), getCategory(CONFIG_LOADER.propertyDisableShader.getCategory()));
+		
+		if (CONFIG_LOADER.propertyDisableShader.isEnabled())
+		updatedBindingsList.add(this.keyBindDisableShader);
 		
 		updatedBindingsList.addAll(bindingsList);
 				
@@ -363,8 +387,13 @@ public class ReBindMain {
 		KeyBinding.getKeybinds().retainAll(occurrences);
     }
     
-    public static String getCat(String categoryName) {
+    private String getName(String name) {
     	
-    	return "key.categories." + categoryName;
+    	return "key." + name;
+    }
+    
+    private String getCategory(String category) {
+    	
+    	return "key.categories." + category;
     }
 }
