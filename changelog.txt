@@ -1,0 +1,28 @@
+2.3.0
++Significant code optimization.
++New option: generate and use external configuration file.
++Keybindings now will use their default mod names if you hadn’t defined new ones.
++Ability to set default keys combination for all keybindings.
++Added support for key bindings settings for: baubles(1.7.10, 1.12.2), thaumcraft(1.7.10, 1.12.2),
+cofhcore(1.7.10), iron backpacks(1.7.10), industrial craft 2(1.7.10, 1.12.2), gravisuite(1.7.10), 
+rpg inventory(1.7.10, 1.12.2), abyssal craft(1.12.2), jei(1.12.2), journeymap(1.12.2), 
+better builder's wands(1.7.10, 1.12.2), inventory tweaks(1.7.10, 1.12.2) and xaero's minimap(1.7.10, 1.12.2).
+
+2.2.0
++Ability to change keybindings names.
++Ability to change the keybindings order in controls menu. 
++Configuration file was rewritten to make settings easier.
+
+2.1.0
++Fixed removing keys from controls menu added by other mods.
++New option: rewriting controls settings on first mod load. 
++Ability to change category. 
+
+2.0.0
++Configuration settings now available for all vanilla keys.
++Configuration file moved to the mod archive. 
+
+1.0.0
++Added previously unavailable keys to controls menu: quit (Esc), hide HUD (F1), debug screen (F3), disable shader (F4).
++Added configuration file for new keys. Now you can set new default keys, 
+remove them from controls and disable key ingame.

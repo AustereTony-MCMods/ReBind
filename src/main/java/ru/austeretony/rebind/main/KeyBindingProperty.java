@@ -1,20 +1,31 @@
 package ru.austeretony.rebind.main;
 
 public class KeyBindingProperty {
-
-	private final String name, category;
 	
-	private final int keyCode, order;
+	private final String domain, defaultName, name, category;
+	
+	private final int keyCode;
 	
 	private final boolean enabled;
-	
-	public KeyBindingProperty(String name, String category, int keyCode, int order, boolean enabled) {
 		
+	public KeyBindingProperty(String domain, String defaultName, String name, String category, int keyCode, boolean enabled) {
+					
+		this.domain = domain;
+		this.defaultName = defaultName;
 		this.name = name;
 		this.category = category;		
 		this.keyCode = keyCode;
-		this.order = order;
 		this.enabled = enabled;
+	}
+	
+	public String getDomain() {
+		
+		return this.domain;
+	}
+	
+	public String getDefaultName() {
+		
+		return this.defaultName;
 	}
 	
 	public String getName() {
@@ -30,11 +41,6 @@ public class KeyBindingProperty {
 	public int getKeyCode() {
 		
 		return this.keyCode;
-	}
-	
-	public int getOrder() {
-		
-		return this.order;
 	}
 	
 	public boolean isEnabled() {

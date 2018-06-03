@@ -1,4 +1,7 @@
-﻿key.quit=Выход
+﻿#
+# Minecraft
+#
+key.quit=Выход
 key.hideHUD=Спрятать HUD
 key.debugScreen=Экран Отладки
 key.disableShader=Отключить Шейдер

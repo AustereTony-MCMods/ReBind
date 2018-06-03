@@ -8,20 +8,54 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import cpw.mods.fml.common.Loader;
 import net.minecraft.client.settings.KeyBinding;
+import ru.austeretony.rebind.main.EnumModsKeys;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
 	
 	public static boolean wasLoadedBefore, optionsChecked;
+	
+	public static KeyBinding[] removeHiddenKeyBindings(KeyBinding[] keyBindings) {
+		
+		List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(keyBindings));
+		
+    	Set<String> occurrences = new HashSet<String>();
+		
+		Iterator<KeyBinding> iterator = bindingsList.iterator();
+		
+		KeyBinding curBinding;
+		
+		while (iterator.hasNext()) {
+			
+			curBinding = iterator.next();
+			
+			if (ReBindMain.CONFIG_LOADER.HIDDEN_KEYS.contains(curBinding.getKeyDescription())) {
+				
+				iterator.remove();
+			}
+			
+			else {
+				
+				occurrences.add(curBinding.getKeyCategory());
+			}
+		}
+
+		KeyBinding.getKeybinds().retainAll(occurrences);
+			
+		return bindingsList.toArray(new KeyBinding[bindingsList.size()]);
+	}
 	
 	public static boolean loadControlsFromOptionsFile(File options) {
 		
@@ -32,7 +66,7 @@ public class ReBindHooks {
 			return true;
 		}
 		
-		else if (ReBindMain.CONFIG_LOADER.enableControlsRewriting) {
+		else if (ReBindMain.CONFIG_LOADER.shouldRewriteControlsSettings()) {
 			
 			return false;
 		}
@@ -77,69 +111,73 @@ public class ReBindHooks {
 	
 	public static KeyBinding[] sortKeyBindings(KeyBinding[] bindingsArray) {
 		
-		Map<String, Integer> nativeOrder = new HashMap<String, Integer>();		
-		
-		Multimap<String, Integer> bindsByCategory = HashMultimap.<String, Integer>create();
-		
-		List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(bindingsArray));
-		
-		List<KeyBinding> orderedBindings = new ArrayList<KeyBinding>();
-		
-		for (int bindIndex = 0; bindIndex < bindingsArray.length; bindIndex++) {
-			
-			nativeOrder.put(bindingsArray[bindIndex].getKeyDescription().substring(4), bindIndex);
-			
-			if (isVanillaCategory(bindingsArray[bindIndex].getKeyCategory()))
-			bindsByCategory.put(bindingsArray[bindIndex].getKeyCategory().substring(15), bindIndex);
-		}
-		
-		int propIndex,knownBindNumber, unknownBindIndex;
-		
-		KeyBinding curKnownBinding, curUnknownBinding;
-		
-		List<KeyBindingProperty> props = ReBindMain.CONFIG_LOADER.orderedProperties;
-		
-		Iterator<Integer> iterator;
-		
-		for (KeyBindingProperty property : props) {
-			
-			propIndex = props.indexOf(property);
-			
-			knownBindNumber = nativeOrder.get(property.getName());
-			
-			curKnownBinding = bindingsArray[knownBindNumber];
+		if (ReBindMain.CONFIG_LOADER.SORTED_KEYS.isEmpty()) {
 						
-			orderedBindings.add(curKnownBinding);	
+			Map<String, Integer> nativeOrder = new HashMap<String, Integer>();		
 			
-			bindingsList.remove(curKnownBinding);
+			Multimap<String, Integer> bindsByCategory = HashMultimap.<String, Integer>create();
 			
-			bindsByCategory.remove(property.getCategory(), knownBindNumber);
-			
-			if ((propIndex + 1 < props.size() && !props.get(propIndex + 1).getCategory().equals(property.getCategory())) || propIndex + 1 == props.size()) {
+			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(bindingsArray));
+					
+			for (int bindIndex = 0; bindIndex < bindingsArray.length; bindIndex++) {
+											
+				nativeOrder.put(bindingsArray[bindIndex].getKeyDescription(), bindIndex);
 				
-				while (bindsByCategory.containsKey(property.getCategory())) {
+				if (isVanillaCategory(bindingsArray[bindIndex].getKeyCategory()))
+				bindsByCategory.put("mc." + bindingsArray[bindIndex].getKeyCategory().substring(15), bindIndex);
+			}
+			
+			int propIndex, knownBindNumber, unknownBindIndex;
+			
+			KeyBinding curKnownBinding, curUnknownBinding;
+			
+			List<KeyBindingProperty> sortedProps = ReBindMain.CONFIG_LOADER.SORTED_PROPERTIES;
+			
+			Iterator<Integer> iterator;
+			
+			for (KeyBindingProperty property : sortedProps) {
+				
+				if (isActualDomain(property.getDomain())) {				 
 					
-					iterator = bindsByCategory.get(property.getCategory()).iterator();
+					propIndex = sortedProps.indexOf(property);
+										
+					knownBindNumber = nativeOrder.containsKey(property.getDefaultName()) ? nativeOrder.get(property.getDefaultName()) : nativeOrder.get("key." + property.getName());
 					
-					while (iterator.hasNext()) {
+					curKnownBinding = bindingsArray[knownBindNumber];
+								
+					ReBindMain.CONFIG_LOADER.SORTED_KEYS.add(curKnownBinding);	
+					
+					bindingsList.remove(curKnownBinding);
+					
+					bindsByCategory.remove(property.getCategory(), knownBindNumber);
+					
+					if ((propIndex + 1 < sortedProps.size() && !sortedProps.get(propIndex + 1).getCategory().equals(property.getCategory())) || propIndex + 1 == sortedProps.size()) {
 						
-						unknownBindIndex = iterator.next();
-						
-						curUnknownBinding = bindingsArray[unknownBindIndex];
-						
-						orderedBindings.add(curUnknownBinding);
-						
-						bindingsList.remove(curUnknownBinding);
-						
-						iterator.remove();
+						while (bindsByCategory.containsKey(property.getCategory())) {
+							
+							iterator = bindsByCategory.get(property.getCategory()).iterator();
+							
+							while (iterator.hasNext()) {
+								
+								unknownBindIndex = iterator.next();
+								
+								curUnknownBinding = bindingsArray[unknownBindIndex];
+								
+								ReBindMain.CONFIG_LOADER.SORTED_KEYS.add(curUnknownBinding);
+								
+								bindingsList.remove(curUnknownBinding);
+								
+								iterator.remove();
+							}
+						}
 					}
 				}
 			}
+			
+			ReBindMain.CONFIG_LOADER.SORTED_KEYS.addAll(bindingsList);
 		}
 		
-		orderedBindings.addAll(bindingsList);
-		
-		return orderedBindings.toArray(new KeyBinding[orderedBindings.size()]);		
+		return ReBindMain.CONFIG_LOADER.SORTED_KEYS.toArray(new KeyBinding[ReBindMain.CONFIG_LOADER.SORTED_KEYS.size()]);		
 	}
 	
 	private static boolean isVanillaCategory(String string) {
@@ -150,6 +188,25 @@ public class ReBindHooks {
 				string.equals("key.categories.misc") ||
 				string.equals("key.categories.stream") ||
 				string.equals("key.categories.multiplayer");
+	}
+	
+	private static boolean isActualDomain(String domain) {
+		
+		boolean flag = false;
+		
+		EnumModsKeys modKey;
+		
+		for (int i = 0; i < EnumModsKeys.values().length; i++) {
+			
+			modKey = EnumModsKeys.values()[i];
+			
+			if (domain.equals(modKey.getDomain()) && Loader.isModLoaded(domain)) {
+				
+				flag = true;
+			}
+		}
+
+		return domain.equals("minecraft") || flag;
 	}
 	
 	public static int getQuitKeyCode() {
@@ -170,5 +227,46 @@ public class ReBindHooks {
 	public static int getDisableShaderKeyCode() {
 		
 		return ReBindMain.instance.keyBindDisableShader.getKeyCode();
+	}
+	
+	public static int getKeyBindingKeyCode(String bindingName, int keyCode) {
+				
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName))
+		keyCode = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getKeyCode();
+		
+		return keyCode;
+	}
+
+	public static String getKeyBindingCategory(String bindingName, String category) {
+				
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName)) {
+			
+			String cat = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getCategory();
+			
+			if (cat.equals("mc.gameplay") ||
+					cat.equals("mc.movement") ||
+					cat.equals("mc.inventory") ||
+					cat.equals("mc.misc") ||
+					cat.equals("mc.stream") ||
+					cat.equals("mc.multiplayer")) {
+				
+				category = "key.categories." + cat.substring(3);
+			}
+			
+			else {
+				
+				category = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getCategory();
+			}
+		}
+		
+		return category;
+	}
+	
+	public static String getKeyBindingName(String bindingName) {	    
+		
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName) && ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getName().length() > 0)
+		bindingName = "key." + ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getName();
+		
+		return bindingName;
 	}
 }

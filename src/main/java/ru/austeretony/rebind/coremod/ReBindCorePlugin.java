@@ -6,18 +6,18 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 @TransformerExclusions({"ru.austeretony.rebind.coremod"})
-public class FMLReBindPlugin implements IFMLLoadingPlugin {
+public class ReBindCorePlugin implements IFMLLoadingPlugin {
 		
     @Override
     public String[] getASMTransformerClass() {
     	
-        return new String[] {"ru.austeretony.rebind.coremod.ReBindClassTransformer"};
+        return new String[] {ReBindClassTransformer.class.getName()};
     }
 
     @Override
     public String getModContainerClass() {
     	
-        return "ru.austeretony.rebind.coremod.ReBindModContainer";
+        return ReBindModContainer.class.getName();
     }
 
     @Override

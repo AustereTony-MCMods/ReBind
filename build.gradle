@@ -17,9 +17,9 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-2.2.0"
+version = "1.7.10-2.3.0"
 group= "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "ReBind"
+archivesBaseName = "rebind"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -69,7 +69,7 @@ processResources
 
 jar {
    manifest {
-       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.coremod.FMLReBindPlugin'
+       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.coremod.ReBindCorePlugin'
        attributes 'FMLCorePluginContainsFMLMod': 'false'
    }
 }
