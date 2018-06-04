@@ -6,7 +6,7 @@
 "controls": 
 [
 {"mc_attack": { "name": "", "category": "mc.gameplay", "key_code": -100, "enabled": true}},
-{"mc_use_item": { "name": "", "category": "mc.gameplay", "key_code": -99, "enabled": true}},
+{"mc_use": { "name": "", "category": "mc.gameplay", "key_code": -99, "enabled": true}},
 {"mc_pick_block": { "name": "", "category": "mc.gameplay", "key_code": -98, "enabled": true}},
 
 {"mc_forward": { "name": "", "category": "mc.movement", "key_code": 17, "enabled": true}},
@@ -88,5 +88,4 @@
 {"xm_toggle_slime": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},    
 {"xm_toggle_waypoints": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},
 {"xm_waypoints_key": { "name": "", "category": "Xaero's Minimap", "key_code": 22, "enabled": true}}
-]
-}
+]}

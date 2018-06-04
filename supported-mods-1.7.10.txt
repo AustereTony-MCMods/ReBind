@@ -1,5 +1,8 @@
 1.7.10. Manage over mods keybindings! You able to remove unused mods keybindings from config. 
-Supports keybindings from:
+
+New supported mods:-
+
+Supported mods:
 
 Baubles,
 Better Builder's Wands,

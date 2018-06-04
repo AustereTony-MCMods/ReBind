@@ -1,12 +1,18 @@
+2.4.0
++Configuration file loading optimization.
++Added compatibility with Controlling mod. Keybindings in controls menu will sort 
+according to ReBind configuration.
+
+2.3.1
++Optimized external config generation.
++Added support for Better Builder's Wands, Xaero's Minimap and Inventory Tweaks.
+
 2.3.0
 +Significant code optimization.
 +New option: generate and use external configuration file.
 +Keybindings now will use their default mod names if you hadn’t defined new ones.
 +Ability to set default keys combination for all keybindings.
-+Added support for key bindings settings for: baubles(1.7.10, 1.12.2), thaumcraft(1.7.10, 1.12.2),
-cofhcore(1.7.10), iron backpacks(1.7.10), industrial craft 2(1.7.10, 1.12.2), gravisuite(1.7.10), 
-rpg inventory(1.7.10, 1.12.2), abyssal craft(1.12.2), jei(1.12.2), journeymap(1.12.2), 
-better builder's wands(1.7.10, 1.12.2), inventory tweaks(1.7.10, 1.12.2) and xaero's minimap(1.7.10, 1.12.2).
++Added support for keybindings from various mods.
 
 2.2.0
 +Ability to change keybindings names.

@@ -19,7 +19,7 @@ import com.google.common.collect.Multimap;
 
 import cpw.mods.fml.common.Loader;
 import net.minecraft.client.settings.KeyBinding;
-import ru.austeretony.rebind.main.EnumModsKeys;
+import ru.austeretony.rebind.main.EnumKeys;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
@@ -192,21 +192,20 @@ public class ReBindHooks {
 	
 	private static boolean isActualDomain(String domain) {
 		
-		boolean flag = false;
-		
-		EnumModsKeys modKey;
-		
-		for (int i = 0; i < EnumModsKeys.values().length; i++) {
+		if (domain.equals(EnumKeys.MINECRAFT.getDomain())) {
 			
-			modKey = EnumModsKeys.values()[i];
-			
+			return true;
+		}
+	
+		for (EnumKeys modKey : EnumKeys.values()) {
+					
 			if (domain.equals(modKey.getDomain()) && Loader.isModLoaded(domain)) {
 				
-				flag = true;
+				return true;
 			}
 		}
 
-		return domain.equals("minecraft") || flag;
+		return false;
 	}
 	
 	public static int getQuitKeyCode() {

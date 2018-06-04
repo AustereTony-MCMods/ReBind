@@ -48,10 +48,13 @@ public class ReBindClassTransformer implements IClassTransformer {
     	
 			
 			case "bes":					
-				return patchGuiKeyBindingList(basicClass, true);
+				return patchGuiKeyBindingList(basicClass, true, false);
 
 			case "net.minecraft.client.gui.GuiKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false);	
+				return patchGuiKeyBindingList(basicClass, false, false);	
+				
+			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
+				return patchGuiKeyBindingList(basicClass, false, true);
 				
 			
 			case "bao":					
@@ -216,23 +219,19 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiKeyBindingList(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchGuiKeyBindingList(byte[] basicClass, boolean obfuscated, boolean flag) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String 
-	 	guiKeyBindingsListClassName = obfuscated ? "bes" : "net/minecraft/client/gui/GuiKeyBindingList",
-	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding",
-	 	guiControlsClassName = obfuscated ? "bew" : "net/minecraft/client/gui/GuiControls",
-	 	minecraftClassName = obfuscated ? "bao" : "net/minecraft/client/Minecraft";
+	 	String keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
         
         boolean isSuccessful = false;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
-			if (methodNode.desc.equals("(L" + guiControlsClassName + ";L" + minecraftClassName + ";)V")) {
+			if (methodNode.name.equals("<init>")) {
 												
                 AbstractInsnNode currentInsn = null;
                 
@@ -265,8 +264,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
 	    classNode.accept(writer);
 	    
-	    if (isSuccessful)
-        LOGGER.info("<GuiKeyBindingList.class> transformed!");   
+	    if (isSuccessful) {
+	    	
+	    	if (!flag)
+	    	LOGGER.info("<GuiKeyBindingList.class> transformed!");  
+	    	else
+		    LOGGER.info("<GuiNewKeyBindingList.class> transformed!");  
+		}
 	            
         return writer.toByteArray();				
 	}
@@ -356,7 +360,7 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated, boolean isContainer) {
+	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated, boolean flag) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
@@ -399,7 +403,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    
 	    if (isSuccessful) {
 
-	    	if (!isContainer) 
+	    	if (!flag) 
 	    	LOGGER.info("<GuiScreen.class> transformed!");   
 	    	else
 	    	LOGGER.info("<GuiContainer.class> transformed!"); 
