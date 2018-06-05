@@ -11,7 +11,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -22,86 +22,73 @@ import ru.austeretony.rebind.main.ReBindMain;
 public class ReBindClassTransformer implements IClassTransformer {
 
 	public static final Logger LOGGER = LogManager.getLogger("ReBind Core");
-
+	
 	public ReBindClassTransformer() {
-		
+				
 		ReBindMain.CONFIG_LOADER.loadConfiguration();
 	}
-	
+
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {    	
     	
-    	switch (name) {
+    	switch (name) { 	
     	
-			case "bbj":					
-				return patchGameSettings(basicClass, true);
-
-			case "net.minecraft.client.settings.GameSettings":							
-				return patchGameSettings(basicClass, false);
+    		case "net.minecraftforge.fml.client.FMLClientHandler":									
+    			return patchFMLClientHandler(basicClass, true);
 				
-			
-			case "bal":									
+				
+			case "bhy":									
 				return patchKeyBinding(basicClass, true);
 
 			case "net.minecraft.client.settings.KeyBinding":		
 				return patchKeyBinding(basicClass, false);
-    	
-			
-			case "bes":					
+				
+				
+			case "bmd":					
 				return patchGuiKeyBindingList(basicClass, true, false);
 
 			case "net.minecraft.client.gui.GuiKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false, false);	
-				
+				return patchGuiKeyBindingList(basicClass, false, false);		
+
 			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
 				return patchGuiKeyBindingList(basicClass, false, true);
 				
-			
-			case "bao":					
+				
+			case "bib":					
 				return patchMinecraft(basicClass, true);
 		
 			case "net.minecraft.client.Minecraft":							
 	    		return patchMinecraft(basicClass, false);	
+	    	
 	    		
-			
-			case "bdw":					
+			case "blk":					
 				return patchGuiScreen(basicClass, true, false);
 		
 			case "net.minecraft.client.gui.GuiScreen":							
 	    		return patchGuiScreen(basicClass, false, false);	
+	    	
 	    		
-			
-			case "bex":					
+			case "bmg":					
 				return patchGuiScreen(basicClass, true, true);
 		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
-	    		return patchGuiScreen(basicClass, false, true);
+	    		return patchGuiScreen(basicClass, false, true);	
     	}
     	
 		return basicClass;
     }
     
-	private byte[] patchGameSettings(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchFMLClientHandler(byte[] basicClass, boolean obfuscated) {
 		
 	    ClassNode classNode = new ClassNode();
 	    ClassReader classReader = new ClassReader(basicClass);
 	    classReader.accept(classNode, 0);
-	    
-	 	String 
-	 	targetMethodName = obfuscated ? "a" : "loadOptions",
-	 	keyBindingsFieldName = obfuscated ? "as" : "keyBindings",
-	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding",
-	    optionsFileFieldName = obfuscated ? "aX" : "optionsFile",	    		
-	    gameSettingsClassName = obfuscated ? "bbj" : "net/minecraft/client/settings/GameSettings",
-	 	fileClassName = "java/io/File";
 	 		    
-        boolean 
-        injected = false,
-        isSuccessful = false;
+        boolean isSuccessful = false;
 	 		    
 	    for (MethodNode methodNode : classNode.methods) {
 	    	
-			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
+			if (methodNode.name.equals("finishMinecraftLoading") && methodNode.desc.equals("()V")) {
 												
 	            AbstractInsnNode currentInsn = null;
 	            
@@ -111,37 +98,20 @@ public class ReBindClassTransformer implements IClassTransformer {
 	            	
 	                currentInsn = insnIterator.next(); 
 	                
-	                if (!injected && currentInsn.getOpcode() == Opcodes.ALOAD) {
+	                if (currentInsn.getOpcode() == Opcodes.ICONST_0) {
 	                	
                     	InsnList nodesList = new InsnList();
-                    	
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, gameSettingsClassName, keyBindingsFieldName, "[L" + keyBindingClassName + ";"));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "removeHiddenKeyBindings", "([L" + keyBindingClassName + ";)[L" + keyBindingClassName + ";", false));
-                        nodesList.add(new FieldInsnNode(Opcodes.PUTFIELD, gameSettingsClassName, keyBindingsFieldName, "[L" + keyBindingClassName + ";"));
+                
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "removeHiddenKeyBindings", "()V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "rewriteControlsSettings", "()V", false));
+
+                        methodNode.instructions.insert(currentInsn.getNext(), nodesList); 
+
+                        isSuccessful = true;
                         
-                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
-                        
-	                	injected = true;
-	                }
-	                	                
-	                if (currentInsn.getOpcode() == Opcodes.IF_ICMPGE) {
-	          		
-                    	InsnList nodesList = new InsnList();
-                    	
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, gameSettingsClassName, optionsFileFieldName, "L" + fileClassName + ";"));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "loadControlsFromOptionsFile", "(L" + fileClassName + ";)Z", false));
-                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
-                    	
-                        methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious().getPrevious().getPrevious().getPrevious().getPrevious(), nodesList); 
-                        	                        
                         break;
 	                }
-	            }	
-	            
-                isSuccessful = true;
+	            }	                      
 	            
 	            break;
 			}
@@ -151,7 +121,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<GameSettings.class> transformed!");   
+	    LOGGER.info("<FMLClientHandler.class> transformed!");   
 	    	    
 	    return writer.toByteArray();	
 	}
@@ -164,9 +134,14 @@ public class ReBindClassTransformer implements IClassTransformer {
         
 	 	String 
 	 	stringClassName = "java/lang/String",
-	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
+	 	keyBindingClassName = obfuscated ? "bhy" : "net/minecraft/client/settings/KeyBinding",
+	 	iKeyConflictContextClassName = "net/minecraftforge/client/settings/IKeyConflictContext",
+	 	keyConflictContextClassName = "net/minecraftforge/client/settings/KeyConflictContext",
+	 	keyModifierClassName = "net/minecraftforge/client/settings/KeyModifier";
        
-        boolean isSuccessful = false;
+        boolean 
+        descChanged = false,
+        isSuccessful = false;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
@@ -180,26 +155,70 @@ public class ReBindClassTransformer implements IClassTransformer {
                 	
                     currentInsn = insnIterator.next(); 
                     
-                    if (currentInsn.getOpcode() == Opcodes.INVOKESPECIAL) {                   	
+                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {                   	
+                    	
+                    	InsnList nodesList = new InsnList();
+                    	
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                    	nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, keyConflictContextClassName, "UNIVERSAL", "L" + keyConflictContextClassName + ";"));
+                    	nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, keyModifierClassName, "NONE", "L" + keyModifierClassName + ";"));
+                    	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, keyBindingClassName, "<init>", "(L" + stringClassName + ";L" + iKeyConflictContextClassName + ";L" + keyModifierClassName + ";IL" + stringClassName + ";)V", false));
+                    	nodesList.add(new InsnNode(Opcodes.RETURN)); 
+                    	
+                    	methodNode.instructions.insertBefore(currentInsn, nodesList); 
+                    
+                    	break;
+                    }
+                }
+			}
+			
+			if (methodNode.name.equals("<init>") && methodNode.desc.equals("(L" + stringClassName + ";L" + iKeyConflictContextClassName + ";L" + keyModifierClassName + ";IL" + stringClassName + ";)V")) {
+				
+                AbstractInsnNode currentInsn = null;
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (!descChanged && currentInsn.getOpcode() == Opcodes.INVOKESPECIAL) {                   	
                     	
                     	InsnList nodesList = new InsnList();
                     	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                    	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingKeyCode", "(L" + stringClassName + ";I)I", false));
-                    	nodesList.add(new VarInsnNode(Opcodes.ISTORE, 2));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingName", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
+                    	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 1));    
                     	
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingCategory", "(L" + stringClassName + ";L" + stringClassName + ";)L" + stringClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingKeyModifier", "(L" + keyModifierClassName + ";)L" + keyModifierClassName + ";", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));
                     	
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingName", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
-                    	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 1));                  
+                    	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 4));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingKeyCode", "(I)I", false));
+                    	nodesList.add(new VarInsnNode(Opcodes.ISTORE, 4));
+                    	
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 5));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingCategory", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
+                    	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 5));                                
                     	
                     	methodNode.instructions.insert(currentInsn, nodesList); 
                     
+                    	descChanged = true;
+                    }
+                    
+                    if (currentInsn.getOpcode() == Opcodes.RETURN) {    
+                    	
+                    	InsnList nodesList = new InsnList();
+
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeybinding", "(L" + keyBindingClassName + ";)V", false));
+                    	
+                    	methodNode.instructions.insertBefore(currentInsn, nodesList); 
+                    	
                     	break;
                     }
                 }
@@ -225,7 +244,7 @@ public class ReBindClassTransformer implements IClassTransformer {
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
+	 	String keyBindingClassName = obfuscated ? "bhy" : "net/minecraft/client/settings/KeyBinding";
         
         boolean isSuccessful = false;
                         
@@ -274,14 +293,14 @@ public class ReBindClassTransformer implements IClassTransformer {
 	            
         return writer.toByteArray();				
 	}
-    
+
 	private byte[] patchMinecraft(byte[] basicClass, boolean obfuscated) {
 		        
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "p" : "runTick";
+	 	String targetMethodName = obfuscated ? "aD" : "runTickKeyboard";
 	 	
         int 
         bipushCount = 0,
@@ -305,38 +324,38 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	bipushCount++;
                     	
-                    	if (bipushCount == 4 || bipushCount == 6 || bipushCount == 9 || bipushCount == 11 || bipushCount == 13 || bipushCount == 17 || bipushCount == 19 || bipushCount == 21 || bipushCount == 23 || bipushCount == 25) {
+                    	if (bipushCount == 2 || bipushCount == 4 || bipushCount == 6 || bipushCount == 10) {
                     		
                             methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDebugMenuKeyCode", "()I", false)); 
                     		
                     		insnIterator.remove();
                     		
-                    		if (bipushCount == 25) {
+                    		if (bipushCount == 10) {
                     			
                     			break; 
                     		}
                     	}
                     	
-                    	if (bipushCount == 7) {
+                    	if (bipushCount == 5) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDisableShaderKeyCode", "()I", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getSwitchShaderKeyCode", "()I", false)); 
                     		
                     		insnIterator.remove();
                     	}
-                    	                   	
-                    	if (bipushCount == 24) {
+                    	
+                    	if (bipushCount == 7) {
                         	                                                   	
                             methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getHideHUDKeyCode", "()I", false)); 
                             
                             insnIterator.remove();               
                         } 
-                    }                                                                       
+                    }
                     
                     if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
                     	
                     	iconstCount++;
                     	
-                    	if (iconstCount == 4) {
+                    	if (iconstCount == 2) {
                     		
                             methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
                     		
@@ -346,30 +365,30 @@ public class ReBindClassTransformer implements IClassTransformer {
                 }
                 
                 isSuccessful = true;
-				
+                
 				break;
 			}
 		}
 		
-	    ClassWriter writer = new ClassWriter(0);	    
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<Minecraft.class> transformed!");
+        LOGGER.info("<Minecraft.class> transformed!");   
 	            
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated, boolean flag) {
+	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated, boolean isContainer) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "a" : "keyTyped";  
+	 	String targetMethodName = obfuscated ? "a" : "keyTyped"; 
 	 	
         boolean isSuccessful = false;
-	 		
+        
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("(CI)V")) {
@@ -398,17 +417,17 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 		}
 		
-	    ClassWriter writer = new ClassWriter(0);	    
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful) {
 
-	    	if (!flag) 
+	    	if (!isContainer) 
 	    	LOGGER.info("<GuiScreen.class> transformed!");   
 	    	else
 	    	LOGGER.info("<GuiContainer.class> transformed!"); 
 	    }
-        
+
         return writer.toByteArray();				
 	}
 }

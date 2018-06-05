@@ -24,18 +24,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import cpw.mods.fml.relauncher.FMLInjectionData;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 public class ConfigLoader {
 	
 	private boolean useExternalConfig, enableRewriting;
 	
     public static final Map<String, KeyBindingProperty> PROPERTIES = new HashMap<String, KeyBindingProperty>();
-    	
+        	
     public static final List<KeyBindingProperty> SORTED_PROPERTIES = new ArrayList<KeyBindingProperty>();
     
     public static final List<String> HIDDEN_KEYS = new ArrayList<String>();
+    
+    public static final Map<String, KeyBinding> KEYBINDINGS = new HashMap<String, KeyBinding>();
     
     public static final List<KeyBinding> SORTED_KEYS = new ArrayList<KeyBinding>();  
     
@@ -117,7 +119,7 @@ public class ConfigLoader {
 		}
 	}
 	
-    private void createExternalCopyAndLoad(String configPath, JsonObject internalConfig) {
+	private void createExternalCopyAndLoad(String configPath, JsonObject internalConfig) {
     	
         try {
         	
@@ -177,7 +179,7 @@ public class ConfigLoader {
         
         JsonObject property;
         
-        KeyBindingProperty keyBindingProperty;
+        KeyBindingProperty keyProperty;
                 
         for (EnumKeys enumKey : EnumKeys.values()) {
         	
@@ -189,20 +191,21 @@ public class ConfigLoader {
         			
         			property = properties.get(key);
         			
-        			keyBindingProperty = new KeyBindingProperty(
+        			keyProperty = new KeyBindingProperty(
         					enumKey.getDomain(), 
         					enumKey.getDefaultNames()[i], 
         					property.get("name").getAsString(), 
         					property.get("category").getAsString(), 
         					property.get("key_code").getAsInt(), 
+        					property.get("mod").getAsString(), 
         					property.get("enabled").getAsBoolean());     
         			
-                    PROPERTIES.put(keyBindingProperty.getDefaultName(), keyBindingProperty);
+                    PROPERTIES.put(keyProperty.getDefaultName(), keyProperty);
                     
-                    if (keyBindingProperty.isEnabled())
-                    enabledKeys.put(key, keyBindingProperty);
+                    if (keyProperty.isEnabled())
+                    enabledKeys.put(key, keyProperty);
                     else
-                    HIDDEN_KEYS.add(keyBindingProperty.getDefaultName());
+                    HIDDEN_KEYS.add(keyProperty.getDefaultName());
         		}
         		
         		i++;

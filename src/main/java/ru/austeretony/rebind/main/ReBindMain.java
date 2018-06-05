@@ -1,11 +1,11 @@
 package ru.austeretony.rebind.main;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 @Mod(modid = ReBindMain.MODID, name = ReBindMain.NAME, version = ReBindMain.VERSION)
 public class ReBindMain {
@@ -13,12 +13,12 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.4.0",
+    VERSION = "2.4.1",
     COREMOD_VERSION = "1.3.0";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
     
-    public KeyBinding keyBindQuit, keyBindHideHUD, keyBindDebugScreen, keyBindDisableShader;
+    public KeyBinding keyBindQuit, keyBindHideHUD, keyBindDebugScreen, keyBindSwitchShader;
     
     @Instance(MODID)
     public static ReBindMain instance;
@@ -34,6 +34,6 @@ public class ReBindMain {
 		ClientRegistry.registerKeyBinding(this.keyBindQuit = new KeyBinding("key.quit", 0, ""));
 		ClientRegistry.registerKeyBinding(this.keyBindHideHUD = new KeyBinding("key.hideHUD", 0, ""));
 		ClientRegistry.registerKeyBinding(this.keyBindDebugScreen = new KeyBinding("key.debugScreen", 0, ""));
-		ClientRegistry.registerKeyBinding(this.keyBindDisableShader = new KeyBinding("key.disableShader", 0, ""));
+		ClientRegistry.registerKeyBinding(this.keyBindSwitchShader = new KeyBinding("key.switchShader", 0, ""));
 	}
 }

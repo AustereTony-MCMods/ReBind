@@ -4,4 +4,4 @@
 key.quit=Выход
 key.hideHUD=Спрятать HUD
 key.debugScreen=Экран Отладки
-key.disableShader=Отключить Шейдер
+key.switchShader=Сменить Шейдер

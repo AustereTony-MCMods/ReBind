@@ -1,3 +1,6 @@
+2.4.1
++Fixed crash on clients with Optifine.
+
 2.4.0
 +Configuration file loading optimization.
 +Added compatibility with Controlling mod. Keybindings in controls menu will sort 
