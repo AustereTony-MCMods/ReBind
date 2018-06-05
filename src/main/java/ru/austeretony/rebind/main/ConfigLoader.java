@@ -37,6 +37,8 @@ public class ConfigLoader {
     
     public static final List<String> HIDDEN_KEYS = new ArrayList<String>();
     
+    public static final Map<String, KeyBinding> KEYBINDINGS = new HashMap<String, KeyBinding>();
+    
     public static final List<KeyBinding> SORTED_KEYS = new ArrayList<KeyBinding>();  
     
 	public void loadConfiguration() {

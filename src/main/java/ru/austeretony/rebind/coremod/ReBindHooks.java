@@ -1,23 +1,31 @@
 package ru.austeretony.rebind.coremod;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.Loader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import ru.austeretony.rebind.main.EnumKeys;
 import ru.austeretony.rebind.main.KeyBindingProperty;
@@ -27,84 +35,112 @@ public class ReBindHooks {
 	
 	public static boolean wasLoadedBefore, optionsChecked;
 	
-	public static KeyBinding[] removeHiddenKeyBindings(KeyBinding[] keyBindings) {
+	private static String keyDefaultName;
+	
+	public static void removeHiddenKeyBindings() {
 		
-		List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(keyBindings));
-		
-    	Set<String> occurrences = new HashSet<String>();
-		
-		Iterator<KeyBinding> iterator = bindingsList.iterator();
-		
-		KeyBinding curBinding;
-		
-		while (iterator.hasNext()) {
+		if (Minecraft.getMinecraft().gameSettings != null) {
+						
+			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(Minecraft.getMinecraft().gameSettings.keyBindings));
 			
-			curBinding = iterator.next();
+	    	Set<String> occurrences = new HashSet<String>();
 			
-			if (ReBindMain.CONFIG_LOADER.HIDDEN_KEYS.contains(curBinding.getKeyDescription())) {
+			Iterator<KeyBinding> iterator = bindingsList.iterator();
+			
+			KeyBinding curBinding;
+			
+			String keyName;
+			
+			while (iterator.hasNext()) {
 				
-				iterator.remove();
-			}
-			
-			else {
+				curBinding = iterator.next();
 				
-				occurrences.add(curBinding.getKeyCategory());
+				keyName = curBinding.getKeyDescription();
+				
+				if (ReBindMain.CONFIG_LOADER.HIDDEN_KEYS.contains(keyName)) {				
+						
+					ReBindMain.CONFIG_LOADER.KEYBINDINGS.get(keyName).setKeyCode(ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyName).getKeyCode());
+					
+					iterator.remove();				
+				}
+				
+				else {
+					
+					occurrences.add(curBinding.getKeyCategory());
+				}
 			}
+	
+			KeyBinding.getKeybinds().retainAll(occurrences);
+						
+			Minecraft.getMinecraft().gameSettings.keyBindings = bindingsList.toArray(new KeyBinding[bindingsList.size()]);
 		}
-
-		KeyBinding.getKeybinds().retainAll(occurrences);
-			
-		return bindingsList.toArray(new KeyBinding[bindingsList.size()]);
 	}
 	
-	public static boolean loadControlsFromOptionsFile(File options) {
+	public static void rewriteControlsSettings() {
 		
-		checkOptionsFile(options);
-		
-		if (wasLoadedBefore) {
-			
-			return true;
-		}
-		
-		else if (ReBindMain.CONFIG_LOADER.shouldRewriteControlsSettings()) {
-			
-			return false;
-		}
-										
-		return true;
-	}
+		if (Minecraft.getMinecraft().gameSettings != null && ReBindMain.CONFIG_LOADER.shouldRewriteControlsSettings()) {
 
-	private static void checkOptionsFile(File options) {
+	    	try {
+	    		
+	    		String optionsPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/options.txt";
+	    		
+				InputStream inputStream = new FileInputStream(new File(optionsPath));
 				
-		if (!optionsChecked) {
+				List<String> optionsLines = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
+				
+				inputStream.close();
+				
+				Map<String, String> options = new LinkedHashMap<String, String>();
+							
+				Splitter splitter = Splitter.on(':');
+				
+				Iterator<String> splitIterator;
+				
+				for (String option : optionsLines) {
+					
+					splitIterator = splitter.split(option).iterator();
+					
+					options.put(splitIterator.next(), splitIterator.next());
+				}
+								
+				if (!options.containsKey("key_key.quit") &&
+						!options.containsKey("key_key.hideHUD") &&
+						!options.containsKey("key_key.debugScreen") &&
+						!options.containsKey("key_key.switchShader")) {
+									
+					Iterator<String> iterator = optionsLines.iterator();
+					
+					String curLine;
+					
+					while (iterator.hasNext()) {
 						
-			String line = "";
-			
-	        try {
-	        	
-				BufferedReader bufferedReader = new BufferedReader(new FileReader(options));
-				
-	            while ((line = bufferedReader.readLine()) != null) {
-	            		            		            	
-	            	if (line.split(":")[0].equals("key_key.quit")) {
-	            		
-	            		wasLoadedBefore = true;
-	            	}
-	            }
-	            
-	            optionsChecked = true;
-	            
-				bufferedReader.close();
+						curLine = iterator.next();
+						
+						if (curLine.length() > 5 && curLine.substring(0, 4).equals("key_")) {
+							
+							iterator.remove();
+						}
+					}
+					
+		            PrintStream fileStream = new PrintStream(new File(optionsPath));
+					
+		            for (String line : optionsLines) {
+		            	
+		            	fileStream.println(line);
+		            }
+		            
+		            fileStream.close();
+				}
 			} 
-	        
-	        catch (FileNotFoundException exception) {
-				
-	        	exception.printStackTrace();       	
+	    	
+	    	catch (FileNotFoundException exception) {
+	    		
+	    		exception.printStackTrace();
 			} 
-	        
-	        catch (IOException exception) {
-				
-	        	exception.printStackTrace();
+	    	
+	    	catch (IOException exception) {
+	    		
+	    		exception.printStackTrace();
 			}
 		}
 	}
@@ -196,6 +232,11 @@ public class ReBindHooks {
 			
 			return true;
 		}
+		
+		if (domain.equals(EnumKeys.OPTIFINE.getDomain()) && FMLClientHandler.instance().hasOptifine()) {
+			
+			return true;
+		}
 	
 		for (EnumKeys modKey : EnumKeys.values()) {
 					
@@ -228,24 +269,35 @@ public class ReBindHooks {
 		return ReBindMain.instance.keyBindDisableShader.getKeyCode();
 	}
 	
-	public static int getKeyBindingKeyCode(String bindingName, int keyCode) {
+	public static String getKeyBindingName(String name) {	    
+		
+		keyDefaultName = name;
+		
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(name) && ReBindMain.CONFIG_LOADER.PROPERTIES.get(name).getName().length() > 0)
+		name = "key." + ReBindMain.CONFIG_LOADER.PROPERTIES.get(name).getName();
+		
+		return name;
+	}
+	
+	public static int getKeyBindingKeyCode(int keyCode) {
 				
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName))
-		keyCode = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getKeyCode();
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(keyDefaultName))
+		keyCode = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getKeyCode();
 		
 		return keyCode;
 	}
 
-	public static String getKeyBindingCategory(String bindingName, String category) {
+	public static String getKeyBindingCategory(String category) {
 				
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName)) {
+		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(keyDefaultName)) {
 			
-			String cat = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getCategory();
+			String cat = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getCategory();
 			
 			if (cat.equals("mc.gameplay") ||
 					cat.equals("mc.movement") ||
 					cat.equals("mc.inventory") ||
 					cat.equals("mc.misc") ||
+					cat.equals("mc.creative") ||
 					cat.equals("mc.stream") ||
 					cat.equals("mc.multiplayer")) {
 				
@@ -254,18 +306,15 @@ public class ReBindHooks {
 			
 			else {
 				
-				category = ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getCategory();
+				category = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getCategory();
 			}
 		}
 		
 		return category;
 	}
 	
-	public static String getKeyBindingName(String bindingName) {	    
-		
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(bindingName) && ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getName().length() > 0)
-		bindingName = "key." + ReBindMain.CONFIG_LOADER.PROPERTIES.get(bindingName).getName();
-		
-		return bindingName;
+	public static void getKeybinding(KeyBinding keyBinding) {	    
+
+		ReBindMain.CONFIG_LOADER.KEYBINDINGS.put(keyDefaultName, keyBinding);
 	}
 }

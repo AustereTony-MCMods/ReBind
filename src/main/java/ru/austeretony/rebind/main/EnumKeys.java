@@ -140,6 +140,12 @@ public enum EnumKeys {
 			"ib_equip_backpack", 
 			"ib_open_backpack"}),
 	
+	OPTIFINE("optifine", 
+			new String[] {
+			"of.key.zoom"},
+			new String[] {
+			"of_zoom"}),
+	
 	RPG_INVENTORY("rpginventorymod", 
 			new String[] {
 			"RPG Inventory Key",

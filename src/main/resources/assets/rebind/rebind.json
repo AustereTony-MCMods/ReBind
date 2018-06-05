@@ -68,6 +68,8 @@
 
 {"ib_equip_backpack": { "name": "", "category": "Iron Backpacks", "key_code": 48, "enabled": true}},  
 {"ib_open_backpack": { "name": "", "category": "Iron Backpacks", "key_code": 19, "enabled": true}},  
+
+{"of_zoom": { "name": "", "category": "Optifine", "key_code": 29, "mod": "", "enabled": true}},    
     
 {"ri_open_inventory": { "name": "", "category": "RPG Inventory", "key_code": 19, "enabled": true}},  
 {"ri_spec_ability": { "name": "", "category": "RPG Inventory", "key_code": 33, "enabled": true}},    

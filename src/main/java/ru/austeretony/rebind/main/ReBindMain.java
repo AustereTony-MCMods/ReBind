@@ -13,7 +13,7 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.4.0",
+    VERSION = "2.4.1",
     COREMOD_VERSION = "1.3.0";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
