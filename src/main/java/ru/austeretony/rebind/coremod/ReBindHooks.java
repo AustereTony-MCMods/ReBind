@@ -9,12 +9,9 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -26,56 +23,62 @@ import com.google.common.collect.Multimap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.settings.KeyModifier;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.Loader;
-import ru.austeretony.rebind.main.EnumKeys;
+import ru.austeretony.rebind.main.ConfigLoader;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
 	
-	private static String keyDefaultName;
+	private static boolean knownKeyBinding;
+			
+	private static String currentModid, currentModName, bindingConfigKey;
+	
+	private static KeyBindingProperty currentProperty;
 		
 	public static void removeHiddenKeyBindings() {
 		
-		List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(Minecraft.getMinecraft().gameSettings.keyBindings));
-		
-    	Set<String> occurrences = new HashSet<String>();
-		
-		Iterator<KeyBinding> iterator = bindingsList.iterator();
-		
-		KeyBinding curBinding;
-		
-		String keyName;
-		
-		while (iterator.hasNext()) {
+		if (Minecraft.getMinecraft().gameSettings != null) {
 			
-			curBinding = iterator.next();
+			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(Minecraft.getMinecraft().gameSettings.keyBindings));
 			
-			keyName = curBinding.getKeyDescription();
+	    	Set<String> occurrences = new HashSet<String>();
 			
-			if (ReBindMain.CONFIG_LOADER.HIDDEN_KEYS.contains(keyName)) {				
+			Iterator<KeyBinding> iterator = bindingsList.iterator();
+			
+			KeyBinding curBinding;
+			
+			String bindingKey;
+			
+			while (iterator.hasNext()) {
+				
+				curBinding = iterator.next();
+				
+				bindingKey = ConfigLoader.KEYS_BY_KEYBINDINGS.get(curBinding);
+								
+				if (ConfigLoader.HIDDEN_KEYBINDINGS.contains(bindingKey)) {				
+						
+					ConfigLoader.KEYBINDINGS_BY_KEYS.get(bindingKey).setKeyCode(ConfigLoader.PROPERTIES.get(bindingKey).getKeyCode());
 					
-				ReBindMain.CONFIG_LOADER.KEYBINDINGS.get(keyName).setKeyCode(ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyName).getKeyCode());
+					iterator.remove();				
+				}
 				
-				iterator.remove();				
+				else {
+					
+					occurrences.add(curBinding.getKeyCategory());
+				}
 			}
-			
-			else {
-				
-				occurrences.add(curBinding.getKeyCategory());
-			}
+	
+			KeyBinding.getKeybinds().retainAll(occurrences);
+						
+			Minecraft.getMinecraft().gameSettings.keyBindings = bindingsList.toArray(new KeyBinding[bindingsList.size()]);
 		}
-
-		KeyBinding.getKeybinds().retainAll(occurrences);
-					
-		Minecraft.getMinecraft().gameSettings.keyBindings = bindingsList.toArray(new KeyBinding[bindingsList.size()]);
 	}
 	
 	public static void rewriteControlsSettings() {
-		
-		if (ReBindMain.CONFIG_LOADER.shouldRewriteControlsSettings()) {
-
+				
+		if (ConfigLoader.isControllsSettingsRewritingAllowed()) {
+			
 	    	try {
 	    		
 	    		String optionsPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/options.txt";
@@ -86,7 +89,7 @@ public class ReBindHooks {
 				
 				inputStream.close();
 				
-				Map<String, String> options = new LinkedHashMap<String, String>();
+				Set<String> options = new HashSet<String>();
 							
 				Splitter splitter = Splitter.on(':');
 				
@@ -96,14 +99,16 @@ public class ReBindHooks {
 					
 					splitIterator = splitter.split(option).iterator();
 					
-					options.put(splitIterator.next(), splitIterator.next());
+					options.add(splitIterator.next());
+					
+					splitIterator.next();
 				}
 								
-				if (!options.containsKey("key_key.quit") &&
-						!options.containsKey("key_key.hideHUD") &&
-						!options.containsKey("key_key.debugScreen") &&
-						!options.containsKey("key_key.switchShader")) {
-									
+				if (!options.contains("key_key.quit") &&
+						!options.contains("key_key.hideHUD") &&
+						!options.contains("key_key.debugScreen") &&
+						!options.contains("key_key.switchShader")) {
+														
 					Iterator<String> iterator = optionsLines.iterator();
 					
 					String curLine;
@@ -112,7 +117,7 @@ public class ReBindHooks {
 						
 						curLine = iterator.next();
 						
-						if (curLine.length() > 5 && curLine.substring(0, 4).equals("key_")) {
+						if (curLine.length() > 4 && curLine.substring(0, 4).equals("key_")) {
 							
 							iterator.remove();
 						}
@@ -143,61 +148,55 @@ public class ReBindHooks {
 
 	public static KeyBinding[] sortKeyBindings(KeyBinding[] bindingsArray) {
 		
-		if (ReBindMain.CONFIG_LOADER.SORTED_KEYS.isEmpty()) {
-						
-			Map<String, Integer> nativeOrder = new HashMap<String, Integer>();		
-			
-			Multimap<String, Integer> bindsByCategory = HashMultimap.<String, Integer>create();
+		if (ConfigLoader.SORTED_KEYBINDINGS.isEmpty()) {
+									
+			Multimap<String, KeyBinding> bindingsByCategory = HashMultimap.<String, KeyBinding>create();
 			
 			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(bindingsArray));
-									
-			for (int bindIndex = 0; bindIndex < bindingsArray.length; bindIndex++) {
-											
-				nativeOrder.put(bindingsArray[bindIndex].getKeyDescription(), bindIndex);
+			
+			for (KeyBinding key : bindingsList) {
 				
-				if (isVanillaCategory(bindingsArray[bindIndex].getKeyCategory()))
-				bindsByCategory.put("mc." + bindingsArray[bindIndex].getKeyCategory().substring(15), bindIndex);
+				if (isVanillaCategory(key.getKeyCategory()))
+				bindingsByCategory.put("mc." + key.getKeyCategory().substring(15), key);
 			}
 			
-			int propIndex, knownBindNumber, unknownBindIndex;
+			int propIndex;
 			
 			KeyBinding curKnownBinding, curUnknownBinding;
 			
-			List<KeyBindingProperty> sortedProps = ReBindMain.CONFIG_LOADER.SORTED_PROPERTIES;
+			List<KeyBindingProperty> sortedProps = ConfigLoader.SORTED_PROPERTIES;
 			
-			Iterator<Integer> iterator;
+			Iterator<KeyBinding> iterator;
 			
 			for (KeyBindingProperty property : sortedProps) {
-				
-				if (isActualDomain(property.getDomain())) {				 
-					
+									
+				if (ConfigLoader.KEYBINDINGS_BY_KEYS.containsKey(property.getConfigKey())) {				 
+
 					propIndex = sortedProps.indexOf(property);
-										
-					knownBindNumber = nativeOrder.containsKey(property.getDefaultName()) ? nativeOrder.get(property.getDefaultName()) : nativeOrder.get("key." + property.getName());
-					
-					curKnownBinding = bindingsArray[knownBindNumber];
+															
+					curKnownBinding = ConfigLoader.KEYBINDINGS_BY_KEYS.get(property.getConfigKey());
 								
-					ReBindMain.CONFIG_LOADER.SORTED_KEYS.add(curKnownBinding);	
+					ConfigLoader.SORTED_KEYBINDINGS.add(curKnownBinding);	
 					
 					bindingsList.remove(curKnownBinding);
 					
-					bindsByCategory.remove(property.getCategory(), knownBindNumber);
+					bindingsByCategory.remove(property.getCategory(), curKnownBinding);
 					
 					if ((propIndex + 1 < sortedProps.size() && !sortedProps.get(propIndex + 1).getCategory().equals(property.getCategory())) || propIndex + 1 == sortedProps.size()) {
 						
-						while (bindsByCategory.containsKey(property.getCategory())) {
+						while (bindingsByCategory.containsKey(property.getCategory())) {
 							
-							iterator = bindsByCategory.get(property.getCategory()).iterator();
+							iterator = bindingsByCategory.get(property.getCategory()).iterator();
 							
 							while (iterator.hasNext()) {
 								
-								unknownBindIndex = iterator.next();
-								
-								curUnknownBinding = bindingsArray[unknownBindIndex];
-								
-								ReBindMain.CONFIG_LOADER.SORTED_KEYS.add(curUnknownBinding);
+								curUnknownBinding = iterator.next();
+																
+								ConfigLoader.SORTED_KEYBINDINGS.add(curUnknownBinding);
 								
 								bindingsList.remove(curUnknownBinding);
+											
+								ConfigLoader.UNKNOWN_MODIDS.add(ConfigLoader.MODIDS_BY_KEYBINDINGS.get(curUnknownBinding));
 								
 								iterator.remove();
 							}
@@ -206,10 +205,16 @@ public class ReBindHooks {
 				}
 			}
 			
-			ReBindMain.CONFIG_LOADER.SORTED_KEYS.addAll(bindingsList);
+			for (KeyBinding key : bindingsList) {
+										
+				if (!key.getKeyDescription().equals("key.pickItem"))//TODO Optifine bug. Vanilla key duplicate occurrence. Need normal fix.
+				ConfigLoader.UNKNOWN_MODIDS.add(ConfigLoader.MODIDS_BY_KEYBINDINGS.get(key));
+			}						
+			
+			ConfigLoader.SORTED_KEYBINDINGS.addAll(bindingsList);
 		}
 		
-		return ReBindMain.CONFIG_LOADER.SORTED_KEYS.toArray(new KeyBinding[ReBindMain.CONFIG_LOADER.SORTED_KEYS.size()]);		
+		return ConfigLoader.SORTED_KEYBINDINGS.toArray(new KeyBinding[ConfigLoader.SORTED_KEYBINDINGS.size()]);		
 	}
 	
 	private static boolean isVanillaCategory(String category) {
@@ -221,81 +226,98 @@ public class ReBindHooks {
 				category.equals("key.categories.creative") ||
 				category.equals("key.categories.multiplayer");
 	}
-	
-	private static boolean isActualDomain(String domain) {
-		
-		if (domain.equals(EnumKeys.MINECRAFT.getDomain())) {
-			
-			return true;
-		}
-		
-		if (domain.equals(EnumKeys.OPTIFINE.getDomain()) && FMLClientHandler.instance().hasOptifine()) {
-			
-			return true;
-		}
-	
-		for (EnumKeys modKey : EnumKeys.values()) {
-					
-			if (domain.equals(modKey.getDomain()) && Loader.isModLoaded(domain)) {
-				
-				return true;
-			}
-		}
 
-		return false;
-	}
-	
 	public static int getQuitKeyCode() {
 		
-		return ReBindMain.instance.keyBindQuit.getKeyCode();
+		return ReBindMain.Registry.KEY_QUIT.getKeyCode();
 	}
 
 	public static int getHideHUDKeyCode() {
 		
-		return ReBindMain.instance.keyBindHideHUD.getKeyCode();
+		return ReBindMain.Registry.KEY_HIDE_HUD.getKeyCode();
 	}
 	
 	public static int getDebugMenuKeyCode() {
 		
-		return ReBindMain.instance.keyBindDebugScreen.getKeyCode();
+		return ReBindMain.Registry.KEY_DEBUG_SCREEN.getKeyCode();
 	}
 	
 	public static int getSwitchShaderKeyCode() {
 		
-		return ReBindMain.instance.keyBindSwitchShader.getKeyCode();
+		return ReBindMain.Registry.KEY_SWITCH_SHADER.getKeyCode();
 	}
 	
-	public static String getKeyBindingName(String name) {	    
+	public static String getKeyBindingName(String keyName) {
+						
+		if (Loader.instance().activeModContainer() != null) {
+									
+			currentModid = Loader.instance().activeModContainer().getModId();
+			
+			currentModName = Loader.instance().activeModContainer().getName();
+		}
 		
-		keyDefaultName = name;
+		else {
+			
+			if (ConfigLoader.KEYBINDINGS_BY_KEYS.size() < 33) {
+				
+				currentModid = "mc";
+				
+				currentModName = "Minecraft";
+			}
+			
+			else {
+								
+				currentModid = "optifine";
+				
+				currentModName = "Optifine";
+			}
+		}
 		
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(name) && ReBindMain.CONFIG_LOADER.PROPERTIES.get(name).getName().length() > 0)
-		name = "key." + ReBindMain.CONFIG_LOADER.PROPERTIES.get(name).getName();
+		currentModid = currentModid.toLowerCase();
 		
-		return name;
+		bindingConfigKey = currentModid + "_" + keyName.toLowerCase();
+		
+		bindingConfigKey = bindingConfigKey.replace(' ', '_').replace('.', '_').replaceAll("_key", "").replaceAll("_" + currentModid, "");
+				
+		knownKeyBinding = ConfigLoader.PROPERTIES.containsKey(bindingConfigKey);
+		
+		//TODO Debug		
+		ReBindClassTransformer.LOGGER.info("Keybinding id: " + bindingConfigKey + ", known: " + knownKeyBinding);
+		
+		if (knownKeyBinding) {
+			
+			currentProperty = ConfigLoader.PROPERTIES.get(bindingConfigKey);
+			
+			if (!currentProperty.getName().isEmpty()) {
+				
+				keyName = currentProperty.getName();
+			}
+		}
+		
+		return keyName;
 	}
 	
-	public static KeyModifier getKeyBindingKeyModifier(KeyModifier conflictContext) {
+	public static KeyModifier getKeyBindingKeyModifier(KeyModifier keyModifier) {
 		
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(keyDefaultName))
-		conflictContext = KeyModifier.valueFromString(ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getModifier());
+		if (knownKeyBinding)
+		keyModifier = KeyModifier.valueFromString(currentProperty.getModifier());
 		
-		return conflictContext;
+		return keyModifier;
 	}
 	
 	public static int getKeyBindingKeyCode(int keyCode) {
 				
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(keyDefaultName))
-		keyCode = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getKeyCode();
+		if (knownKeyBinding)
+		keyCode = currentProperty.getKeyCode();
 		
 		return keyCode;
 	}
 
 	public static String getKeyBindingCategory(String category) {
 				
-		if (ReBindMain.CONFIG_LOADER.PROPERTIES.containsKey(keyDefaultName)) {
+		if (knownKeyBinding) {
 			
-			String cat = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getCategory();
+			String cat = currentProperty.getCategory();
 			
 			if (cat.equals("mc.gameplay") ||
 					cat.equals("mc.movement") ||
@@ -309,15 +331,23 @@ public class ReBindHooks {
 			
 			else {
 				
-				category = ReBindMain.CONFIG_LOADER.PROPERTIES.get(keyDefaultName).getCategory();
+				category = currentProperty.getCategory();
 			}
 		}
 		
 		return category;
 	}
 	
-	public static void getKeybinding(KeyBinding keyBinding) {	    
+	public static void storeKeybinding(KeyBinding keyBinding) {
+		
+		ConfigLoader.MODNAMES_BY_MODIDS.put(currentModid, currentModName);
+		
+		ConfigLoader.KEYS_BY_KEYBINDINGS.put(keyBinding, bindingConfigKey);
 
-		ReBindMain.CONFIG_LOADER.KEYBINDINGS.put(keyDefaultName, keyBinding);
+		ConfigLoader.KEYBINDINGS_BY_KEYS.put(bindingConfigKey, keyBinding);
+		
+		ConfigLoader.MODIDS_BY_KEYBINDINGS.put(keyBinding, currentModid);
+		
+		ConfigLoader.KEYBINDINGS_BY_MODIDS.put(currentModid, keyBinding);
 	}
 }

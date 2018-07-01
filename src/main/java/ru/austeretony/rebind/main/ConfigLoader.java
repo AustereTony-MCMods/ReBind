@@ -13,13 +13,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,18 +34,28 @@ import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 public class ConfigLoader {
 	
-	private boolean useExternalConfig, enableRewriting;
+	private static boolean enableRewriting, enableDebugMode;
 	
     public static final Map<String, KeyBindingProperty> PROPERTIES = new HashMap<String, KeyBindingProperty>();
-        	
+    
     public static final List<KeyBindingProperty> SORTED_PROPERTIES = new ArrayList<KeyBindingProperty>();
     
-    public static final List<String> HIDDEN_KEYS = new ArrayList<String>();
+    public static final Map<String, KeyBinding> KEYBINDINGS_BY_KEYS = new HashMap<String, KeyBinding>();
     
-    public static final Map<String, KeyBinding> KEYBINDINGS = new HashMap<String, KeyBinding>();
+    public static final Map<KeyBinding, String> KEYS_BY_KEYBINDINGS = new HashMap<KeyBinding, String>();
     
-    public static final List<KeyBinding> SORTED_KEYS = new ArrayList<KeyBinding>();  
+    public static final Multimap<String, KeyBinding> KEYBINDINGS_BY_MODIDS = LinkedHashMultimap.<String, KeyBinding>create();
+        	    
+    public static final Map<KeyBinding, String> MODIDS_BY_KEYBINDINGS = new HashMap<KeyBinding, String>();
     
+    public static final Set<KeyBinding> SORTED_KEYBINDINGS = new LinkedHashSet<KeyBinding>();  
+    
+    public static final Set<String> HIDDEN_KEYBINDINGS = new HashSet<String>();
+    
+    public static final Set<String> UNKNOWN_MODIDS = new TreeSet<String>();
+    
+    public static final Map<String, String> MODNAMES_BY_MODIDS = new HashMap<String, String>();
+	                   
 	public void loadConfiguration() {
 		
         try {       
@@ -51,9 +66,9 @@ public class ConfigLoader {
             
             inputStream.close();   
                                     
-            this.useExternalConfig = internalConfig.get("use_external_config").getAsBoolean();   
+            boolean useExternalConfig = internalConfig.get("use_external").getAsBoolean();   
             
-            if (!this.useExternalConfig) {
+            if (!useExternalConfig) {
             	
             	this.loadData(internalConfig);
             }
@@ -154,75 +169,61 @@ public class ConfigLoader {
         	exception.printStackTrace();
 		}
     }
-    
+	
 	private void loadData(JsonObject configFile) {
-		
-        this.enableRewriting = configFile.get("rewrite_controls").getAsBoolean();
+				
+        enableRewriting = configFile.get("rewrite").getAsBoolean();
+        
+        enableDebugMode = configFile.get("debug_mode").getAsBoolean();
                 
-        Map<String, JsonObject> properties = new LinkedHashMap<String, JsonObject>();
+        Map<String, JsonObject> rawProperties = new LinkedHashMap<String, JsonObject>();
         
         Set<Map.Entry<String, JsonElement>> entrySet;
         
-        for (JsonElement jsonElement : configFile.get("controls").getAsJsonArray()) {
+        for (JsonElement jsonElement : configFile.get("keybindings").getAsJsonArray()) {
         	
         	entrySet = jsonElement.getAsJsonObject().entrySet();
         	
         	for (Map.Entry<String, JsonElement> entry : entrySet) {
         		
-            	properties.put(entry.getKey(), entry.getValue().getAsJsonObject());
+            	rawProperties.put(entry.getKey(), entry.getValue().getAsJsonObject());
         	}
         }
-        
-        Map<String, KeyBindingProperty> enabledKeys = new HashMap<String, KeyBindingProperty>();
-        
-        int i = 0;
-        
-        JsonObject property;
-        
-        KeyBindingProperty keyProperty;
+                                
+        int i = 0;         
                 
-        for (EnumKeys enumKey : EnumKeys.values()) {
-        	
-        	i = 0;
-        	
-        	for (String key : enumKey.getConfigKeys()) {
-        		
-        		if (properties.containsKey(key)) {
-        			
-        			property = properties.get(key);
-        			
-        			keyProperty = new KeyBindingProperty(
-        					enumKey.getDomain(), 
-        					enumKey.getDefaultNames()[i], 
-        					property.get("name").getAsString(), 
-        					property.get("category").getAsString(), 
-        					property.get("key_code").getAsInt(), 
-        					property.get("mod").getAsString(), 
-        					property.get("enabled").getAsBoolean());     
-        			
-                    PROPERTIES.put(keyProperty.getDefaultName(), keyProperty);
-                    
-                    if (keyProperty.isEnabled())
-                    enabledKeys.put(key, keyProperty);
-                    else
-                    HIDDEN_KEYS.add(keyProperty.getDefaultName());
-        		}
-        		
-        		i++;
-        	}
-        }
+        JsonObject rawProperty;
         
-        for (String configKey : properties.keySet()) {
-        	
-        	if (enabledKeys.containsKey(configKey)) {
-        		
-        		SORTED_PROPERTIES.add(enabledKeys.get(configKey));
-        	}
-        }
+        KeyBindingProperty property;            
+
+    	for (String configKey : rawProperties.keySet()) {
+    			
+			rawProperty = rawProperties.get(configKey);
+			
+			property = new KeyBindingProperty(
+					configKey, 
+					rawProperty.get("name").getAsString(), 
+					rawProperty.get("category").getAsString(), 
+					rawProperty.get("key").getAsInt(), 
+					rawProperty.get("mod").getAsString(), 
+					rawProperty.get("enabled").getAsBoolean());     
+			
+            PROPERTIES.put(property.getConfigKey(), property);
+            
+            if (property.isEnabled()) 
+        	SORTED_PROPERTIES.add(property);
+            else
+            HIDDEN_KEYBINDINGS.add(property.getConfigKey());
+    	}
 	}
 	
-	public boolean shouldRewriteControlsSettings() {
+	public static boolean isControllsSettingsRewritingAllowed() {
 		
-		return this.enableRewriting;
+		return enableRewriting;
+	}
+	
+	public static boolean isDebugModeEnabled() {
+		
+		return enableDebugMode;
 	}
 }
