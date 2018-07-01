@@ -1,93 +1,50 @@
 {
-"use_external_config": false, 
+"use_external": false, 
   
-"rewrite_controls": true,  
+"rewrite": true,  
 
-"controls": 
-[
-{"mc_attack": { "name": "", "category": "mc.gameplay", "key_code": -100, "enabled": true}},
-{"mc_use": { "name": "", "category": "mc.gameplay", "key_code": -99, "enabled": true}},
-{"mc_pick_block": { "name": "", "category": "mc.gameplay", "key_code": -98, "enabled": true}},
+"debug_mode": true,
 
-{"mc_forward": { "name": "", "category": "mc.movement", "key_code": 17, "enabled": true}},
-{"mc_left": { "name": "", "category": "mc.movement", "key_code": 30, "enabled": true}},
-{"mc_back": { "name": "", "category": "mc.movement", "key_code": 31, "enabled": true}},
-{"mc_right": { "name": "", "category": "mc.movement", "key_code": 32, "enabled": true}},
-{"mc_jump": { "name": "", "category": "mc.movement", "key_code": 57, "enabled": true}},
-{"mc_sneak": { "name": "", "category": "mc.movement", "key_code": 42, "enabled": true}},
-{"mc_sprint": { "name": "", "category": "mc.movement", "key_code": 29, "enabled": true}},
+"keybindings": [
+{"mc_attack": { "name": "", "category": "mc.gameplay", "key": -100, "enabled": true}},
+{"mc_use": { "name": "", "category": "mc.gameplay", "key": -99, "enabled": true}},
+{"mc_pickitem": { "name": "", "category": "mc.gameplay", "key": -98, "enabled": true}},
 
-{"mc_inventory": { "name": "", "category": "mc.inventory", "key_code": 18, "enabled": true}},
-{"mc_hotbar_1": { "name": "", "category": "mc.inventory", "key_code": 2, "enabled": true}},
-{"mc_hotbar_2": { "name": "", "category": "mc.inventory", "key_code": 3, "enabled": true}},
-{"mc_hotbar_3": { "name": "", "category": "mc.inventory", "key_code": 4, "enabled": true}},
-{"mc_hotbar_4": { "name": "", "category": "mc.inventory", "key_code": 5, "enabled": true}},
-{"mc_hotbar_5": { "name": "", "category": "mc.inventory", "key_code": 6, "enabled": true}},
-{"mc_hotbar_6": { "name": "", "category": "mc.inventory", "key_code": 7, "enabled": true}},
-{"mc_hotbar_7": { "name": "", "category": "mc.inventory", "key_code": 8, "enabled": true}},
-{"mc_hotbar_8": { "name": "", "category": "mc.inventory", "key_code": 9, "enabled": true}},
-{"mc_hotbar_9": { "name": "", "category": "mc.inventory", "key_code": 10, "enabled": true}},
-{"mc_drop": { "name": "", "category": "mc.inventory", "key_code": 16, "enabled": true}},
-    
-{"mc_quit": { "name": "", "category": "mc.misc", "key_code": 1, "enabled": true}},
-{"mc_hide_hud": { "name": "", "category": "mc.misc", "key_code": 59, "enabled": true}},
-{"mc_screenshot": { "name": "", "category": "mc.misc", "key_code": 60, "enabled": true}},
-{"mc_debug_screen": { "name": "", "category": "mc.misc", "key_code": 61, "enabled": true}},
-{"mc_disable_shader": { "name": "", "category": "mc.misc", "key_code": 62, "enabled": true}},
-{"mc_toggle_perspective": { "name": "", "category": "mc.misc", "key_code": 63, "enabled": true}},
-{"mc_fullscreen": { "name": "", "category": "mc.misc", "key_code": 87, "enabled": true}},
-{"mc_smooth_camera": { "name": "", "category": "mc.misc", "key_code": 0, "enabled": true}},
-    
-{"mc_chat": { "name": "", "category": "mc.multiplayer", "key_code": 20, "enabled": true}},
-{"mc_command": { "name": "", "category": "mc.multiplayer", "key_code": 53, "enabled": true}},
-{"mc_playerlist": { "name": "", "category": "mc.multiplayer", "key_code": 15, "enabled": true}},
-    
-{"mc_stream_start_stop": { "name": "", "category": "mc.stream", "key_code": 64, "enabled": true}},
-{"mc_stream_pause_unpause": { "name": "", "category": "mc.stream", "key_code": 65, "enabled": true}},
-{"mc_stream_commercial": { "name": "", "category": "mc.stream", "key_code": 0, "enabled": true}},
-{"mc_stream_toggle_mic": { "name": "", "category": "mc.stream", "key_code": 0, "enabled": true}},
-        
-{"ba_open_inventory": { "name": "", "category": "Baubles", "key_code": 48, "enabled": true}},
-    
-{"bw_fluid_mode": { "name": "", "category": "Better Builder's Wands", "key_code": 33, "enabled": true}},
-{"bw_mode": { "name": "", "category": "Better Builder's Wands", "key_code": 50, "enabled": true}},
+{"mc_forward": { "name": "", "category": "mc.movement", "key": 17, "enabled": true}},
+{"mc_left": { "name": "", "category": "mc.movement", "key": 30, "enabled": true}},
+{"mc_back": { "name": "", "category": "mc.movement", "key": 31, "enabled": true}},
+{"mc_right": { "name": "", "category": "mc.movement", "key": 32, "enabled": true}},
+{"mc_jump": { "name": "", "category": "mc.movement", "key": 57, "enabled": true}},
+{"mc_sneak": { "name": "", "category": "mc.movement", "key": 42, "enabled": true}},
+{"mc_sprint": { "name": "", "category": "mc.movement", "key": 29, "enabled": true}},
 
-{"cc_multimode": { "name": "", "category": "CoFHCore", "key_code": 46, "enabled": true}},
-{"cc_empower": { "name": "", "category": "CoFHCore", "key_code": 47, "enabled": true}},
+{"mc_inventory": { "name": "", "category": "mc.inventory", "key": 18, "enabled": true}},
+{"mc_hotbar_1": { "name": "", "category": "mc.inventory", "key": 2, "enabled": true}},
+{"mc_hotbar_2": { "name": "", "category": "mc.inventory", "key": 3, "enabled": true}},
+{"mc_hotbar_3": { "name": "", "category": "mc.inventory", "key": 4, "enabled": true}},
+{"mc_hotbar_4": { "name": "", "category": "mc.inventory", "key": 5, "enabled": true}},
+{"mc_hotbar_5": { "name": "", "category": "mc.inventory", "key": 6, "enabled": true}},
+{"mc_hotbar_6": { "name": "", "category": "mc.inventory", "key": 7, "enabled": true}},
+{"mc_hotbar_7": { "name": "", "category": "mc.inventory", "key": 8, "enabled": true}},
+{"mc_hotbar_8": { "name": "", "category": "mc.inventory", "key": 9, "enabled": true}},
+{"mc_hotbar_9": { "name": "", "category": "mc.inventory", "key": 10, "enabled": true}},
+{"mc_drop": { "name": "", "category": "mc.inventory", "key": 16, "enabled": true}},
     
-{"ic_alt": { "name": "", "category": "Industrial Craft 2", "key_code": 56, "enabled": true}},
-{"ic_boost": { "name": "", "category": "Industrial Craft 2", "key_code": 29, "enabled": true}},
-{"ic_hub_expand": { "name": "", "category": "Industrial Craft 2", "key_code": 45, "enabled": true}},
-{"ic_mode_switch": { "name": "", "category": "Industrial Craft 2", "key_code": 50, "enabled": true}},
-{"ic_side_inventory": { "name": "", "category": "Industrial Craft 2", "key_code": 46, "enabled": true}},
-
-{"gs_display_hud": { "name": "", "category": "GraviSuite", "key_code": 35, "enabled": true}},
-{"gs_toggle_fly": { "name": "", "category": "GraviSuite", "key_code": 33, "enabled": true}},
+{"rebind_quit": { "name": "", "category": "mc.misc", "key": 1, "enabled": true}},
+{"rebind_hidehud": { "name": "", "category": "mc.misc", "key": 59, "enabled": true}},
+{"mc_screenshot": { "name": "", "category": "mc.misc", "key": 60, "enabled": true}},
+{"rebind_debugscreen": { "name": "", "category": "mc.misc", "key": 61, "enabled": true}},
+{"rebind_disableshader": { "name": "", "category": "mc.misc", "key": 62, "enabled": true}},
+{"mc_toggleperspective": { "name": "", "category": "mc.misc", "key": 63, "enabled": true}},
+{"mc_fullscreen": { "name": "", "category": "mc.misc", "key": 87, "enabled": true}},
+{"mc_smoothcamera": { "name": "", "category": "mc.misc", "key": 0, "enabled": true}},
     
-{"it_sort_inventory": { "name": "", "category": "Inventory Tweaks", "key_code": 19, "enabled": true}},    
-
-{"ib_equip_backpack": { "name": "", "category": "Iron Backpacks", "key_code": 48, "enabled": true}},  
-{"ib_open_backpack": { "name": "", "category": "Iron Backpacks", "key_code": 19, "enabled": true}},  
-
-{"of_zoom": { "name": "", "category": "Optifine", "key_code": 29, "mod": "", "enabled": true}},    
+{"mc_chat": { "name": "", "category": "mc.multiplayer", "key": 20, "enabled": true}},
+{"mc_command": { "name": "", "category": "mc.multiplayer", "key": 53, "enabled": true}},
+{"mc_playerlist": { "name": "", "category": "mc.multiplayer", "key": 15, "enabled": true}},
     
-{"ri_open_inventory": { "name": "", "category": "RPG Inventory", "key_code": 19, "enabled": true}},  
-{"ri_spec_ability": { "name": "", "category": "RPG Inventory", "key_code": 33, "enabled": true}},    
-    
-{"th_activate_harness": { "name": "", "category": "Thaumcraft", "key_code": 35, "enabled": true}},   
-{"th_change_focus": { "name": "", "category": "Thaumcraft", "key_code": 33, "enabled": true}},
-{"th_misc_toggle": { "name": "", "category": "Thaumcraft", "key_code": 34, "enabled": true}},
-    
-{"xm_enlarge_map": { "name": "", "category": "Xaero's Minimap", "key_code": 44, "enabled": true}},
-{"xm_minimap_settings": { "name": "", "category": "Xaero's Minimap", "key_code": 21, "enabled": true}},
-{"xm_zoom_in": { "name": "", "category": "Xaero's Minimap", "key_code": 23, "enabled": true}},
-{"xm_zoom_out": { "name": "", "category": "Xaero's Minimap", "key_code": 24, "enabled": true}},
-{"xm_new_waypoint": { "name": "", "category": "Xaero's Minimap", "key_code": 48, "enabled": true}},    
-{"xm_instant_waypoint": { "name": "", "category": "Xaero's Minimap", "key_code": 78, "enabled": true}},
-{"xm_switch_waypoint_set": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},
-{"xm_toggle_grid": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},
-{"xm_toggle_map": { "name": "", "category": "Xaero's Minimap", "key_code": 35, "enabled": true}},
-{"xm_toggle_slime": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},    
-{"xm_toggle_waypoints": { "name": "", "category": "Xaero's Minimap", "key_code": 0, "enabled": true}},
-{"xm_waypoints_key": { "name": "", "category": "Xaero's Minimap", "key_code": 22, "enabled": true}}
+{"mc_streamstartstop": { "name": "", "category": "mc.stream", "key": 64, "enabled": true}},
+{"mc_streampauseunpause": { "name": "", "category": "mc.stream", "key": 65, "enabled": true}},
+{"mc_streamcommercial": { "name": "", "category": "mc.stream", "key": 0, "enabled": true}},
+{"mc_streamtogglemic": { "name": "", "category": "mc.stream", "key": 0, "enabled": true}}
 ]}

@@ -1,3 +1,6 @@
+2.5.0
++Added debug mode. Now you can manually add any mod keybindings support. 
+
 2.4.1
 +Fixed crash on clients with Optifine.
 

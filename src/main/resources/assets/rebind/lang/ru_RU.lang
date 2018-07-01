@@ -1,7 +1,9 @@
-﻿#
-# Minecraft
-#
 key.quit=Выход
 key.hideHUD=Спрятать HUD
 key.debugScreen=Экран Отладки
 key.disableShader=Отключить Шейдер
+
+command.rebind.unsupportedKeys=Список неизвестных биндов
+command.rebind.none=Пусто
+command.rebind.exist=Файл keys.json уже существует
+command.rebind.generated=Файл keys.json создан в папке конфигурации

@@ -181,7 +181,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
 
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeybinding", "(L" + keyBindingClassName + ";)V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "storeKeybinding", "(L" + keyBindingClassName + ";)V", false));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     	
