@@ -5,7 +5,7 @@
 		
 	"changelog": [
 			
-		"Added manual mods keybindings support."
+		{"Added manual mods keybindings support."}
 	]
 },
 	
@@ -21,7 +21,7 @@
 		
 	"changelog": [
 			
-		"Added manual mods keybindings support."
+		{"Added manual mods keybindings support."}
 	]
 }
 }
