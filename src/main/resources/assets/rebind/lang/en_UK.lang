@@ -1,9 +1,0 @@
-key.exit=Quit
-key.hideHUD=Hide HUD
-key.debugScreen=Debug Screen
-key.disableShader=Disable Shader
-
-command.rebind.unsupportedKeys=Unknown keybindings list
-command.rebind.none=No unknown keybindings
-command.rebind.exist=File keys.json already exist
-command.rebind.generated=File keys.json created in config folder

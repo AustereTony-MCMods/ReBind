@@ -1,0 +1,27 @@
+{
+"1.7.10": {
+
+	"available": "2.5.0",
+		
+	"changelog": [
+			
+		"Added manual mods keybindings support."
+	]
+},
+	
+"1.9.4": {},
+	
+"1.10.2": {},
+	
+"1.11.2": {},
+	
+"1.12.2": {
+
+	"available": "2.5.0",
+		
+	"changelog": [
+			
+		"Added manual mods keybindings support."
+	]
+}
+}
