@@ -5,12 +5,12 @@
 		
 	"changelog": [
 			
-		"Added custom configurable update checker.",
+		"Added update checker.",
 		"Added command for adding mods keybindings description straight to external config.",
 		"Added custom auto jump for one block height.",
 		"Ability to disable double tap forward sprint.",
 		"Ability to disable player sprint.",
-		"Ability to disable riding acceleration."
+		"Ability to disable mount sprint."
 	]
 },
 	
@@ -20,12 +20,12 @@
 		
 	"changelog": [
 			
-		"Added custom configurable update checker.",
+		"Added update checker.",
 		"Added command for adding mods keybindings description straight to external config.",
 		"Added custom auto jump for one block height.",
 		"Ability to disable double tap forward sprint.",
 		"Ability to disable player sprint.",
-		"Ability to disable riding acceleration."
+		"Ability to disable mount sprint."
 	]
 }
 }
