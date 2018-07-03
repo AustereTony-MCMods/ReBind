@@ -1,0 +1,47 @@
+2.5.6
++Added update checker.
++Added command for adding mods keybindings description straight to external co+Added custom auto jump for one block height.
++Ability to disable double tap forward sprint.
++Ability to disable player sprint.
++Ability to disable mount sprint.
+
+2.5.0
++Added debug mode. Now you can manually add any mod keybindings support. 
+
+2.4.1
++Fixed crash on clients with Optifine.
+
+2.4.0
++Configuration file loading optimization.
++Added compatibility with Controlling mod. Keybindings in controls menu will sort 
+according to ReBind configuration.
+
+2.3.1
++Optimized external config generation.
++Added support for Better Builder's Wands, Xaero's Minimap and Inventory Tweaks.
+
+2.3.0
++Significant code optimization.
++New option: generate and use external configuration file.
++Keybindings now will use their default mod names if you hadn’t defined new ones.
++Ability to set default keys combination for all keybindings.
++Added support for keybindings from various mods.
+
+2.2.0
++Ability to change keybindings names.
++Ability to change the keybindings order in controls menu. 
++Configuration file was rewritten to make settings easier.
+
+2.1.0
++Fixed removing keys from controls menu added by other mods.
++New option: rewriting controls settings on first mod load. 
++Ability to change category. 
+
+2.0.0
++Configuration settings now available for all vanilla keys.
++Configuration file moved to the mod archive. 
+
+1.0.0
++Added previously unavailable keys to controls menu: quit (Esc), hide HUD (F1), debug screen (F3), disable shader (F4).
++Added configuration file for new keys. Now you can set new default keys, 
+remove them from controls and disable key ingame.
