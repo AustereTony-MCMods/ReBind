@@ -33,8 +33,8 @@ import cpw.mods.fml.relauncher.FMLInjectionData;
 import net.minecraft.client.settings.KeyBinding;
 
 public class ConfigLoader {
-	
-	private static boolean enableRewriting, enableDebugMode;
+
+	private static boolean checkForUpdates, showChangelog, useExternalConfig, rewriteControls, enableDebugMode, enableAutoJump, allowDoubleTapForwardSprint, allowPlayerSprint, allowMountSprint;
 	
     public static final Map<String, KeyBindingProperty> PROPERTIES = new HashMap<String, KeyBindingProperty>();
     
@@ -66,7 +66,7 @@ public class ConfigLoader {
             
             inputStream.close();   
                                     
-            boolean useExternalConfig = internalConfig.get("use_external").getAsBoolean();   
+            useExternalConfig = internalConfig.get("main").getAsJsonObject().get("external_config").getAsBoolean();   
             
             if (!useExternalConfig) {
             	
@@ -108,8 +108,7 @@ public class ConfigLoader {
         	
         	catch (FileNotFoundException exception) {
 				
-        		exception.printStackTrace();
-        		
+        		exception.printStackTrace();		
 			} 
         	
         	catch (IOException exception) {
@@ -140,16 +139,16 @@ public class ConfigLoader {
         	
         	InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
         	        	        	
-			List<String> configLinesList = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
+			List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 			
 			inputStream.close();
 			
-			configLinesList.remove(1);
-			configLinesList.remove(1);
+			configData.remove(2);
+			configData.remove(2);
 			
             PrintStream fileStream = new PrintStream(new File(configPath));
             
-            for (String line : configLinesList) {
+            for (String line : configData) {
             	
             	fileStream.println(line);
             }
@@ -171,10 +170,28 @@ public class ConfigLoader {
     }
 	
 	private void loadData(JsonObject configFile) {
-				
-        enableRewriting = configFile.get("rewrite").getAsBoolean();
+		
+        JsonObject rawMainData = configFile.get("main").getAsJsonObject();
         
-        enableDebugMode = configFile.get("debug_mode").getAsBoolean();
+        rewriteControls = rawMainData.get("rewrite_controls").getAsBoolean();
+        
+        enableDebugMode = rawMainData.get("debug_mode").getAsBoolean();
+        
+        checkForUpdates = rawMainData.get("updates").getAsJsonObject().get("update_checker").getAsBoolean();
+				
+        showChangelog = rawMainData.get("updates").getAsJsonObject().get("show_changelog").getAsBoolean();
+        
+        JsonObject rawIngameData = configFile.get("game").getAsJsonObject();
+        
+        enableAutoJump = rawIngameData.get("auto_jump").getAsBoolean();
+        
+        JsonObject rawControlsData = configFile.get("controls").getAsJsonObject();
+                
+        allowPlayerSprint = rawControlsData.get("player_sprint").getAsBoolean();
+        
+        allowDoubleTapForwardSprint = rawControlsData.get("double_tap_forward_sprint").getAsBoolean();
+        
+        allowMountSprint = rawControlsData.get("mount_sprint").getAsBoolean();
                 
         Map<String, JsonObject> rawProperties = new LinkedHashMap<String, JsonObject>();
         
@@ -207,23 +224,58 @@ public class ConfigLoader {
 					rawProperty.get("key").getAsInt(), 
 					rawProperty.get("enabled").getAsBoolean());     
 			
-            PROPERTIES.put(property.getConfigKey(), property);
+            PROPERTIES.put(configKey, property);
             
             if (property.isEnabled()) 
         	SORTED_PROPERTIES.add(property);
             else
-            HIDDEN_KEYBINDINGS.add(property.getConfigKey());
+            HIDDEN_KEYBINDINGS.add(configKey);
     	}
 	}
 	
-	public static boolean isControllsSettingsRewritingAllowed() {
+	public static boolean isUpdateCheckerEnabled() {
 		
-		return enableRewriting;
+		return checkForUpdates;
+	}
+	
+	public static boolean shouldShowChangeolog() {
+		
+		return showChangelog;
+	}
+	
+	public static boolean isExternalConfigEnabled() {
+		
+		return useExternalConfig;
+	}
+	
+	public static boolean isControllsSettingsRewritingEnabled() {
+		
+		return rewriteControls;
 	}
 	
 	public static boolean isDebugModeEnabled() {
 		
 		return enableDebugMode;
+	}
+	
+	public static boolean isAutoJumpEnabled() {
+		
+		return enableAutoJump;
+	}
+	
+	public static boolean isPlayerSprintAllowed() {
+		
+		return allowPlayerSprint;
+	}
+	
+	public static boolean isDoubleTapForwardSprintAllowed() {
+		
+		return allowDoubleTapForwardSprint;
+	}
+	
+	public static boolean isMountSprintAllowed() {
+		
+		return allowMountSprint;
 	}
 }
 

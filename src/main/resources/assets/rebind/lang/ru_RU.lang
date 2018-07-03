@@ -4,6 +4,12 @@ key.debugScreen=Экран Отладки
 key.disableShader=Отключить Шейдер
 
 command.rebind.unsupportedKeys=Список неизвестных биндов
-command.rebind.none=Пусто
+command.rebind.none=Нет неизвестных биндов
 command.rebind.exist=Файл keys.json уже существует
 command.rebind.generated=Файл keys.json создан в папке конфигурации
+command.rebind.noExternal=Внешний конфиг неактивен
+command.rebind.alreadyUpdated=Внешний конфиг уже обновлён
+command.rebind.updated=Внешний конфиг обновлён
+
+rebind.update.newVersion=Доступна новая версия!
+rebind.update.projectPage=Сайт

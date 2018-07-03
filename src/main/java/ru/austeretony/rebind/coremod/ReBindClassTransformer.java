@@ -14,6 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import com.google.gson.JsonSyntaxException;
+
 import net.minecraft.launchwrapper.IClassTransformer;
 import ru.austeretony.rebind.main.ReBindMain;
 
@@ -23,7 +25,17 @@ public class ReBindClassTransformer implements IClassTransformer {
 
 	public ReBindClassTransformer() {
 		
-		ReBindMain.CONFIG_LOADER.loadConfiguration();
+		try {
+			
+			ReBindMain.CONFIG_LOADER.loadConfiguration();
+		}
+		
+		catch (JsonSyntaxException exception) {
+			
+			LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix json syntax errors!");
+			
+			exception.printStackTrace();
+		}
 	}
 	
     @Override
@@ -74,6 +86,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
 	    		return patchGuiScreen(basicClass, false, true);
+	    		
+	    		
+			case "blk":					
+				return patchEntityPlayerSP(basicClass, true);
+		
+			case "net.minecraft.client.entity.EntityPlayerSP":							
+	    		return patchEntityPlayerSP(basicClass, false);
     	}
     	
 		return basicClass;
@@ -124,7 +143,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<GameSettings.class> transformed!");   
+	    LOGGER.info("<GameSettings.class> patched!");   
 	    	    
 	    return writer.toByteArray();	
 	}
@@ -199,7 +218,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-        LOGGER.info("<KeyBinding.class> transformed!");   
+        LOGGER.info("<KeyBinding.class> patched!");   
 	            
         return writer.toByteArray();				
 	}
@@ -252,9 +271,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 	    	
 	    	if (!flag)
-	    	LOGGER.info("<GuiKeyBindingList.class> transformed!");  
+	    	LOGGER.info("<GuiKeyBindingList.class> patched!");  
 	    	else
-		    LOGGER.info("<GuiNewKeyBindingList.class> transformed!");  
+		    LOGGER.info("<GuiNewKeyBindingList.class> patched!");  
 		}
 	            
         return writer.toByteArray();				
@@ -340,7 +359,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<Minecraft.class> transformed!");
+	    LOGGER.info("<Minecraft.class> patched!");
 	            
         return writer.toByteArray();				
 	}
@@ -389,10 +408,71 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 
 	    	if (!flag) 
-	    	LOGGER.info("<GuiScreen.class> transformed!");   
+	    	LOGGER.info("<GuiScreen.class> patched!");   
 	    	else
-	    	LOGGER.info("<GuiContainer.class> transformed!"); 
+	    	LOGGER.info("<GuiContainer.class> patched!"); 
 	    }
+        
+        return writer.toByteArray();				
+	}
+	
+	private byte[] patchEntityPlayerSP(byte[] basicClass, boolean obfuscated) {
+        
+	    ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(basicClass);
+        classReader.accept(classNode, 0);
+        
+	 	String targetMethodName = obfuscated ? "e" : "onLivingUpdate";  
+	 	
+        boolean isSuccessful = false;
+        
+        int iconstCount = 0;
+	 		
+		for (MethodNode methodNode : classNode.methods) {
+			
+			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
+												
+                AbstractInsnNode currentInsn = null;
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
+                    	
+                    	iconstCount++;
+                    	
+                    	if (iconstCount == 6) {
+                    		
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "isDoubleTapForwardSprintAllowed", "()Z", false)); 
+                    		
+                        	insnIterator.remove();
+                    	}
+                    	
+                    	if (iconstCount == 7) {
+                    		
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "isPlayerSprintAllowed", "()Z", false)); 
+                    		
+                        	insnIterator.remove();
+                    		
+	                        break;
+                    	}
+                    }
+                }
+                
+                isSuccessful = true;
+				
+				break;
+			}
+		}
+		
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    classNode.accept(writer);
+	    
+	    if (isSuccessful)
+	    LOGGER.info("<EntityPlayerSP.class> patched!");   
         
         return writer.toByteArray();				
 	}
