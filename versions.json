@@ -1,21 +1,31 @@
 {
 "1.7.10": {
 
-	"available": "2.5.0",
+	"available": "2.5.6",
 		
 	"changelog": [
 			
-		"Added manual mods keybindings support."
+		"Added custom configurable update checker.",
+		"Added command for adding mods keybindings description straight to external config.",
+		"Added custom auto jump for one block height.",
+		"Ability to disable double tap forward sprint.",
+		"Ability to disable player sprint.",
+		"Ability to disable riding acceleration."
 	]
 },
 	
 "1.12.2": {
 
-	"available": "2.5.0",
+	"available": "2.5.6",
 		
 	"changelog": [
 			
-		"Added manual mods keybindings support."
+		"Added custom configurable update checker.",
+		"Added command for adding mods keybindings description straight to external config.",
+		"Added custom auto jump for one block height.",
+		"Ability to disable double tap forward sprint.",
+		"Ability to disable player sprint.",
+		"Ability to disable riding acceleration."
 	]
 }
 }
