@@ -1,9 +1,33 @@
 {
-"use_external": false, 
-  
-"rewrite": true,  
+"main": {
 
-"debug_mode": true,
+    "external_config": false, 
+    
+    "rewrite_controls": true,  
+
+    "debug_mode": true,
+
+    "updates": {
+    
+        "update_checker": true,
+        
+        "show_changelog": false
+    }
+},
+
+"game": {
+
+    "auto_jump": false
+},
+
+"controls": {
+    
+    "player_sprint": true,
+    
+    "double_tap_forward_sprint": true,
+    
+    "mount_sprint": true
+},
 
 "keybindings": [
 {"mc_attack": { "name": "", "category": "mc.gameplay", "key": -100, "mod": "", "enabled": true}},

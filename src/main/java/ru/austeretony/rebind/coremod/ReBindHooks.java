@@ -22,6 +22,7 @@ import com.google.common.collect.Multimap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.common.Loader;
 import ru.austeretony.rebind.main.ConfigLoader;
@@ -30,7 +31,7 @@ import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
 	
-	private static boolean knownKeyBinding;
+	private static boolean isKnownKeybinding;
 			
 	private static String currentModid, currentModName, bindingConfigKey;
 	
@@ -77,7 +78,7 @@ public class ReBindHooks {
 	
 	public static void rewriteControlsSettings() {
 				
-		if (ConfigLoader.isControllsSettingsRewritingAllowed()) {
+		if (ConfigLoader.isControllsSettingsRewritingEnabled()) {
 			
 	    	try {
 	    		
@@ -277,14 +278,14 @@ public class ReBindHooks {
 		
 		bindingConfigKey = currentModid + "_" + keyName.toLowerCase();
 		
-		bindingConfigKey = bindingConfigKey.replace(' ', '_').replace('.', '_').replaceAll("_key", "").replaceAll("_" + currentModid, "");
+		bindingConfigKey = bindingConfigKey.replaceAll("[. ]", "_").replace("_key", "").replace("_" + currentModid, "");
 				
-		knownKeyBinding = ConfigLoader.PROPERTIES.containsKey(bindingConfigKey);
+		isKnownKeybinding = ConfigLoader.PROPERTIES.containsKey(bindingConfigKey);
 		
 		//TODO Debug		
-		ReBindClassTransformer.LOGGER.info("Keybinding id: " + bindingConfigKey + ", known: " + knownKeyBinding);
+		ReBindClassTransformer.LOGGER.info("Keybinding id: " + bindingConfigKey + ", known: " + isKnownKeybinding);
 		
-		if (knownKeyBinding) {
+		if (isKnownKeybinding) {
 			
 			currentProperty = ConfigLoader.PROPERTIES.get(bindingConfigKey);
 			
@@ -299,7 +300,7 @@ public class ReBindHooks {
 	
 	public static KeyModifier getKeyBindingKeyModifier(KeyModifier keyModifier) {
 		
-		if (knownKeyBinding)
+		if (isKnownKeybinding)
 		keyModifier = KeyModifier.valueFromString(currentProperty.getModifier());
 		
 		return keyModifier;
@@ -307,7 +308,7 @@ public class ReBindHooks {
 	
 	public static int getKeyBindingKeyCode(int keyCode) {
 				
-		if (knownKeyBinding)
+		if (isKnownKeybinding)
 		keyCode = currentProperty.getKeyCode();
 		
 		return keyCode;
@@ -315,7 +316,7 @@ public class ReBindHooks {
 
 	public static String getKeyBindingCategory(String category) {
 				
-		if (knownKeyBinding) {
+		if (isKnownKeybinding) {
 			
 			String cat = currentProperty.getCategory();
 			
@@ -349,5 +350,20 @@ public class ReBindHooks {
 		ConfigLoader.MODIDS_BY_KEYBINDINGS.put(keyBinding, currentModid);
 		
 		ConfigLoader.KEYBINDINGS_BY_MODIDS.put(currentModid, keyBinding);
+	}
+	
+	public static boolean isDoubleTapForwardSprintAllowed() {
+		
+		return ConfigLoader.isDoubleTapForwardSprintAllowed() && ConfigLoader.isPlayerSprintAllowed();
+	}
+	
+	public static boolean isPlayerSprintAllowed() {
+				
+		EntityPlayer player = Minecraft.getMinecraft().player;
+		
+		if ((!player.isRiding() && ConfigLoader.isPlayerSprintAllowed()) || (player.isRiding() && ConfigLoader.isMountSprintAllowed()))
+		return true;
+		
+		return false;
 	}
 }

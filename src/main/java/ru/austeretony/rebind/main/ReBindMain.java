@@ -2,11 +2,13 @@ package ru.austeretony.rebind.main;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import ru.austeretony.rebind.command.CommandRebind;
+import ru.austeretony.rebind.event.ReBindEvents;
 
 @Mod(modid = ReBindMain.MODID, name = ReBindMain.NAME, version = ReBindMain.VERSION)
 public class ReBindMain {
@@ -14,8 +16,9 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.5.0",
-    COREMOD_VERSION = "1.4.0";
+    VERSION = "2.5.6",
+    COREMOD_VERSION = "1.5.0",
+    VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
         
@@ -42,6 +45,9 @@ public class ReBindMain {
     		
         	if (CONFIG_LOADER.isDebugModeEnabled())
         	ClientCommandHandler.instance.registerCommand(new CommandRebind());
+        	
+        	if (CONFIG_LOADER.isUpdateCheckerEnabled() || CONFIG_LOADER.isAutoJumpEnabled())
+        	MinecraftForge.EVENT_BUS.register(new ReBindEvents());
         }
     }
 }
