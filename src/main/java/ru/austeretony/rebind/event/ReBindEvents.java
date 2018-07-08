@@ -1,10 +1,12 @@
 package ru.austeretony.rebind.event;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import ru.austeretony.rebind.coremod.ReBindClassTransformer;
 import ru.austeretony.rebind.main.ConfigLoader;
 import ru.austeretony.rebind.main.ReBindMain;
 
@@ -31,8 +34,11 @@ public class ReBindEvents {
 	public void onPlayerJoinedWorld(EntityJoinWorldEvent event) {
 		
 		if (event.world.isRemote && event.entity instanceof EntityPlayer) {
-						
-			this.checkForUpdates();
+					
+			if (ConfigLoader.isUpdateCheckerEnabled()) {
+				
+				this.checkForUpdates();
+			}
 		}
 	}
 	
@@ -52,83 +58,91 @@ public class ReBindEvents {
 	}
 	
 	private void checkForUpdates() {
-		
-		if (ConfigLoader.isUpdateCheckerEnabled()) {
+					
+		try {
+			
+			URL versionsURL = new URL(ReBindMain.VERSIONS_URL);
+			
+			InputStream inputStream = null;
 			
 			try {
 				
-				URL versionsURL = new URL(ReBindMain.VERSIONS_URL);
-				
-				InputStream inputStream = versionsURL.openStream();
-						
-	            JsonObject remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));  			
-				
-	            inputStream.close();
-	            
-	            JsonObject data = remoteData.get("1.7.10").getAsJsonObject();
-	            
-	            String newVersion = data.get("available").getAsString();
-	            	            
-	            int 
-	            availableVersion = Integer.valueOf(newVersion.replace(".", "")),
-	            currentVersion = Integer.valueOf(ReBindMain.VERSION.replace(".", ""));
-	            
-	            if (currentVersion < availableVersion) {
-	            	
-	            	List<String> changelog = new ArrayList<String>();
-	            	
-	            	for (JsonElement element : data.get("changelog").getAsJsonArray()) {
-	            		
-	            		changelog.add(element.getAsString());
-	            	}
-	            	
-	            	EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-	            	
-	            	IChatComponent 
-	            	updateMessage = new ChatComponentText("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + " / " + newVersion + "]"),
-	            	pageMessage = new ChatComponentText(I18n.format("rebind.update.projectPage") + ": "),
-	            	urlMessage = new ChatComponentText("https://www.curseforge.com/minecraft/mc-mods/rebind");
-	            
-	            	updateMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-	            	pageMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-	            	urlMessage.getChatStyle().setColor(EnumChatFormatting.WHITE);
-	            	
-	            	urlMessage.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, urlMessage.getUnformattedText()));
-	            	
-	            	player.addChatMessage(updateMessage);
-	            	player.addChatMessage(pageMessage.appendSibling(urlMessage));
-	            	
-	            	if (ConfigLoader.shouldShowChangeolog()) {
-	            		
-	            		IChatComponent 
-	            		changelogMessage = new ChatComponentText("Changelog:"),
-	            		changelogLine;
-	            		
-	            		changelogMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-	            		
-		            	player.addChatMessage(changelogMessage);
-		            	
-		            	player.isRiding();
-	            		
-	            		for (String line : changelog) {
-	            			
-	            			changelogLine = new ChatComponentText(" + " + line);
-	            			
-	    	            	player.addChatMessage(changelogLine);
-	            		}
-	            	}
-	            }
+				inputStream = versionsURL.openStream();
 			}
 			
-			catch (MalformedURLException exception) {
+			catch (UnknownHostException exception) {
+														
+				ReBindClassTransformer.LOGGER.error("Update check failed, no internet connection.");
 				
-				exception.printStackTrace();
+				return;
 			}
 			
-			catch (IOException exception) {
-				
-				exception.printStackTrace();
-			}
+            JsonObject remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));  			
+			
+            inputStream.close();
+            
+            JsonObject data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();
+            
+            String newVersion = data.get("available").getAsString();
+            	            
+            int 
+            availableVersion = Integer.valueOf(newVersion.replace(".", "")),
+            currentVersion = Integer.valueOf(ReBindMain.VERSION.replace(".", ""));
+            
+            if (currentVersion < availableVersion) {
+            	
+            	List<String> changelog = new ArrayList<String>();
+            	
+            	for (JsonElement element : data.get("changelog").getAsJsonArray()) {
+            		
+            		changelog.add(element.getAsString());
+            	}
+            	
+            	EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+            	
+            	IChatComponent 
+            	updateMessage = new ChatComponentText("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + " / " + newVersion + "]"),
+            	pageMessage = new ChatComponentText(I18n.format("rebind.update.projectPage") + ": "),
+            	urlMessage = new ChatComponentText(ReBindMain.PROJECT_URL);
+            
+            	updateMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
+            	pageMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
+            	urlMessage.getChatStyle().setColor(EnumChatFormatting.WHITE);
+            	
+            	urlMessage.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, urlMessage.getUnformattedText()));
+            	
+            	player.addChatMessage(updateMessage);
+            	player.addChatMessage(pageMessage.appendSibling(urlMessage));
+            	
+            	if (ConfigLoader.shouldShowChangeolog()) {
+            		
+            		IChatComponent changelogMessage = new ChatComponentText("Changelog:");
+            		
+            		changelogMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
+            		
+	            	player.addChatMessage(changelogMessage);
+	            		            		
+            		for (String line : changelog) {
+            			            			
+    	            	player.addChatMessage(new ChatComponentText(" + " + line));
+            		}
+            	}
+            }
+		}
+		
+		catch (MalformedURLException exception) {
+			
+			exception.printStackTrace();
+		}
+		
+		catch (FileNotFoundException exception) {
+			
+			ReBindClassTransformer.LOGGER.error("Update check failed, remote file is absent.");			
+		}
+		
+		catch (IOException exception) {
+			
+			exception.printStackTrace();
 		}
 	}
 }

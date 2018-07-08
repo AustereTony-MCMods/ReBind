@@ -16,9 +16,11 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.5.6",
-    COREMOD_VERSION = "1.5.0",
-    VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json";
+    VERSION = "2.5.7",
+    COREMOD_VERSION = "1.6.0",
+    GAME_VERSION = "1.7.10",
+    VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
+    PROJECT_URL = "https://www.curseforge.com/minecraft/mc-mods/rebind";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
         
@@ -42,6 +44,8 @@ public class ReBindMain {
         	ClientRegistry.registerKeyBinding(KEY_HIDE_HUD);
         	ClientRegistry.registerKeyBinding(KEY_DEBUG_SCREEN);
         	ClientRegistry.registerKeyBinding(KEY_DISABLE_SHADER);
+        	
+        	KeyBindingProperty.setKeysConflictContext();
     		
         	if (CONFIG_LOADER.isDebugModeEnabled())
         	ClientCommandHandler.instance.registerCommand(new CommandRebind());

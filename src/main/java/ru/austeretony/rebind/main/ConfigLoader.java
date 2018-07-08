@@ -23,6 +23,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
@@ -31,6 +32,7 @@ import com.google.gson.JsonParser;
 
 import cpw.mods.fml.relauncher.FMLInjectionData;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.IntHashMap;
 
 public class ConfigLoader {
 
@@ -55,7 +57,17 @@ public class ConfigLoader {
     public static final Set<String> UNKNOWN_MODIDS = new TreeSet<String>();
     
     public static final Map<String, String> MODNAMES_BY_MODIDS = new HashMap<String, String>();
-	                   
+        
+    public static IntHashMap keyBindingsHash;
+    
+    public static final Map<KeyBinding, EnumKeyModifier> KEY_MODIFIERS = new HashMap<KeyBinding, EnumKeyModifier>();
+    
+    public static final Map<KeyBinding, EnumKeyModifier> DEFAULT_KEY_MODIFIERS = new HashMap<KeyBinding, EnumKeyModifier>();
+	 
+    public static final Map<KeyBinding, EnumKeyConflictContext> CONFLICT_CONTEXT = new HashMap<KeyBinding, EnumKeyConflictContext>();
+    
+    public static final Multimap<EnumKeyModifier, KeyBinding> MODIFIERS = HashMultimap.<EnumKeyModifier, KeyBinding>create();
+    
 	public void loadConfiguration() {
 		
         try {       
@@ -142,10 +154,7 @@ public class ConfigLoader {
 			List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 			
 			inputStream.close();
-			
-			configData.remove(2);
-			configData.remove(2);
-			
+						
             PrintStream fileStream = new PrintStream(new File(configPath));
             
             for (String line : configData) {
@@ -206,9 +215,7 @@ public class ConfigLoader {
             	rawProperties.put(entry.getKey(), entry.getValue().getAsJsonObject());
         	}
         }
-                                
-        int i = 0;         
-                
+                                                
         JsonObject rawProperty;
         
         KeyBindingProperty property;            
@@ -222,6 +229,7 @@ public class ConfigLoader {
 					rawProperty.get("name").getAsString(), 
 					rawProperty.get("category").getAsString(), 
 					rawProperty.get("key").getAsInt(), 
+					rawProperty.get("mod").getAsString(), 
 					rawProperty.get("enabled").getAsBoolean());     
 			
             PROPERTIES.put(configKey, property);

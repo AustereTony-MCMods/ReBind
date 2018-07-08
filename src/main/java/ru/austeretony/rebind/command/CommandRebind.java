@@ -31,6 +31,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import ru.austeretony.rebind.coremod.ReBindHooks;
 import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.main.EnumKeyModifier;
+import ru.austeretony.rebind.main.KeyBindingProperty;
 
 public class CommandRebind extends CommandBase {
 	
@@ -292,7 +294,7 @@ public class CommandRebind extends CommandBase {
 		modidIndex = 0,
 		keyIndex = 0;
 		
-		String line;
+		String line, keyModifier;
 				
 		for (String modId : ConfigLoader.UNKNOWN_MODIDS) {
 				
@@ -302,7 +304,9 @@ public class CommandRebind extends CommandBase {
 				
 				keyIndex++;
 				
-				line = "{/" + ConfigLoader.KEYS_BY_KEYBINDINGS.get(key) + "/: { /name/: //, /category/: /" + ConfigLoader.MODNAMES_BY_MODIDS.get(modId) + "/, /key/: " + key.getKeyCodeDefault() + ", /enabled/: true}}";
+				keyModifier = KeyBindingProperty.getDefaultKeyModifier(key) == EnumKeyModifier.NONE ? "" : KeyBindingProperty.getDefaultKeyModifier(key).toString();
+				
+				line = "{/" + ConfigLoader.KEYS_BY_KEYBINDINGS.get(key) + "/: { /name/: //, /category/: /" + ConfigLoader.MODNAMES_BY_MODIDS.get(modId) + "/, /key/: " + key.getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
 			
 				if (keyIndex < ConfigLoader.KEYBINDINGS_BY_MODIDS.get(modId).size()) {
 					
