@@ -1,31 +1,23 @@
 {
 "1.7.10": {
 
-	"available": "2.5.6",
+	"available": "2.5.7",
 		
 	"changelog": [
 			
-		"Added update checker.",
-		"Added command for adding mods keybindings description straight to external config.",
-		"Added custom auto jump for one block height.",
-		"Ability to disable double tap forward sprint.",
-		"Ability to disable player sprint.",
-		"Ability to disable mount sprint."
+		"Fixed combinations for ReBind keybindings (Hide HUD and etc.).",
+		"Key combinations system integration for 1.7.10."
 	]
 },
 	
 "1.12.2": {
 
-	"available": "2.5.6",
+	"available": "2.5.7",
 		
 	"changelog": [
 			
-		"Added update checker.",
-		"Added command for adding mods keybindings description straight to external config.",
-		"Added custom auto jump for one block height.",
-		"Ability to disable double tap forward sprint.",
-		"Ability to disable player sprint.",
-		"Ability to disable mount sprint."
+		"Fixed combinations for ReBind keybindings (Hide HUD and etc.).",
+		"Key combinations system integration for 1.7.10."
 	]
 }
 }
