@@ -2,15 +2,12 @@
 "main": {
 
     "external_config": false, 
-    
     "rewrite_controls": true,  
-
     "debug_mode": true,
 
     "updates": {
     
         "update_checker": true,
-        
         "show_changelog": false
     }
 },
@@ -22,10 +19,8 @@
 
 "controls": {
     
-    "player_sprint": true,
-    
-    "double_tap_forward_sprint": true,
-    
+    "player_sprint": true,    
+    "double_tap_forward_sprint": true,  
     "mount_sprint": true
 },
 

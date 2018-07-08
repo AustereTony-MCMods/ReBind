@@ -34,7 +34,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 		
 		catch (JsonSyntaxException exception) {
 			
-			LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix json syntax errors!");
+			LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix syntax errors!");
 			
 			exception.printStackTrace();
 		}
@@ -63,7 +63,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 				return patchGuiKeyBindingList(basicClass, false, false);		
 
 			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false, true);
+				return patchGuiKeyBindingList(basicClass, true, true);
 				
 				
 			case "bib":					
@@ -264,8 +264,8 @@ public class ReBindClassTransformer implements IClassTransformer {
         classReader.accept(classNode, 0);
         
 	 	String keyBindingClassName = obfuscated ? "bhy" : "net/minecraft/client/settings/KeyBinding";
-        
-        boolean isSuccessful = false;
+
+        boolean isSuccessful = false;  
                         
 		for (MethodNode methodNode : classNode.methods) {
 			

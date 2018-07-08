@@ -31,6 +31,8 @@ import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
 	
+	private static Minecraft mc = Minecraft.getMinecraft();
+	
 	private static boolean isKnownKeybinding;
 			
 	private static String currentModid, currentModName, bindingConfigKey;
@@ -39,9 +41,9 @@ public class ReBindHooks {
 		
 	public static void removeHiddenKeyBindings() {
 		
-		if (Minecraft.getMinecraft().gameSettings != null) {
+		if (mc.gameSettings != null) {
 			
-			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(Minecraft.getMinecraft().gameSettings.keyBindings));
+			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(mc.gameSettings.keyBindings));
 			
 	    	Set<String> occurrences = new HashSet<String>();
 			
@@ -72,7 +74,7 @@ public class ReBindHooks {
 	
 			KeyBinding.getKeybinds().retainAll(occurrences);
 						
-			Minecraft.getMinecraft().gameSettings.keyBindings = bindingsList.toArray(new KeyBinding[bindingsList.size()]);
+			mc.gameSettings.keyBindings = bindingsList.toArray(new KeyBinding[bindingsList.size()]);
 		}
 	}
 	
@@ -82,7 +84,7 @@ public class ReBindHooks {
 			
 	    	try {
 	    		
-	    		String optionsPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/options.txt";
+	    		String optionsPath = mc.mcDataDir.getAbsolutePath() + "/options.txt";
 	    		
 				InputStream inputStream = new FileInputStream(new File(optionsPath));
 				
@@ -235,17 +237,17 @@ public class ReBindHooks {
 
 	public static int getHideHUDKeyCode() {
 		
-		return ReBindMain.Registry.KEY_HIDE_HUD.getKeyCode();
+		return ReBindMain.Registry.KEY_HIDE_HUD.isPressed() ? ReBindMain.Registry.KEY_HIDE_HUD.getKeyCode() : 0;
 	}
 	
 	public static int getDebugMenuKeyCode() {
 		
-		return ReBindMain.Registry.KEY_DEBUG_SCREEN.getKeyCode();
+		return ReBindMain.Registry.KEY_DEBUG_SCREEN.isPressed() ? ReBindMain.Registry.KEY_DEBUG_SCREEN.getKeyCode() : 0;
 	}
 	
 	public static int getSwitchShaderKeyCode() {
 		
-		return ReBindMain.Registry.KEY_SWITCH_SHADER.getKeyCode();
+		return ReBindMain.Registry.KEY_SWITCH_SHADER.isPressed() ? ReBindMain.Registry.KEY_SWITCH_SHADER.getKeyCode() : 0;
 	}
 	
 	public static String getKeyBindingName(String keyName) {
@@ -359,7 +361,7 @@ public class ReBindHooks {
 	
 	public static boolean isPlayerSprintAllowed() {
 				
-		EntityPlayer player = Minecraft.getMinecraft().player;
+		EntityPlayer player = mc.player;
 		
 		if ((!player.isRiding() && ConfigLoader.isPlayerSprintAllowed()) || (player.isRiding() && ConfigLoader.isMountSprintAllowed()))
 		return true;

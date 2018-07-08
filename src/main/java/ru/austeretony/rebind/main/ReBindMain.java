@@ -16,9 +16,11 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.5.6",
+    VERSION = "2.5.7",
     COREMOD_VERSION = "1.5.0",
-    VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json";
+    GAME_VERSION = "1.12.2",
+    VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
+    PROJECT_URL = "https://www.curseforge.com/minecraft/mc-mods/rebind";
     
     public static final ConfigLoader CONFIG_LOADER = new ConfigLoader();
         

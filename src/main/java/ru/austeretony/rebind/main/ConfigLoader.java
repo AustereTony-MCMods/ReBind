@@ -142,10 +142,7 @@ public class ConfigLoader {
 			List<String> configLinesList = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 			
 			inputStream.close();
-			
-			configLinesList.remove(2);
-			configLinesList.remove(2);
-			
+						
             PrintStream fileStream = new PrintStream(new File(configPath));
             
             for (String line : configLinesList) {
@@ -206,9 +203,7 @@ public class ConfigLoader {
             	rawProperties.put(entry.getKey(), entry.getValue().getAsJsonObject());
         	}
         }
-                                
-        int i = 0;         
-                
+                                                
         JsonObject rawProperty;
         
         KeyBindingProperty property;            
