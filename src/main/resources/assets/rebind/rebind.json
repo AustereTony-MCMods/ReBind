@@ -1,13 +1,13 @@
 {
 "main": {
 
-    "external_config": false, 
+    "external_config": false,  
     "rewrite_controls": true,  
     "debug_mode": true,
 
     "updates": {
     
-        "update_checker": true,
+        "update_checker": true,        
         "show_changelog": false
     }
 },
@@ -18,10 +18,21 @@
 },
 
 "controls": {
-    
-    "player_sprint": true,    
-    "double_tap_forward_sprint": true,  
-    "mount_sprint": true
+
+    "player_sprint": true,
+    "double_tap_forward_sprint": true, 
+    "mount_sprint": true,
+    "hotbar_scrolling": true
+},
+
+"gui": {
+
+    "quick_move_container": true,
+    "hotbar_slot_swap": true,
+    "slot_stack_clone": true,
+    "throw": true,
+    "pick_up_all": true,
+    "quick_craft": true
 },
 
 "keybindings": [
@@ -54,10 +65,11 @@
 {"rebind_hidehud": { "name": "", "category": "mc.misc", "key": 59, "mod": "", "enabled": true}},
 {"mc_screenshot": { "name": "", "category": "mc.misc", "key": 60, "mod": "", "enabled": true}},
 {"rebind_debugscreen": { "name": "", "category": "mc.misc", "key": 61, "mod": "", "enabled": true}},
-{"rebind_switchshader": { "name": "", "category": "mc.misc", "key": 62, "mod": "", "enabled": true}},
+{"rebind_switchshader": { "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": false}},
 {"mc_toggleperspective": { "name": "", "category": "mc.misc", "key": 63, "mod": "", "enabled": true}},
 {"mc_fullscreen": { "name": "", "category": "mc.misc", "key": 87, "mod": "", "enabled": true}},
 {"mc_advancements": { "name": "", "category": "mc.misc", "key": 38, "mod": "", "enabled": true}},
+{"rebind_narrator": { "name": "", "category": "mc.misc", "key": 48, "mod": "CONTROL", "enabled": true}},
 {"mc_smoothcamera": { "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": true}},
 {"mc_spectatoroutlines": { "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": true}},
 

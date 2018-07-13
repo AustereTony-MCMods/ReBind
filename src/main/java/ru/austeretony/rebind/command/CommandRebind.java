@@ -6,20 +6,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -32,6 +34,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.settings.KeyModifier;
 import ru.austeretony.rebind.coremod.ReBindHooks;
 import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.main.KeyBindingProperty;
 
 public class CommandRebind extends CommandBase {
 	
@@ -60,16 +63,14 @@ public class CommandRebind extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
     	
-		if (args.length != 1 || !(args[0].equals("keys") || args[0].equals("file") || args[0].equals("update"))) {
-			
+		if (args.length != 1 || !(args[0].equals("keys") || args[0].equals("file") || args[0].equals("update")))		
 			throw new WrongUsageException(this.getUsage(sender));
-		}
     	
 		EntityPlayer player = Minecraft.getMinecraft().player;	
 		
-		this.sortKeyBindings();
+		ReBindHooks.sortKeyBindings();
 		
-		if (ConfigLoader.UNKNOWN_MODIDS.isEmpty()) {
+		if (KeyBindingProperty.UNKNOWN.isEmpty()) {
 			
 			ITextComponent message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.none"));
 			
@@ -81,41 +82,52 @@ public class CommandRebind extends CommandBase {
 		}
 								
 		if (args[0].equals("keys")) {
-													
-			ITextComponent main, modidLog, modid, nameLog, name, codeLog, code, catLog, cat;
+										
+			ITextComponent main, modNameLog, modName, nameLog, name, codeLog, code, catLog, cat;
+									
+			Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
+			
+			Set<String> sortedModNames = new TreeSet<String>();
+			
+			for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
+
+				propsByModnames.put(property.getModName(), property);
+				
+				sortedModNames.add(property.getModName());
+			}
 			
 			player.sendMessage(new TextComponentString("[ReBind] " + I18n.format("command.rebind.unsupportedKeys") + ":"));
-						
-			for (String modId : ConfigLoader.UNKNOWN_MODIDS) {
+
+			for (String modNameStr : sortedModNames) {
 								
-				for (KeyBinding key : ConfigLoader.KEYBINDINGS_BY_MODIDS.get(modId)) {
+				for (KeyBindingProperty property : propsByModnames.get(modNameStr)) {
 					
-					modidLog = new TextComponentString("M: ");	
-					modidLog.getStyle().setColor(TextFormatting.AQUA);
+					modNameLog = new TextComponentString("M: ");	
+					modNameLog.getStyle().setColor(TextFormatting.AQUA);
 					
-					modid = new TextComponentString(ConfigLoader.MODNAMES_BY_MODIDS.get(modId));			
-					modid.getStyle().setColor(TextFormatting.WHITE);
+					modName = new TextComponentString(property.getModName());			
+					modName.getStyle().setColor(TextFormatting.WHITE);
 					
 					nameLog = new TextComponentString(", N: ");	
 					nameLog.getStyle().setColor(TextFormatting.AQUA);
 					
-					name = new TextComponentString(I18n.format(key.getKeyDescription()));			
+					name = new TextComponentString(I18n.format(property.getKeyBinding().getKeyDescription()));			
 					name.getStyle().setColor(TextFormatting.WHITE);
 					
 					codeLog = new TextComponentString(", K: ");
 					
-					code = new TextComponentString(key.getDisplayName());
+					code = new TextComponentString(GameSettings.getKeyDisplayString(property.getKeyBinding().getKeyCode()));
 					code.getStyle().setColor(TextFormatting.WHITE);
 					
 					catLog = new TextComponentString(", C: ");
 		
-					cat = new TextComponentString(I18n.format(key.getKeyCategory()));
+					cat = new TextComponentString(I18n.format(property.getKeyBinding().getKeyCategory()));
 					cat.getStyle().setColor(TextFormatting.WHITE);
-		
-					player.sendMessage(modidLog.appendSibling(modid).appendSibling(nameLog).appendSibling(name).appendSibling(codeLog).appendSibling(code).appendSibling(catLog).appendSibling(cat));
+							
+					player.sendMessage(modNameLog.appendSibling(modName).appendSibling(nameLog).appendSibling(name).appendSibling(codeLog).appendSibling(code).appendSibling(catLog).appendSibling(cat));
 				}
 				
-				player.sendMessage(new TextComponentString(" "));
+				player.sendMessage(new TextComponentString(""));
 			}
 		}
 		
@@ -145,12 +157,12 @@ public class CommandRebind extends CommandBase {
 	            try {
 	            	
 					Files.createDirectories(path.getParent());
-					
+										
 					List<String> keybindingsData = new ArrayList<String>();
 					
 					keybindingsData.add("{/keybindings/: [".replace('/', '"'));
 							
-					keybindingsData.addAll(this.getModsKeybindingsData());
+					keybindingsData.addAll(this.getUnknownKeybindingsData());
 					
 					keybindingsData.add("]}");	
 					
@@ -158,10 +170,8 @@ public class CommandRebind extends CommandBase {
 						
 				        PrintStream fileStream = new PrintStream(new File(filePath));
 				        
-				        for (String line : keybindingsData) {
-				        	
+				        for (String line : keybindingsData)				        	
 				        	fileStream.println(line);
-				        }
 				        
 				        fileStream.close();
 				        
@@ -208,7 +218,7 @@ public class CommandRebind extends CommandBase {
 
 				List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 
-				List<String> modsKeybindingsData = this.getModsKeybindingsData();
+				List<String> modsKeybindingsData = this.getUnknownKeybindingsData();
 				
 				String 
 				lastConfigLine = configData.get(configData.size() - 2),
@@ -241,10 +251,8 @@ public class CommandRebind extends CommandBase {
 					
 			        PrintStream fileStream = new PrintStream(new File(configPath));
 			        
-			        for (String line : configData) {
-			        	
+			        for (String line : configData)			        	
 			        	fileStream.println(line);
-			        }
 			        
 			        fileStream.close();
 			        
@@ -260,11 +268,6 @@ public class CommandRebind extends CommandBase {
 		        	exception.printStackTrace();
 				}
 			}
-			
-	        catch (UnsupportedEncodingException exception) {
-	        	
-	        	exception.printStackTrace();
-			} 
 	        
 	        catch (IOException exception) {
 	        	
@@ -273,61 +276,55 @@ public class CommandRebind extends CommandBase {
 		}
     }
     
-    private void sortKeyBindings() {
-    	
-		if (ConfigLoader.SORTED_KEYBINDINGS.isEmpty()) {
-
-	        KeyBinding[] bindings = (KeyBinding[]) ArrayUtils.clone(Minecraft.getMinecraft().gameSettings.keyBindings);
-
-	        Arrays.sort(bindings);
-
-	        ReBindHooks.sortKeyBindings(bindings);
-		}
-    }
-    
-    private List<String> getModsKeybindingsData() {
+    private List<String> getUnknownKeybindingsData() {
     	
 		List<String> data = new ArrayList<String>();
-				
+								
+		Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
+		
+		Set<String> sortedModNames = new TreeSet<String>();
+		
+		for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
+
+			propsByModnames.put(property.getModName(), property);
+			
+			sortedModNames.add(property.getModName());
+		}
+		
 		int 
-		modidIndex = 0,
+		modNameIndex = 0,
 		keyIndex = 0;
 		
 		String line, keyModifier;
 				
-		for (String modId : ConfigLoader.UNKNOWN_MODIDS) {
+		for (String modName : sortedModNames) {
 				
-			modidIndex++;
+			modNameIndex++;
 			
-			for (KeyBinding key : ConfigLoader.KEYBINDINGS_BY_MODIDS.get(modId)) {
+			for (KeyBindingProperty property : propsByModnames.get(modName)) {
 				
 				keyIndex++;
 				
-				keyModifier = key.getKeyModifierDefault() == KeyModifier.NONE ? "" : key.getKeyModifierDefault().toString();
+				keyModifier = property.getKeyBinding().getKeyModifierDefault() == KeyModifier.NONE ? "" : property.getKeyBinding().getKeyModifierDefault().toString();
 				
-				line = "{/" + ConfigLoader.KEYS_BY_KEYBINDINGS.get(key) + "/: { /name/: //, /category/: /" + ConfigLoader.MODNAMES_BY_MODIDS.get(modId) + "/, /key/: " + key.getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
+				line = "{/" + property.getConfigKey() + "/: { /name/: //, /category/: /" + property.getModName() + "/, /key/: " + property.getKeyBinding().getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
 			
-				if (keyIndex < ConfigLoader.KEYBINDINGS_BY_MODIDS.get(modId).size()) {
-					
+				if (keyIndex < propsByModnames.get(modName).size())				
+					line += ",";				
+				else if (modNameIndex < sortedModNames.size())					
 					line += ",";
-				}
-				
-				else if (modidIndex < ConfigLoader.UNKNOWN_MODIDS.size()) {
-					
-					line += ",";
-				}
 				
 				data.add(line.replace('/', '"'));
 			}
 			
 			keyIndex = 0;
 									
-			if (modidIndex < ConfigLoader.UNKNOWN_MODIDS.size()) {
-				
+			if (modNameIndex < sortedModNames.size())				
 				data.add("");
-			}
 		}
 				
 		return data;
     }
 }
+
+

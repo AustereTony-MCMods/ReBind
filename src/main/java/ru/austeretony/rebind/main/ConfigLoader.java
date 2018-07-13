@@ -2,60 +2,46 @@ package ru.austeretony.rebind.main;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 public class ConfigLoader {
-	
-	private static boolean checkForUpdates, showChangelog, useExternalConfig, rewriteControls, enableDebugMode, enableAutoJump, allowDoubleTapForwardSprint, allowPlayerSprint, allowMountSprint;
-	
-    public static final Map<String, KeyBindingProperty> PROPERTIES = new HashMap<String, KeyBindingProperty>();
-    
-    public static final List<KeyBindingProperty> SORTED_PROPERTIES = new ArrayList<KeyBindingProperty>();
-    
-    public static final Map<String, KeyBinding> KEYBINDINGS_BY_KEYS = new HashMap<String, KeyBinding>();
-    
-    public static final Map<KeyBinding, String> KEYS_BY_KEYBINDINGS = new HashMap<KeyBinding, String>();
-    
-    public static final Multimap<String, KeyBinding> KEYBINDINGS_BY_MODIDS = LinkedHashMultimap.<String, KeyBinding>create();
-        	    
-    public static final Map<KeyBinding, String> MODIDS_BY_KEYBINDINGS = new HashMap<KeyBinding, String>();
-    
-    public static final Set<KeyBinding> SORTED_KEYBINDINGS = new LinkedHashSet<KeyBinding>();  
-    
-    public static final Set<String> HIDDEN_KEYBINDINGS = new HashSet<String>();
-    
-    public static final Set<String> UNKNOWN_MODIDS = new TreeSet<String>();
-    
-    public static final Map<String, String> MODNAMES_BY_MODIDS = new HashMap<String, String>();
-	                   
+
+	private static boolean 
+	checkForUpdates, 
+	showChangelog, 
+	useExternalConfig, 
+	rewriteControls, 
+	enableDebugMode, 
+	enableAutoJump, 
+	allowDoubleTapForwardSprint, 
+	allowPlayerSprint, 
+	allowMountSprint,
+	allowHotbarScrolling,
+	allowGuiQuickMoveContainer,
+	allowGuiHotbarSwap,
+	allowGuiSlotClone,
+	allowGuiThrow,
+	allowGuiPickUpAll,
+	allowGuiQuickCraft;
+
 	public void loadConfiguration() {
 		
         try {       
@@ -68,15 +54,10 @@ public class ConfigLoader {
                                     
             useExternalConfig = internalConfig.get("main").getAsJsonObject().get("external_config").getAsBoolean();   
             
-            if (!useExternalConfig) {
-            	
+            if (!useExternalConfig)           	
             	this.loadData(internalConfig);
-            }
-            
-            else {
-            	
+            else           	
             	this.loadExternalConfig(internalConfig);
-            }
         }
         
         catch (IOException exception) {
@@ -106,11 +87,6 @@ public class ConfigLoader {
             	this.loadData(externalConfig);
 			}
         	
-        	catch (FileNotFoundException exception) {
-				
-        		exception.printStackTrace();     		
-			} 
-        	
         	catch (IOException exception) {
         		
         		exception.printStackTrace();
@@ -139,25 +115,18 @@ public class ConfigLoader {
         	
         	InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
         	        	        	
-			List<String> configLinesList = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
+			List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 			
 			inputStream.close();
 						
             PrintStream fileStream = new PrintStream(new File(configPath));
             
-            for (String line : configLinesList) {
-            	
+            for (String line : configData)           	
             	fileStream.println(line);
-            }
             
             fileStream.close();
                     	        				            			
         	this.loadData(internalConfig);
-		} 
-        
-        catch (UnsupportedEncodingException exception) {
-        	
-        	exception.printStackTrace();
 		} 
         
         catch (IOException exception) {
@@ -167,29 +136,34 @@ public class ConfigLoader {
     }
 	
 	private void loadData(JsonObject configFile) {
-				
-        JsonObject rawMainData = configFile.get("main").getAsJsonObject();
+		
+        JsonObject mainSettings = configFile.get("main").getAsJsonObject();
         
-        rewriteControls = rawMainData.get("rewrite_controls").getAsBoolean();
+        rewriteControls = mainSettings.get("rewrite_controls").getAsBoolean();        
+        enableDebugMode = mainSettings.get("debug_mode").getAsBoolean();      
+        checkForUpdates = mainSettings.get("updates").getAsJsonObject().get("update_checker").getAsBoolean();				
+        showChangelog = mainSettings.get("updates").getAsJsonObject().get("show_changelog").getAsBoolean();
         
-        enableDebugMode = rawMainData.get("debug_mode").getAsBoolean();
+        JsonObject ingameSettings = configFile.get("game").getAsJsonObject();
         
-        checkForUpdates = rawMainData.get("updates").getAsJsonObject().get("update_checker").getAsBoolean();
-				
-        showChangelog = rawMainData.get("updates").getAsJsonObject().get("show_changelog").getAsBoolean();
+        enableAutoJump = ingameSettings.get("auto_jump").getAsBoolean();
         
-        JsonObject rawIngameData = configFile.get("game").getAsJsonObject();
-        
-        enableAutoJump = rawIngameData.get("auto_jump").getAsBoolean();
-        
-        JsonObject rawControlsData = configFile.get("controls").getAsJsonObject();
+        JsonObject controlsSettings = configFile.get("controls").getAsJsonObject();
                 
-        allowPlayerSprint = rawControlsData.get("player_sprint").getAsBoolean();
+        allowPlayerSprint = controlsSettings.get("player_sprint").getAsBoolean();       
+        allowDoubleTapForwardSprint = controlsSettings.get("double_tap_forward_sprint").getAsBoolean();      
+        allowMountSprint = controlsSettings.get("mount_sprint").getAsBoolean();        
+        allowHotbarScrolling = controlsSettings.get("hotbar_scrolling").getAsBoolean();
         
-        allowDoubleTapForwardSprint = rawControlsData.get("double_tap_forward_sprint").getAsBoolean();
+        JsonObject guiSettings = configFile.get("gui").getAsJsonObject();
         
-        allowMountSprint = rawControlsData.get("mount_sprint").getAsBoolean();
-        
+        allowGuiQuickMoveContainer = guiSettings.get("quick_move_container").getAsBoolean();       
+        allowGuiHotbarSwap = guiSettings.get("hotbar_slot_swap").getAsBoolean();
+        allowGuiSlotClone = guiSettings.get("slot_stack_clone").getAsBoolean();    
+        allowGuiThrow = guiSettings.get("throw").getAsBoolean();
+        allowGuiPickUpAll = guiSettings.get("pick_up_all").getAsBoolean();
+        allowGuiQuickCraft = guiSettings.get("quick_craft").getAsBoolean();
+                
         Map<String, JsonObject> rawProperties = new LinkedHashMap<String, JsonObject>();
         
         Set<Map.Entry<String, JsonElement>> entrySet;
@@ -198,10 +172,8 @@ public class ConfigLoader {
         	
         	entrySet = jsonElement.getAsJsonObject().entrySet();
         	
-        	for (Map.Entry<String, JsonElement> entry : entrySet) {
-        		
+        	for (Map.Entry<String, JsonElement> entry : entrySet)      		
             	rawProperties.put(entry.getKey(), entry.getValue().getAsJsonObject());
-        	}
         }
                                                 
         JsonObject rawProperty;
@@ -217,15 +189,9 @@ public class ConfigLoader {
 					rawProperty.get("name").getAsString(), 
 					rawProperty.get("category").getAsString(), 
 					rawProperty.get("key").getAsInt(), 
-					rawProperty.get("mod").getAsString(), 
-					rawProperty.get("enabled").getAsBoolean());     
-			
-            PROPERTIES.put(configKey, property);
-            
-            if (property.isEnabled()) 
-        	SORTED_PROPERTIES.add(property);
-            else
-            HIDDEN_KEYBINDINGS.add(configKey);
+					rawProperty.get("mod").getAsString(),
+					rawProperty.get("enabled").getAsBoolean(),
+					true);     
     	}
 	}
 	
@@ -272,5 +238,40 @@ public class ConfigLoader {
 	public static boolean isMountSprintAllowed() {
 		
 		return allowMountSprint;
+	}
+	
+	public static boolean isHotbarScrollingAllowed() {
+		
+		return allowHotbarScrolling;
+	}
+	
+	public static boolean isGuiQuickMoveContainerAllowed() {
+		
+		return allowGuiQuickMoveContainer;
+	}
+	
+	public static boolean isGuiHotbarSlotSwapAllowed() {
+		
+		return allowGuiHotbarSwap;
+	}
+	
+	public static boolean isGuiSlotStackCloneAllowed() {
+		
+		return allowGuiSlotClone;
+	}
+	
+	public static boolean isGuiThrowAllowed() {
+		
+		return allowGuiThrow;
+	}
+	
+	public static boolean isGuiPickUpAllAllowed() {
+		
+		return allowGuiPickUpAll;
+	}
+	
+	public static boolean isGuiQuickCraftAllowed() {
+		
+		return allowGuiQuickCraft;
 	}
 }

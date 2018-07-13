@@ -33,12 +33,10 @@ public class ReBindEvents {
 	@SubscribeEvent
 	public void onPlayerJoinedWorld(EntityJoinWorldEvent event) {
 		
-		if (event.getWorld().isRemote && event.getEntity() instanceof EntityPlayer) {
-						
-			if (ConfigLoader.isUpdateCheckerEnabled()) {
-				
-				this.checkForUpdates();
-			}
+		if (event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {
+					
+			if (ConfigLoader.isUpdateCheckerEnabled())				
+				this.checkForUpdate();
 		}
 	}
 	
@@ -49,19 +47,17 @@ public class ReBindEvents {
 						
 			if (ConfigLoader.isAutoJumpEnabled()) {
 				
-				if (event.getEntityLiving().stepHeight != 1.0F) {
-					
+				if (event.getEntityLiving().stepHeight != 1.0F)					
 					event.getEntityLiving().stepHeight = 1.0F;
-				}
 			}
 		}
 	}
 	
-	private void checkForUpdates() {
-					
+	private void checkForUpdate() {
+							
 		try {
 			
-			URL versionsURL = new URL(ReBindMain.VERSIONS_URL);			
+			URL versionsURL = new URL(ReBindMain.VERSIONS_URL);
 			
 			InputStream inputStream = null;
 			
@@ -71,37 +67,31 @@ public class ReBindEvents {
 			}
 			
 			catch (UnknownHostException exception) {
-				
+														
 				ReBindClassTransformer.LOGGER.error("Update check failed, no internet connection.");
 				
 				return;
 			}
-					
+			
             JsonObject remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));  			
 			
             inputStream.close();
             
-            JsonObject data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();
+            JsonObject data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();                     	        
             
-            String newVersion = data.get("available").getAsString();
-            	            
-            int 
-            availableVersion = Integer.valueOf(newVersion.replace(".", "")),
-            currentVersion = Integer.valueOf(ReBindMain.VERSION.replace(".", ""));
+            String availableVersion = data.get("available").getAsString();
             
-            if (currentVersion < availableVersion) {
-            	
+            if (this.compareVersions(ReBindMain.VERSION, availableVersion)) {	
+            	            	
             	List<String> changelog = new ArrayList<String>();
             	
-            	for (JsonElement element : data.get("changelog").getAsJsonArray()) {
-            		
+            	for (JsonElement element : data.get("changelog").getAsJsonArray())       		
             		changelog.add(element.getAsString());
-            	}
             	
             	EntityPlayer player = Minecraft.getMinecraft().player;
             	
             	ITextComponent 
-            	updateMessage = new TextComponentString("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + " / " + newVersion + "]"),
+            	updateMessage = new TextComponentString("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + "/" + availableVersion + "]"),
             	pageMessage = new TextComponentString(I18n.format("rebind.update.projectPage") + ": "),
             	urlMessage = new TextComponentString(ReBindMain.PROJECT_URL);
             
@@ -122,10 +112,8 @@ public class ReBindEvents {
             		
 	            	player.sendMessage(changelogMessage);
 	            		            		
-            		for (String line : changelog) {
-            			            			
+            		for (String line : changelog)            			            			
     	            	player.sendMessage(new TextComponentString(" + " + line));
-            		}
             	}
             }
 		}
@@ -144,5 +132,35 @@ public class ReBindEvents {
 			
 			exception.printStackTrace();
 		}
+	}
+	
+	private boolean compareVersions(String currentVersion, String availableVersion) {
+								
+		String[] 
+		cVer = currentVersion.split("[.]"),
+		aVer = availableVersion.split("[.]");
+				
+		int diff;
+		
+		for (int i = 0; i < cVer.length; i++) {
+					
+			try {
+				
+				diff = Integer.parseInt(aVer[i]) - Integer.parseInt(cVer[i]);
+												
+				if (diff > 0)
+					return true;
+				
+				if (diff < 0)
+					return false;
+			}
+			
+			catch (NumberFormatException exception) {
+				
+				exception.printStackTrace();
+			}
+		}
+		
+		return false;
 	}
 }

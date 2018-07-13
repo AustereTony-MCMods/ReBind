@@ -2,6 +2,7 @@
 key.hideHUD=Спрятать HUD
 key.debugScreen=Экран Отладки
 key.switchShader=Сменить Шейдер
+key.narrator=Диктор
 
 command.rebind.unsupportedKeys=Список неизвестных биндов
 command.rebind.none=Нет неизвестных биндов
