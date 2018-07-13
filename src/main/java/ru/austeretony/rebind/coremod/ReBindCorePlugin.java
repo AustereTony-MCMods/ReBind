@@ -17,7 +17,7 @@ public class ReBindCorePlugin implements IFMLLoadingPlugin {
     @Override
     public String getModContainerClass() {
     	
-        return ReBindModContainer.class.getName();
+        return null;
     }
 
     @Override

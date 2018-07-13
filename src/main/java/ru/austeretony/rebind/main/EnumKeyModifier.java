@@ -15,15 +15,10 @@ public enum EnumKeyModifier {
         @Override
         public boolean match(int keyCode) {
         	
-            if (Minecraft.isRunningOnMac) {
-            	
+            if (Minecraft.isRunningOnMac)          	
                 return keyCode == Keyboard.KEY_LMETA || keyCode == Keyboard.KEY_RMETA;
-            }
-            
-            else {
-            	
+            else
                 return keyCode == Keyboard.KEY_LCONTROL || keyCode == Keyboard.KEY_RCONTROL;
-            }
         }
         
         @Override
@@ -104,10 +99,8 @@ public enum EnumKeyModifier {
             	
                 for (EnumKeyModifier keyModifier : MODIFIER_VALUES) {
                 	
-                    if (keyModifier.isActive(conflictContext)) {
-                    	
+                    if (keyModifier.isActive(conflictContext))                    	
                         return false;
-                    }
                 }
             }
             
@@ -127,10 +120,8 @@ public enum EnumKeyModifier {
     	
         for (EnumKeyModifier keyModifier : MODIFIER_VALUES) {
         	
-            if (keyModifier.isActive(null)) {
-            	
+            if (keyModifier.isActive(null))        	
                 return keyModifier;
-            }
         }
         
         return NONE;
@@ -140,10 +131,8 @@ public enum EnumKeyModifier {
     	
         for (EnumKeyModifier keyModifier : MODIFIER_VALUES) {
         	
-            if (keyModifier.match(keyCode)) {
-            	
+            if (keyModifier.match(keyCode))      	
                 return true;
-            }
         }
         
         return false;

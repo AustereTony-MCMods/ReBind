@@ -26,6 +26,8 @@ import ru.austeretony.rebind.main.ReBindMain;
 public class ReBindClassTransformer implements IClassTransformer {
 
 	public static final Logger LOGGER = LogManager.getLogger("ReBind Core");
+	
+	private static final String HOOKS_CLASS = "ru/austeretony/rebind/coremod/ReBindHooks";
 
 	public ReBindClassTransformer() {
 		
@@ -99,17 +101,17 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    		
 			
 			case "bdw":					
-				return patchGuiScreen(basicClass, true, false);
+				return patchGuiScreen(basicClass, true);
 		
 			case "net.minecraft.client.gui.GuiScreen":							
-	    		return patchGuiScreen(basicClass, false, false);	
+	    		return patchGuiScreen(basicClass, false);	
 	    		
 			
 			case "bex":					
-				return patchGuiScreen(basicClass, true, true);
+				return patchGuiContainer(basicClass, true);
 		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
-	    		return patchGuiScreen(basicClass, false, true);
+	    		return patchGuiContainer(basicClass, false);
 	    		
 	    		
 			case "blk":					
@@ -138,13 +140,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         boolean 
         isFirstInserted = false,
         isSuccessful = false;
+        
+        AbstractInsnNode currentInsn;
 	 		    
 	    for (MethodNode methodNode : classNode.methods) {
 	    	
 			if (methodNode.name.equals(loadOptionsMethodName) && methodNode.desc.equals("()V")) {
-												
-	            AbstractInsnNode currentInsn = null;
-	            
+													            
 	            Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
 	           
 	            while (insnIterator.hasNext()) {
@@ -155,8 +157,8 @@ public class ReBindClassTransformer implements IClassTransformer {
 	                	
                     	InsnList nodesList = new InsnList();
                     	
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "removeHiddenKeyBindings", "()V", false));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "rewriteControlsSettings", "()V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "removeHiddenKeyBindings", "()V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "removeControlsSettings", "()V", false));
                         
                         methodNode.instructions.insertBefore(currentInsn, nodesList);
                         
@@ -168,7 +170,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
                     	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "loadControlsFromOptionsFile", "([L" + stringClassName + ";)Z", false));                 	
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "loadControlsFromOptionsFile", "([L" + stringClassName + ";)Z", false));                 	
                         nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
                     	
                         methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious(), nodesList);
@@ -179,9 +181,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 			
 			if (methodNode.name.equals(saveOptionsMethodName) && methodNode.desc.equals("()V")) {
-				
-	            AbstractInsnNode currentInsn = null;
-	            
+					            
 	            Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
 	           
 	            while (insnIterator.hasNext()) {
@@ -193,7 +193,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
                     	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "saveControlsToOptionsFile", "(L" + printWriterClassName + ";)Z", false));          
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "saveControlsToOptionsFile", "(L" + printWriterClassName + ";)Z", false));          
                         nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
                     	
                         methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious(), nodesList);
@@ -212,7 +212,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<GameSettings.class> patched!");   
+	    	LOGGER.info("<GameSettings.class> patched!");   
 	    	    
 	    return writer.toByteArray();	
 	}
@@ -224,24 +224,22 @@ public class ReBindClassTransformer implements IClassTransformer {
         classReader.accept(classNode, 0);
         
 	 	String 
-	 	hashFieldName = obfuscated ? "b" : "hash",
 	 	onTickMethodName = obfuscated ? "a" : "onTick",
 	 	isKeyPressedMethodName = obfuscated ? "d" : "getIsKeyPressed",
 	 	setKeyBindStateMethodName = obfuscated ? "a" : "setKeyBindState",
 	 	stringClassName = "java/lang/String",
-	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding",
-	 	intHashMapClassName = obfuscated ? "pz" : "net/minecraft/util/IntHashMap";
+	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
 
         boolean 
         descChanged = false,
         isSuccessful = false;
+        
+        AbstractInsnNode currentInsn;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(onTickMethodName) && methodNode.desc.equals("(I)V")) {
-				
-                AbstractInsnNode currentInsn = null;
-                
+				                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -253,7 +251,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
 
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 0));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "lookupActive", "(I)L" + keyBindingClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "lookupActive", "(I)L" + keyBindingClassName + ";", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 1));
                     	
                     	methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
@@ -264,9 +262,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 			
 			if (methodNode.name.equals(setKeyBindStateMethodName) && methodNode.desc.equals("(IZ)V")) {
-				
-                AbstractInsnNode currentInsn = null;
-                
+				                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -279,7 +275,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 0));
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 1));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setKeybindingsState", "(IZ)V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeybindingsState", "(IZ)V", false));
                     	nodesList.add(new InsnNode(Opcodes.RETURN));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
@@ -290,9 +286,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 			
 			if (methodNode.name.equals("<init>") && methodNode.desc.equals("(L" + stringClassName + ";IL" + stringClassName + ";)V")) {
-												
-                AbstractInsnNode currentInsn = null;
-                
+												                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -303,19 +297,16 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	InsnList nodesList = new InsnList();
                     	
-                    	nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, keyBindingClassName, hashFieldName, "L" + intHashMapClassName + ";"));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingsHash", "(L" + intHashMapClassName + ";)V", false));
-                    	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingName", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getKeyBindingName", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 1));   
                     	
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingKeyCode", "(I)I", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getKeyBindingKeyCode", "(I)I", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ISTORE, 2));
                     	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getKeyBindingCategory", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getKeyBindingCategory", "(L" + stringClassName + ";)L" + stringClassName + ";", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));                   	               
                     	
                     	methodNode.instructions.insert(currentInsn, nodesList); 
@@ -328,7 +319,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
 
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "storeKeybinding", "(L" + keyBindingClassName + ";)V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "storeKeybinding", "(L" + keyBindingClassName + ";)V", false));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     	
@@ -338,9 +329,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 			
 			if (methodNode.name.equals(isKeyPressedMethodName) && methodNode.desc.equals("()Z")) {
-				
-                AbstractInsnNode currentInsn = null;
-                
+				                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -352,7 +341,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	InsnList nodesList = new InsnList();
 
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "isKeyPressed", "(L" + keyBindingClassName + ";)Z", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isKeyPressed", "(L" + keyBindingClassName + ";)Z", false));
                     	nodesList.add(new InsnNode(Opcodes.IRETURN));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
@@ -371,7 +360,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-        LOGGER.info("<KeyBinding.class> patched!");   
+	    	LOGGER.info("<KeyBinding.class> patched!");   
 	            
         return writer.toByteArray();				
 	}
@@ -385,13 +374,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 	 	String keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
         
         boolean isSuccessful = false;
+        
+        AbstractInsnNode currentInsn;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals("<init>")) {
-												
-                AbstractInsnNode currentInsn = null;
-                
+												                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -402,8 +391,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	InsnList nodesList = new InsnList();
                     	
-                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "sortKeyBindings", "([L" + keyBindingClassName + ";)[L" + keyBindingClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "sortKeyBindings", "()[L" + keyBindingClassName + ";", false));
                     	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
@@ -424,9 +412,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 	    	
 	    	if (!flag)
-	    	LOGGER.info("<GuiKeyBindingList.class> patched!");  
+	    		LOGGER.info("<GuiKeyBindingList.class> patched!");  
 	    	else
-		    LOGGER.info("<GuiNewKeyBindingList.class> (Controlling) patched!");  
+	    		LOGGER.info("<GuiNewKeyBindingList.class> (Controlling) patched!");  
 		}
 	            
         return writer.toByteArray();				
@@ -464,13 +452,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         int
         ifeqCount = 0,
         aloadCount = 0;
+        
+        AbstractInsnNode currentInsn;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(drawEntryMethodName) && methodNode.desc.equals("(IIIIIL" + tesselatorClassName + ";IIZ)V")) {
-																
-                AbstractInsnNode currentInsn = null;
-                
+																                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -496,7 +484,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 3));
                         	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 7));
                         	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 8));
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "drawCuiControlsKeyEntry", "(L" + guiButtonClassName + ";L" + guiButtonClassName + ";L" + keyBindingClassName + ";ZIIII)V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "drawCuiControlsKeyEntry", "(L" + guiButtonClassName + ";L" + guiButtonClassName + ";L" + keyBindingClassName + ";ZIIII)V", false));
 
 	                    	nodesList.add(new InsnNode(Opcodes.RETURN));
                         	
@@ -509,9 +497,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 			
 			if (methodNode.name.equals(mousePressedMethodName) && methodNode.desc.equals("(IIIIII)Z")) {
-								
-                AbstractInsnNode currentInsn = null;
-                
+								                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -528,7 +514,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	
                         	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 	                    	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, keyEntryClassName, keyBindingFieldName, "L" + keyBindingClassName + ";"));
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setToDefault", "(L" + keyBindingClassName + ";)V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setToDefault", "(L" + keyBindingClassName + ";)V", false));
                         	
                         	methodNode.instructions.insertBefore(currentInsn.getNext(), nodesList); 
                     	}
@@ -547,9 +533,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {	    	
 	    	
 	    	if (!flag)
-	    	LOGGER.info("<GuiKeyBindingList.KeyEntry.class> patched!");  
+	    		LOGGER.info("<GuiKeyBindingList.KeyEntry.class> patched!");  
 	    	else
-		    LOGGER.info("<GuiNewKeyBindingList.KeyEntry.class> (Controlling) patched!");  
+	    		LOGGER.info("<GuiNewKeyBindingList.KeyEntry.class> (Controlling) patched!");  
 	    }
 	            
         return writer.toByteArray();				
@@ -589,7 +575,7 @@ public class ReBindClassTransformer implements IClassTransformer {
         
         int aloadCount = 0;
         
-        AbstractInsnNode currentInsn = null;
+        AbstractInsnNode currentInsn;
 	 		
 		for (MethodNode methodNode : classNode.methods) {
 			
@@ -609,7 +595,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     		
                         	InsnList nodesList = new InsnList();
                         	
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "resetAllKeys", "()V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "resetAllKeys", "()V", false));
 	                    	
                         	nodesList.add(new InsnNode(Opcodes.RETURN));
                         	
@@ -645,7 +631,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	nodesList.add(new IntInsnNode(Opcodes.BIPUSH, - 100));
                         	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 3));
                         	nodesList.add(new InsnNode(Opcodes.IADD));
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
                         	
                         	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     		
@@ -677,7 +663,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, guiControlsClassName, buttonIdFieldName, "L" + keyBindingClassName + ";"));
                         	nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, keyModifierClassName, "NONE", "L" + keyModifierClassName + ";"));
                         	nodesList.add(new IntInsnNode(Opcodes.BIPUSH, 0));
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
                         	
                         	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     	}  
@@ -690,7 +676,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, guiControlsClassName, buttonIdFieldName, "L" + keyBindingClassName + ";"));
                         	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, keyModifierClassName, "getActiveModifier", "()L" + keyModifierClassName + ";", false));
                         	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
-                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
+                        	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeyModifierAndCode", "(L" + keyBindingClassName + ";L" + keyModifierClassName + ";I)V", false));
                         	
                         	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     		
@@ -705,7 +691,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
                     	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, guiControlsClassName, buttonIdFieldName, "L" + keyBindingClassName + ";"));
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "resetKeyBinding", "(L" + keyBindingClassName + ";I)L" + keyBindingClassName + ";", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "resetKeyBinding", "(L" + keyBindingClassName + ";I)L" + keyBindingClassName + ";", false));
                                                                         
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
                     	                    	
@@ -730,7 +716,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                         	
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
                     	nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, guiControlsClassName, resetButtonFieldName, "L" + guiButtonClassName + ";"));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "setResetButtonState", "(L" + guiButtonClassName + ";)V", false));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setResetButtonState", "(L" + guiButtonClassName + ";)V", false));
                         
                     	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 1));
@@ -758,9 +744,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 	    	
 	    	if (!flag)
-	    	LOGGER.info("<GuiControls.class> patched!");   
+	    		LOGGER.info("<GuiControls.class> patched!");   
 	    	else
-		    LOGGER.info("<GuiNewControls.class> (Controlling) patched!");   
+	    		LOGGER.info("<GuiNewControls.class> (Controlling) patched!");   
 	    }
         
         return writer.toByteArray();				
@@ -772,25 +758,45 @@ public class ReBindClassTransformer implements IClassTransformer {
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "p" : "runTick";
+	 	String runTickMethodName = obfuscated ? "p" : "runTick";
 	 	
         int 
         bipushCount = 0,
-        iconstCount = 0;
+        iconstCount = 0,
+        ifeqCount =0;
         
-        boolean isSuccessful = false;
+        boolean 
+        isSuccessful = false,
+        first = false;
+        
+        AbstractInsnNode currentInsn;
                         
 		for (MethodNode methodNode : classNode.methods) {
 			
-			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
-												
-                AbstractInsnNode currentInsn = null;
-                
+			if (methodNode.name.equals(runTickMethodName) && methodNode.desc.equals("()V")) {
+												                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
                 	
                     currentInsn = insnIterator.next(); 
+                    
+                    if (!first && currentInsn.getOpcode() == Opcodes.IFEQ) {
+                    	
+                    	ifeqCount++;
+                    	
+                    	if (ifeqCount == 7) {
+                    		
+	                        InsnList nodesList = new InsnList();
+	                    	                    	
+	                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isHotbarScrollingAllowed", "()Z", false));          
+	                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+	                        
+	                        methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
+	                    	
+	                    	first = true;
+                    	}
+                    }
                     
                     if (currentInsn.getOpcode() == Opcodes.BIPUSH) {
                     	
@@ -798,7 +804,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	if (bipushCount == 4 || bipushCount == 6 || bipushCount == 9 || bipushCount == 11 || bipushCount == 13 || bipushCount == 17 || bipushCount == 19 || bipushCount == 21 || bipushCount == 23 || bipushCount == 25) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDebugMenuKeyCode", "()I", false)); 
+                            methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getDebugScreenKeyCode", "()I", false)); 
                     		
                     		insnIterator.remove();
                     		
@@ -810,14 +816,16 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	if (bipushCount == 7) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getDisableShaderKeyCode", "()I", false)); 
+                            methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getDisableShaderKeyCode", "()I", false)); 
                     		
                     		insnIterator.remove();
                     	}
                     	                   	
                     	if (bipushCount == 24) {
                         	                                                   	
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getHideHUDKeyCode", "()I", false)); 
+                            methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isHideHUDKeyPressed", "(I)Z", false)); 
+                            
+                            ((JumpInsnNode) currentInsn.getNext()).setOpcode(Opcodes.IFEQ);
                             
                             insnIterator.remove();               
                         } 
@@ -829,8 +837,10 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	if (iconstCount == 4) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
+                            methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isQuitKeyPressed", "(I)Z", false)); 
                     		
+                            ((JumpInsnNode) currentInsn.getNext()).setOpcode(Opcodes.IFEQ);
+                            
                     		insnIterator.remove();
                     	}
                     }
@@ -846,27 +856,27 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<Minecraft.class> patched!");
+	    	LOGGER.info("<Minecraft.class> patched!");
 	            
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated, boolean flag) {
+	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "a" : "keyTyped";  
+	 	String keyTypedMethodName = obfuscated ? "a" : "keyTyped";  
 	 	
         boolean isSuccessful = false;
+        
+        AbstractInsnNode currentInsn;
 	 		
 		for (MethodNode methodNode : classNode.methods) {
 			
-			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("(CI)V")) {
-												
-                AbstractInsnNode currentInsn = null;
-                
+			if (methodNode.name.equals(keyTypedMethodName) && methodNode.desc.equals("(CI)V")) {
+												                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -875,7 +885,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     
                     if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
                     		
-                        methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "getQuitKeyCode", "()I", false)); 
+                        methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getQuitKeyCode", "()I", false)); 
                     		
                     	insnIterator.remove();
                     	
@@ -889,16 +899,91 @@ public class ReBindClassTransformer implements IClassTransformer {
 			}
 		}
 		
-	    ClassWriter writer = new ClassWriter(0);	    
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
 	    classNode.accept(writer);
 	    
-	    if (isSuccessful) {
-
-	    	if (!flag) 
+	    if (isSuccessful)
 	    	LOGGER.info("<GuiScreen.class> patched!");   
-	    	else
+        
+        return writer.toByteArray();				
+	}
+	
+	private byte[] patchGuiContainer(byte[] basicClass, boolean obfuscated) {
+        
+	    ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(basicClass);
+        classReader.accept(classNode, 0);
+        
+	 	String 
+	 	keyTypedMethodName = obfuscated ? "a" : "keyTyped",
+	 	handleMouseClickMethodName = obfuscated ? "a" : "handleMouseClick",
+	 	slotClassName = obfuscated ? "aay" : "net/minecraft/inventory/Slot";  
+	 	
+        boolean isSuccessful = false;
+        
+        int aloadCount = 0;
+        
+        AbstractInsnNode currentInsn;
+	 		
+		for (MethodNode methodNode : classNode.methods) {
+			
+			if (methodNode.name.equals(handleMouseClickMethodName) && methodNode.desc.equals("(L" + slotClassName + ";III)V")) {
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {
+                    	
+                    	aloadCount++;
+                    		
+                    	if (aloadCount == 3) {
+                    		
+	                        InsnList nodesList = new InsnList();
+	                    	
+	                        nodesList.add(new VarInsnNode(Opcodes.ILOAD, 4));
+	                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "verifyClickAction", "(I)I", false));          
+	                        nodesList.add(new VarInsnNode(Opcodes.ISTORE, 4));
+	                        
+	                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
+	                    	
+	                    	break;
+                    	}
+                    }
+                }               
+			}
+			
+			if (methodNode.name.equals(keyTypedMethodName) && methodNode.desc.equals("(CI)V")) {
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
+                    		
+                        methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getQuitKeyCode", "()I", false)); 
+                    		
+                    	insnIterator.remove();
+                    	
+                    	break;
+                    }
+                }
+                
+                isSuccessful = true;
+    			
+    			break;
+			}		
+		}
+		
+	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
+	    classNode.accept(writer);
+	    
+	    if (isSuccessful)
 	    	LOGGER.info("<GuiContainer.class> patched!"); 
-	    }
         
         return writer.toByteArray();				
 	}
@@ -914,13 +999,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         boolean isSuccessful = false;
         
         int iconstCount = 0;
+        
+        AbstractInsnNode currentInsn;
 	 		
 		for (MethodNode methodNode : classNode.methods) {
 			
 			if (methodNode.name.equals(targetMethodName) && methodNode.desc.equals("()V")) {
-												
-                AbstractInsnNode currentInsn = null;
-                
+												                
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                
                 while (insnIterator.hasNext()) {
@@ -933,14 +1018,14 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	
                     	if (iconstCount == 6) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "isDoubleTapForwardSprintAllowed", "()Z", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isDoubleTapForwardSprintAllowed", "()Z", false)); 
                     		
                         	insnIterator.remove();
                     	}
                     	
                     	if (iconstCount == 7) {
                     		
-                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, "ru/austeretony/rebind/coremod/ReBindHooks", "isPlayerSprintAllowed", "()Z", false)); 
+                            methodNode.instructions.insert(currentInsn.getPrevious(), new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isPlayerSprintAllowed", "()Z", false)); 
                     		
                         	insnIterator.remove();
                     		
@@ -959,7 +1044,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    LOGGER.info("<EntityPlayerSP.class> patched!");   
+	    	LOGGER.info("<EntityPlayerSP.class> patched!");   
         
         return writer.toByteArray();				
 	}

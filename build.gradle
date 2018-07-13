@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-2.5.7"
+version = "1.7.10-2.6.0"
 group= "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "rebind"
 
@@ -70,7 +70,7 @@ processResources
 jar {
    manifest {
        attributes 'FMLCorePlugin': 'ru.austeretony.rebind.coremod.ReBindCorePlugin'
-       attributes 'FMLCorePluginContainsFMLMod': 'false'
+       attributes 'FMLCorePluginContainsFMLMod': 'true'
 	   attributes 'FMLAT': 'rebind_at.cfg'
    }
 }

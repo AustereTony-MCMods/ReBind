@@ -21,7 +21,18 @@
 
     "player_sprint": true,
     "double_tap_forward_sprint": true, 
-    "mount_sprint": true
+    "mount_sprint": true,
+    "hotbar_scrolling": true
+},
+
+"gui": {
+
+    "quick_move_container": true,
+    "hotbar_slot_swap": true,
+    "slot_stack_clone": true,
+    "throw": true,
+    "pick_up_all": true,
+    "quick_craft": true
 },
 
 "keybindings": [
