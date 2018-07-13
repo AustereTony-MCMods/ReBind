@@ -1,3 +1,11 @@
+2.6.0
++Fixed minor errors and code clean up.
++Fixed server crash if installed on server.
++Added narrator keybinding.
++Ability to disable hotbar slots scrolling with mouse wheel.
++Ability to disable gui actions: quick move, quick craft, 
+cloning, swapping, throwing and sorting items in one stack.
+
 2.5.7
 +Fixed combinations for keybindings "Hide hud", "Debug screen" and 
 "Disable shader" (1.7.10). Now they works properly.

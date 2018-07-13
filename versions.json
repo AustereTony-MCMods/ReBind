@@ -1,23 +1,29 @@
 {
 "1.7.10": {
 
-	"available": "2.5.7",
+	"available": "2.6.0",
 		
 	"changelog": [
 			
-		"Fixed combinations for ReBind keybindings (Hide HUD and etc.).",
-		"Key combinations system integration for 1.7.10."
+		"Fixed minor errors and code clean up.",
+		"Fixed server crash if installed on server.",
+		"Added narrator keybinding.",
+		"Ability to disable hotbar slots scrolling with mouse wheel.",
+		"Ability to disable gui actions."
 	]
 },
 	
 "1.12.2": {
 
-	"available": "2.5.7",
+	"available": "2.6.0",
 		
 	"changelog": [
 			
-		"Fixed combinations for ReBind keybindings (Hide HUD and etc.).",
-		"Key combinations system integration for 1.7.10."
+		"Fixed minor errors and code clean up.",
+		"Fixed server crash if installed on server.",
+		"Added narrator keybinding.",
+		"Ability to disable hotbar slots scrolling with mouse wheel.",
+		"Ability to disable gui actions."
 	]
 }
 }
