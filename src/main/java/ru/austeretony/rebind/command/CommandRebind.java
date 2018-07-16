@@ -31,16 +31,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.settings.KeyModifier;
 import ru.austeretony.rebind.coremod.ReBindHooks;
 import ru.austeretony.rebind.main.ConfigLoader;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 
-public class CommandRebind extends CommandBase {
+public class CommandReBind extends CommandBase {
 	
 	public static final String 
 	NAME = "rebind",
-	USAGE = "/rebind <keys, file, update>";
+	USAGE = "/rebind <list, save, update>";
 
 	@Override
 	public String getName() {
@@ -63,7 +62,7 @@ public class CommandRebind extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
     	
-		if (args.length != 1 || !(args[0].equals("keys") || args[0].equals("file") || args[0].equals("update")))		
+		if (args.length != 1 || !(args[0].equals("list") || args[0].equals("save") || args[0].equals("update")))		
 			throw new WrongUsageException(this.getUsage(sender));
     	
 		EntityPlayer player = Minecraft.getMinecraft().player;	
@@ -72,7 +71,7 @@ public class CommandRebind extends CommandBase {
 		
 		if (KeyBindingProperty.UNKNOWN.isEmpty()) {
 			
-			ITextComponent message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.none"));
+			ITextComponent message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.none"));
 			
 			message.getStyle().setColor(TextFormatting.RED);
 			
@@ -81,7 +80,7 @@ public class CommandRebind extends CommandBase {
 			return;
 		}
 								
-		if (args[0].equals("keys")) {
+		if (args[0].equals("list")) {
 										
 			ITextComponent main, modNameLog, modName, nameLog, name, codeLog, code, catLog, cat;
 									
@@ -96,7 +95,7 @@ public class CommandRebind extends CommandBase {
 				sortedModNames.add(property.getModName());
 			}
 			
-			player.sendMessage(new TextComponentString("[ReBind] " + I18n.format("command.rebind.unsupportedKeys") + ":"));
+			player.sendMessage(new TextComponentString("[ReBind] " + I18n.format("rebind.command.unsupportedKeys") + ":"));
 
 			for (String modNameStr : sortedModNames) {
 								
@@ -131,7 +130,7 @@ public class CommandRebind extends CommandBase {
 			}
 		}
 		
-		if (args[0].equals("file")) {
+		if (args[0].equals("save")) {
 						
 			ITextComponent message;
 												
@@ -143,7 +142,7 @@ public class CommandRebind extends CommandBase {
 			
 			if (Files.exists(path)) {
 				
-				message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.exist"));
+				message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.exist"));
 				
 				message.getStyle().setColor(TextFormatting.RED);
 				
@@ -175,7 +174,7 @@ public class CommandRebind extends CommandBase {
 				        
 				        fileStream.close();
 				        
-						message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.generated"));
+						message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.generated"));
 						
 						message.getStyle().setColor(TextFormatting.GREEN);
 											
@@ -201,7 +200,7 @@ public class CommandRebind extends CommandBase {
 			
 			if (!ConfigLoader.isExternalConfigEnabled()) {
 				
-				message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.noExternal"));
+				message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.noExternal"));
 				
 				message.getStyle().setColor(TextFormatting.RED);
 				
@@ -226,7 +225,7 @@ public class CommandRebind extends CommandBase {
 				
 				if (lastConfigLine.equals(lastModsLine)) {
 					
-					message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.alreadyUpdated"));
+					message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.alreadyUpdated"));
 					
 					message.getStyle().setColor(TextFormatting.RED);
 					
@@ -256,7 +255,7 @@ public class CommandRebind extends CommandBase {
 			        
 			        fileStream.close();
 			        
-					message = new TextComponentString("[ReBind] " + I18n.format("command.rebind.updated"));
+					message = new TextComponentString("[ReBind] " + I18n.format("rebind.command.updated"));
 					
 					message.getStyle().setColor(TextFormatting.GREEN);
 					
@@ -304,10 +303,8 @@ public class CommandRebind extends CommandBase {
 			for (KeyBindingProperty property : propsByModnames.get(modName)) {
 				
 				keyIndex++;
-				
-				keyModifier = property.getKeyBinding().getKeyModifierDefault() == KeyModifier.NONE ? "" : property.getKeyBinding().getKeyModifierDefault().toString();
-				
-				line = "{/" + property.getConfigKey() + "/: { /name/: //, /category/: /" + property.getModName() + "/, /key/: " + property.getKeyBinding().getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
+								
+				line = "{/" + property.getKeyBindingId() + "/: { /holder/: //, /name/: //, /category/: /" + property.getCategory() + "/, /key/: " + property.getKeyCode() + ", /mod/: /" + property.getKeyModifier() + "/, /enabled/: true}}";
 			
 				if (keyIndex < propsByModnames.get(modName).size())				
 					line += ",";				

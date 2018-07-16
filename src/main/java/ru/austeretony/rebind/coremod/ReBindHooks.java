@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ClickType;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.common.Loader;
 import ru.austeretony.rebind.main.ConfigLoader;
@@ -31,12 +30,14 @@ import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
+		
+    public static final Set<String> ID_OCCURENCES = new HashSet<String>();  
 	
-	private static boolean isKnownKeyBinding;
+	private static boolean isKnown;
 			
-	private static String currentModid, currentModName, bindingConfigKey;
+	private static String modId, modName, keyBindingId;
 	
-	private static KeyBindingProperty currentProperty;
+	private static KeyBindingProperty keyBindingProperty;
 		
 	private static int keyCount;
 		
@@ -52,15 +53,20 @@ public class ReBindHooks {
 			
 			KeyBinding keyBinding;
 			
-			KeyBindingProperty property;
+			KeyBindingProperty property, holderProperty;
 						
 			while (iterator.hasNext()) {
 				
 				keyBinding = iterator.next();
 				
 				property = KeyBindingProperty.get(keyBinding);
+				
+				if (property.isKeyBindingMerged()) {	
+										
+					iterator.remove();				
+				}
 												
-				if (!property.isEnabled()) {				
+				else if (!property.isEnabled()) {				
 						
 					keyBinding.setKeyCode(property.getKeyCode());
 					
@@ -145,11 +151,11 @@ public class ReBindHooks {
 		
 		if (KeyBindingProperty.SORTED_KEYBINDINGS.isEmpty()) {
 															
-			for (KeyBindingProperty property : KeyBindingProperty.PROPERTIES_BY_KEYS.values()) {
+			for (KeyBindingProperty property : KeyBindingProperty.PROPERTIES_BY_IDS.values()) {
 						
 				if (property.isKnown()) {
 					 
-					if (property.isEnabled()) 
+					if (property.isEnabled() && property.isFullyLoaded() && !property.isKeyBindingMerged()) 
 						KeyBindingProperty.SORTED_KEYBINDINGS.add(property.getKeyBinding());
 				}
 				
@@ -180,75 +186,135 @@ public class ReBindHooks {
 		return KeyBindingProperty.SORTED_KEYBINDINGS.toArray(new KeyBinding[KeyBindingProperty.SORTED_KEYBINDINGS.size()]);		
 	}
 	
+	public static boolean isKeyDown(KeyBinding keyBinding) {
+		
+		KeyBindingProperty property = KeyBindingProperty.get(keyBinding);
+		
+		if (!property.isKeyBindingMerged()) {
+			
+			return keyBinding.pressed && keyBinding.getKeyConflictContext().isActive() && keyBinding.getKeyModifier().isActive(keyBinding.getKeyConflictContext());
+		}
+		
+		else {
+			
+			KeyBinding holder = property.getHolderKeyBinding();
+			
+			return holder.pressed && holder.getKeyConflictContext().isActive() && holder.getKeyModifier().isActive(holder.getKeyConflictContext());
+		}
+	}
+	
+	public static boolean isPressed(KeyBinding keyBinding) {
+		
+		KeyBindingProperty property = KeyBindingProperty.get(keyBinding);
+		
+		if (!property.isKeyBindingMerged()) {
+					
+	        if (keyBinding.pressTime == 0) {
+	        		        		        	
+	            return false;
+	        }
+	        
+	        else {
+	        		        	
+	            --keyBinding.pressTime;
+	            
+	            return true;
+	        }
+		}
+			
+		else {			
+									
+	        if (property.getHolderKeyBinding().pressTime == 0)	        		        		        	
+	            return false;
+	        else   		        	
+	            return true;	        
+		}
+	}
+	
+	public static boolean isActiveAndMatches(KeyBinding keyBinding, int keyCode) {
+				
+		if (!KeyBindingProperty.get(keyBinding).isKeyBindingMerged()) {
+			
+			return keyCode != 0 && keyCode == keyBinding.getKeyCode() && keyBinding.getKeyConflictContext().isActive() && keyBinding.getKeyModifier().isActive(keyBinding.getKeyConflictContext());
+		}
+		
+		return false;
+	}
+	
 	public static int getQuitKeyCode() {
 		
-		return ReBindMain.Registry.KEY_QUIT.getKeyCode();
+		return ReBindMain.keyBindingQuit.getKeyCode();
 	}
 
 	public static boolean isQuitKeyPressed(int key) {
 				
-		return ReBindMain.Registry.KEY_QUIT.isActiveAndMatches(key);
+		return ReBindMain.keyBindingQuit.isActiveAndMatches(key);
 	}
 
 	public static boolean isHideHUDKeyPressed(int key) {
 		
-		return ReBindMain.Registry.KEY_HIDE_HUD.isActiveAndMatches(key);
+		return ReBindMain.keyBindingHideHUD.isActiveAndMatches(key);
 	}
 	
 	public static int getDebugScreenKeyCode() {
 				
-		return ReBindMain.Registry.KEY_DEBUG_SCREEN.isPressed() ? ReBindMain.Registry.KEY_DEBUG_SCREEN.getKeyCode() : 0;
+		return ReBindMain.keyBindingDebugScreen.isPressed() ? ReBindMain.keyBindingDebugScreen.getKeyCode() : 0;
 	}
 	
 	public static int getSwitchShaderKeyCode() {
 		
-		return ReBindMain.Registry.KEY_SWITCH_SHADER.isPressed() ? ReBindMain.Registry.KEY_SWITCH_SHADER.getKeyCode() : 0;
+		return ReBindMain.keyBindingSwitchShader.isPressed() ? ReBindMain.keyBindingSwitchShader.getKeyCode() : 0;
 	}
 	
 	public static boolean isNarratorKeyPressed(int key) {
 		
-		return ReBindMain.Registry.KEY_NARRATOR.isActiveAndMatches(key);
+		return ReBindMain.keyBindingNarrator.isActiveAndMatches(key);
 	}
 	
 	public static String getKeyBindingName(String keyName) {
 						
 		if (Loader.instance().activeModContainer() != null) {
 									
-			currentModid = Loader.instance().activeModContainer().getModId();			
-			currentModName = Loader.instance().activeModContainer().getName();
+			modId = Loader.instance().activeModContainer().getModId();			
+			modName = Loader.instance().activeModContainer().getName();
 		}
 		
 		else {
 			
 			if (keyCount < 33) {
 				
-				currentModid = "mc";				
-				currentModName = "Minecraft";
+				modId = "mc";				
+				modName = "Minecraft";
 			}
 			
 			else {
 								
-				currentModid = "optifine";				
-				currentModName = "Optifine";
+				modId = "optifine";				
+				modName = "Optifine";
 			}
 		}
 		
-		currentModid = currentModid.toLowerCase();
+		modId = modId.toLowerCase();
 		
-		bindingConfigKey = currentModid + "_" + keyName.toLowerCase();		
-		bindingConfigKey = bindingConfigKey.replaceAll("[. ]", "_").replace("_key", "").replace("_" + currentModid, "");
-				
-		isKnownKeyBinding = KeyBindingProperty.PROPERTIES_BY_KEYS.containsKey(bindingConfigKey);
+		keyBindingId = modId + "_" + keyName.toLowerCase();		
+		keyBindingId = keyBindingId.replaceAll("[. ]", "_").replace("_key", "").replace("_" + modId, "");
+					
+		while (ID_OCCURENCES.contains(keyBindingId)) {
+			
+			keyBindingId = keyBindingId + "_";
+		}
+		
+		isKnown = KeyBindingProperty.PROPERTIES_BY_IDS.containsKey(keyBindingId);
 		
 		//TODO Debug		
-		ReBindClassTransformer.LOGGER.info("Keybinding id: " + bindingConfigKey + ", known: " + isKnownKeyBinding);
+		ReBindClassTransformer.CORE_LOGGER.info("Keybinding id: " + keyBindingId + ", known: " + isKnown);
 		
-		if (isKnownKeyBinding) {
+		if (isKnown) {
 			
-			currentProperty = KeyBindingProperty.get(bindingConfigKey);
+			keyBindingProperty = KeyBindingProperty.get(keyBindingId);
 			
-			if (!currentProperty.getName().isEmpty())				
-				keyName = currentProperty.getName();		
+			if (!keyBindingProperty.getName().isEmpty())				
+				keyName = keyBindingProperty.getName();		
 		}
 		
 		return keyName;
@@ -256,25 +322,25 @@ public class ReBindHooks {
 	
 	public static KeyModifier getKeyBindingKeyModifier(KeyModifier keyModifier) {
 		
-		if (isKnownKeyBinding)
-			keyModifier = KeyModifier.valueFromString(currentProperty.getKeyModifier());
+		if (isKnown)
+			keyModifier = KeyModifier.valueFromString(keyBindingProperty.getKeyModifier());
 		
 		return keyModifier;
 	}
 	
 	public static int getKeyBindingKeyCode(int keyCode) {
 						
-		if (isKnownKeyBinding)			
-			keyCode = currentProperty.getKeyCode();    
+		if (isKnown)			
+			keyCode = keyBindingProperty.getKeyCode();    
 		
 		return keyCode;
 	}
 
 	public static String getKeyBindingCategory(String category) {
 				
-		if (isKnownKeyBinding) {
+		if (isKnown) {
 			
-			String cat = currentProperty.getCategory();
+			String cat = keyBindingProperty.getCategory();
 			
 			if (cat.equals("mc.gameplay") ||
 					cat.equals("mc.movement") ||
@@ -284,12 +350,12 @@ public class ReBindHooks {
 					cat.equals("mc.multiplayer"))				
 				category = "key.categories." + cat.substring(3);
 			else
-				category = currentProperty.getCategory();
+				category = keyBindingProperty.getCategory();
 		}
 		
 		else {
 			
-			category = currentModName;
+			category = modName;
 		}
 		
 		return category;
@@ -299,20 +365,23 @@ public class ReBindHooks {
 		
 		keyCount++;
 		
-		if (!isKnownKeyBinding)		
-			currentProperty = new KeyBindingProperty(
-					bindingConfigKey,
-					keyBinding.getKeyDescription(),
-					currentModName,
+		if (!isKnown)		
+			keyBindingProperty = new KeyBindingProperty(
+					keyBindingId,
+					"",
+					"",
+					modName,
 					keyBinding.getKeyCodeDefault(),
-					keyBinding.getKeyModifierDefault().toString(),
-					true,
+					keyBinding.getKeyModifierDefault() == KeyModifier.NONE ? "" : keyBinding.getKeyModifierDefault().toString(),
+					true, 
 					false);
 		
-		currentProperty.bindKeyBinding(keyBinding);
+		keyBindingProperty.bindKeyBinding(keyBinding);
 		
-		currentProperty.setModId(currentModid);
-		currentProperty.setModName(currentModName);
+		keyBindingProperty.setModId(modId);
+		keyBindingProperty.setModName(modName);
+		
+		ID_OCCURENCES.add(keyBindingId);
 	}
 	
 	public static boolean isDoubleTapForwardSprintAllowed() {
@@ -333,29 +402,5 @@ public class ReBindHooks {
 	public static int isHotbarScrollingAllowed(int direction) {
 		
 		return ConfigLoader.isHotbarScrollingAllowed() ? direction : 0;
-	}
-	
-	public static ClickType verifyClickAction(ClickType clickType) {
-		
-		switch (clickType) {
-		
-			case PICKUP: 
-				return ClickType.PICKUP;
-			case QUICK_MOVE: 
-				return ConfigLoader.isGuiQuickMoveContainerAllowed() ? ClickType.QUICK_MOVE : ClickType.PICKUP;
-			case SWAP: 
-				return ConfigLoader.isGuiHotbarSlotSwapAllowed() ? ClickType.SWAP : ClickType.PICKUP;
-			case CLONE: 
-				return ConfigLoader.isGuiSlotStackCloneAllowed() ? ClickType.CLONE : ClickType.PICKUP;
-			case THROW: 
-				return ConfigLoader.isGuiThrowAllowed() ? ClickType.THROW : ClickType.PICKUP;
-			case QUICK_CRAFT: 
-				return ConfigLoader.isGuiQuickCraftAllowed() ? ClickType.QUICK_CRAFT : ClickType.PICKUP;
-			case PICKUP_ALL: 
-				return ConfigLoader.isGuiPickUpAllAllowed() ? ClickType.PICKUP_ALL : ClickType.PICKUP;
-				
-			default:
-				return ClickType.PICKUP;
-		}
 	}
 }

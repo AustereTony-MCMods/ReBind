@@ -10,17 +10,17 @@ import net.minecraft.client.settings.KeyBinding;
 
 public class KeyBindingProperty {
 	
-	public static final Map<String, KeyBindingProperty> PROPERTIES_BY_KEYS = new LinkedHashMap<String, KeyBindingProperty>();
+	public static final Map<String, KeyBindingProperty> PROPERTIES_BY_IDS = new LinkedHashMap<String, KeyBindingProperty>();
 	
 	private static final Map<KeyBinding, KeyBindingProperty> PROPERTIES_BY_KEYBINDINGS = new HashMap<KeyBinding, KeyBindingProperty>();
 	
     public static final Set<KeyBinding> SORTED_KEYBINDINGS = new LinkedHashSet<KeyBinding>();  
     
     public static final Set<KeyBindingProperty> UNKNOWN = new LinkedHashSet<KeyBindingProperty>();  
-    	    
+        	    
 	private KeyBinding keyBinding;
 	
-	private final String configKey, configName, configCategory, configKeyModifier;
+	private final String keyBindingId, holderBindingId, configName, configCategory, configKeyModifier;
 	
 	private String modId, modName;
 	
@@ -28,9 +28,10 @@ public class KeyBindingProperty {
 		
 	private final boolean isEnabled, isKnown;
 		
-	public KeyBindingProperty(String configKey, String name, String category, int keyCode, String keyModifier, boolean isEnabled, boolean isKnown) {
+	public KeyBindingProperty(String keyId, String holderId, String name, String category, int keyCode, String keyModifier, boolean isEnabled, boolean isKnown) {
 					
-		this.configKey = configKey;
+		this.keyBindingId = keyId;
+		this.holderBindingId = holderId;
 		this.configName = name;
 		this.configCategory = category;		
 		this.configKeyCode = keyCode;
@@ -38,12 +39,15 @@ public class KeyBindingProperty {
 		this.isEnabled = isEnabled;
 		this.isKnown = isKnown;
 		
-		PROPERTIES_BY_KEYS.put(configKey, this);
+		if (!isKnown)
+			UNKNOWN.add(this);
+		
+		PROPERTIES_BY_IDS.put(keyId, this);
 	}
 	
-	public static KeyBindingProperty get(String configKey) {
+	public static KeyBindingProperty get(String keyId) {
 		
-		return PROPERTIES_BY_KEYS.get(configKey);
+		return PROPERTIES_BY_IDS.get(keyId);
 	}
 	
 	public static KeyBindingProperty get(KeyBinding keyBinding) {
@@ -51,9 +55,14 @@ public class KeyBindingProperty {
 		return PROPERTIES_BY_KEYBINDINGS.get(keyBinding);
 	}
 	
-	public String getConfigKey() {
+	public String getKeyBindingId() {
 		
-		return this.configKey;
+		return this.keyBindingId;
+	}
+	
+	public KeyBinding getHolderKeyBinding() {
+		
+		return PROPERTIES_BY_IDS.get(this.holderBindingId).getKeyBinding();
 	}
 	
 	public String getName() {
@@ -86,6 +95,11 @@ public class KeyBindingProperty {
 		return this.isKnown;
 	}
 	
+	public boolean isKeyBindingMerged() {
+		
+		return !this.holderBindingId.isEmpty();
+	}
+		
 	public String getModId() {
 		
 		return this.modId;
@@ -111,13 +125,15 @@ public class KeyBindingProperty {
 		return this.keyBinding;
 	}
 	
+	public boolean isFullyLoaded() {
+		
+		return this.keyBinding != null;
+	}
+	
 	public void bindKeyBinding(KeyBinding keyBinding) {
 		
 		this.keyBinding = keyBinding;
 		
-		PROPERTIES_BY_KEYBINDINGS.put(this.keyBinding, this);
-		
-		if (!isKnown)
-			UNKNOWN.add(this);
+		PROPERTIES_BY_KEYBINDINGS.put(this.keyBinding, this);		
 	}
 }
