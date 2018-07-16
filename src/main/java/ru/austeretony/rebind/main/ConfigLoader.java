@@ -34,19 +34,13 @@ public class ConfigLoader {
 	allowDoubleTapForwardSprint, 
 	allowPlayerSprint, 
 	allowMountSprint,
-	allowHotbarScrolling,
-	allowGuiQuickMoveContainer,
-	allowGuiHotbarSwap,
-	allowGuiSlotClone,
-	allowGuiThrow,
-	allowGuiPickUpAll,
-	allowGuiQuickCraft;
+	allowHotbarScrolling;
 
-	public void loadConfiguration() {
+	public static void loadConfiguration() {
 		
         try {       
         	
-        	InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
+        	InputStream inputStream = ConfigLoader.class.getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
         	        	
             JsonObject internalConfig = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));  
             
@@ -55,9 +49,9 @@ public class ConfigLoader {
             useExternalConfig = internalConfig.get("main").getAsJsonObject().get("external_config").getAsBoolean();   
             
             if (!useExternalConfig)           	
-            	this.loadData(internalConfig);
+            	loadData(internalConfig);
             else           	
-            	this.loadExternalConfig(internalConfig);
+            	loadExternalConfig(internalConfig);
         }
         
         catch (IOException exception) {
@@ -66,7 +60,7 @@ public class ConfigLoader {
         }
     }
     
-	private void loadExternalConfig(JsonObject internalConfig) {
+	private static void loadExternalConfig(JsonObject internalConfig) {
 
 		String 
 		gameDirPath = ((File) (FMLInjectionData.data()[6])).getAbsolutePath(),
@@ -84,7 +78,7 @@ public class ConfigLoader {
 				
 				inputStream.close();
 				
-            	this.loadData(externalConfig);
+            	loadData(externalConfig);
 			}
         	
         	catch (IOException exception) {
@@ -99,7 +93,7 @@ public class ConfigLoader {
             	
 				Files.createDirectories(path.getParent());
 				
-				this.createExternalCopyAndLoad(configPath, internalConfig);												
+				createExternalCopyAndLoad(configPath, internalConfig);												
 			} 
             
             catch (IOException exception) {
@@ -109,11 +103,11 @@ public class ConfigLoader {
 		}
 	}
 	
-	private void createExternalCopyAndLoad(String configPath, JsonObject internalConfig) {
+	private static void createExternalCopyAndLoad(String configPath, JsonObject internalConfig) {
     	
         try {
         	
-        	InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
+        	InputStream inputStream = ConfigLoader.class.getClassLoader().getResourceAsStream("assets/rebind/rebind.json");
         	        	        	
 			List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
 			
@@ -126,7 +120,7 @@ public class ConfigLoader {
             
             fileStream.close();
                     	        				            			
-        	this.loadData(internalConfig);
+        	loadData(internalConfig);
 		} 
         
         catch (IOException exception) {
@@ -135,7 +129,7 @@ public class ConfigLoader {
 		}
     }
 	
-	private void loadData(JsonObject configFile) {
+	private static void loadData(JsonObject configFile) {
 		
         JsonObject mainSettings = configFile.get("main").getAsJsonObject();
         
@@ -154,15 +148,6 @@ public class ConfigLoader {
         allowDoubleTapForwardSprint = controlsSettings.get("double_tap_forward_sprint").getAsBoolean();      
         allowMountSprint = controlsSettings.get("mount_sprint").getAsBoolean();        
         allowHotbarScrolling = controlsSettings.get("hotbar_scrolling").getAsBoolean();
-        
-        JsonObject guiSettings = configFile.get("gui").getAsJsonObject();
-        
-        allowGuiQuickMoveContainer = guiSettings.get("quick_move_container").getAsBoolean();       
-        allowGuiHotbarSwap = guiSettings.get("hotbar_slot_swap").getAsBoolean();
-        allowGuiSlotClone = guiSettings.get("slot_stack_clone").getAsBoolean();    
-        allowGuiThrow = guiSettings.get("throw").getAsBoolean();
-        allowGuiPickUpAll = guiSettings.get("pick_up_all").getAsBoolean();
-        allowGuiQuickCraft = guiSettings.get("quick_craft").getAsBoolean();
                 
         Map<String, JsonObject> rawProperties = new LinkedHashMap<String, JsonObject>();
         
@@ -185,7 +170,8 @@ public class ConfigLoader {
 			rawProperty = rawProperties.get(configKey);
 			
 			property = new KeyBindingProperty(
-					configKey, 
+					configKey,
+					rawProperty.get("holder").getAsString(), 
 					rawProperty.get("name").getAsString(), 
 					rawProperty.get("category").getAsString(), 
 					rawProperty.get("key").getAsInt(), 
@@ -243,36 +229,6 @@ public class ConfigLoader {
 	public static boolean isHotbarScrollingAllowed() {
 		
 		return allowHotbarScrolling;
-	}
-	
-	public static boolean isGuiQuickMoveContainerAllowed() {
-		
-		return allowGuiQuickMoveContainer;
-	}
-	
-	public static boolean isGuiHotbarSlotSwapAllowed() {
-		
-		return allowGuiHotbarSwap;
-	}
-	
-	public static boolean isGuiSlotStackCloneAllowed() {
-		
-		return allowGuiSlotClone;
-	}
-	
-	public static boolean isGuiThrowAllowed() {
-		
-		return allowGuiThrow;
-	}
-	
-	public static boolean isGuiPickUpAllAllowed() {
-		
-		return allowGuiPickUpAll;
-	}
-	
-	public static boolean isGuiQuickCraftAllowed() {
-		
-		return allowGuiQuickCraft;
 	}
 }
 

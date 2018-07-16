@@ -35,11 +35,11 @@ import ru.austeretony.rebind.main.ConfigLoader;
 import ru.austeretony.rebind.main.EnumKeyModifier;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 
-public class CommandRebind extends CommandBase {
+public class CommandReBind extends CommandBase {
 	
 	public static final String 
 	NAME = "rebind",
-	USAGE = "/rebind <keys, file, update>";
+	USAGE = "/rebind <list, save, update>";
 
 	@Override
 	public String getCommandName() {
@@ -62,7 +62,7 @@ public class CommandRebind extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
     	
-		if (args.length != 1 || !(args[0].equals("keys") || args[0].equals("file") || args[0].equals("update")))		
+		if (args.length != 1 || !(args[0].equals("list") || args[0].equals("save") || args[0].equals("update")))		
 			throw new WrongUsageException(this.getCommandUsage(sender));
     	
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;	
@@ -71,7 +71,7 @@ public class CommandRebind extends CommandBase {
 		
 		if (KeyBindingProperty.UNKNOWN.isEmpty()) {
 			
-			IChatComponent message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.none"));
+			IChatComponent message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.none"));
 			
 			message.getChatStyle().setColor(EnumChatFormatting.RED);
 			
@@ -80,7 +80,7 @@ public class CommandRebind extends CommandBase {
 			return;
 		}
 								
-		if (args[0].equals("keys")) {
+		if (args[0].equals("list")) {
 										
 			IChatComponent main, modNameLog, modName, nameLog, name, codeLog, code, catLog, cat;
 									
@@ -95,7 +95,7 @@ public class CommandRebind extends CommandBase {
 				sortedModNames.add(property.getModName());
 			}
 			
-			player.addChatMessage(new ChatComponentText("[ReBind] " + I18n.format("command.rebind.unsupportedKeys") + ":"));
+			player.addChatMessage(new ChatComponentText("[ReBind] " + I18n.format("rebind.command.unsupportedKeys") + ":"));
 
 			for (String modNameStr : sortedModNames) {
 								
@@ -130,7 +130,7 @@ public class CommandRebind extends CommandBase {
 			}
 		}
 		
-		if (args[0].equals("file")) {
+		if (args[0].equals("save")) {
 						
 			IChatComponent message;
 												
@@ -142,7 +142,7 @@ public class CommandRebind extends CommandBase {
 			
 			if (Files.exists(path)) {
 				
-				message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.exist"));
+				message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.exist"));
 				
 				message.getChatStyle().setColor(EnumChatFormatting.RED);
 				
@@ -174,7 +174,7 @@ public class CommandRebind extends CommandBase {
 				        
 				        fileStream.close();
 				        
-						message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.generated"));
+						message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.generated"));
 						
 						message.getChatStyle().setColor(EnumChatFormatting.GREEN);
 											
@@ -200,7 +200,7 @@ public class CommandRebind extends CommandBase {
 			
 			if (!ConfigLoader.isExternalConfigEnabled()) {
 				
-				message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.noExternal"));
+				message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.noExternal"));
 				
 				message.getChatStyle().setColor(EnumChatFormatting.RED);
 				
@@ -225,7 +225,7 @@ public class CommandRebind extends CommandBase {
 				
 				if (lastConfigLine.equals(lastModsLine)) {
 					
-					message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.alreadyUpdated"));
+					message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.alreadyUpdated"));
 					
 					message.getChatStyle().setColor(EnumChatFormatting.RED);
 					
@@ -255,7 +255,7 @@ public class CommandRebind extends CommandBase {
 			        
 			        fileStream.close();
 			        
-					message = new ChatComponentText("[ReBind] " + I18n.format("command.rebind.updated"));
+					message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.updated"));
 					
 					message.getChatStyle().setColor(EnumChatFormatting.GREEN);
 					
@@ -306,7 +306,7 @@ public class CommandRebind extends CommandBase {
 				
 				keyModifier = property.getDefaultKeyModifier() == EnumKeyModifier.NONE ? "" : property.getDefaultKeyModifier().toString();
 				
-				line = "{/" + property.getConfigKey() + "/: { /name/: //, /category/: /" + property.getModName() + "/, /key/: " + property.getKeyBinding().getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
+				line = "{/" + property.getKeyBindingId() + "/: { /holder/: //, /name/: //, /category/: /" + property.getModName() + "/, /key/: " + property.getKeyBinding().getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
 			
 				if (keyIndex < propsByModnames.get(modName).size())				
 					line += ",";				

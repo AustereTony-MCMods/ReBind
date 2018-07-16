@@ -1,4 +1,4 @@
-package ru.austeretony.rebind.event;
+package ru.austeretony.rebind.main;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,19 +24,16 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import ru.austeretony.rebind.coremod.ReBindClassTransformer;
-import ru.austeretony.rebind.main.ConfigLoader;
-import ru.austeretony.rebind.main.ReBindMain;
 
-public class ReBindEvents {
+public class UpdateChecker {
 
 	@SubscribeEvent
 	public void onPlayerJoinedWorld(EntityJoinWorldEvent event) {
 		
-		if (event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
+		if (event.world.isRemote && event.entity instanceof EntityPlayer) {
 					
 			if (ConfigLoader.isUpdateCheckerEnabled())				
-				this.checkForUpdate();
+				this.checkForUpdates();
 		}
 	}
 	
@@ -53,7 +50,7 @@ public class ReBindEvents {
 		}
 	}
 	
-	private void checkForUpdate() {
+	private void checkForUpdates() {
 							
 		try {
 			
@@ -68,7 +65,7 @@ public class ReBindEvents {
 			
 			catch (UnknownHostException exception) {
 														
-				ReBindClassTransformer.LOGGER.error("Update check failed, no internet connection.");
+				ReBindMain.LOGGER.error("Update check failed, no internet connection.");
 				
 				return;
 			}
@@ -77,8 +74,20 @@ public class ReBindEvents {
 			
             inputStream.close();
             
-            JsonObject data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();                     	        
+            JsonObject data;  
             
+            try {
+            	
+            	data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();      
+            }
+            
+            catch (NullPointerException exception) {
+            	
+            	ReBindMain.LOGGER.error("Update check failed, remote data is undefined for " + ReBindMain.GAME_VERSION + " version.");
+            	
+            	return;
+            }
+                           
             String availableVersion = data.get("available").getAsString();
             
             if (this.compareVersions(ReBindMain.VERSION, availableVersion)) {	
@@ -125,7 +134,7 @@ public class ReBindEvents {
 		
 		catch (FileNotFoundException exception) {
 			
-			ReBindClassTransformer.LOGGER.error("Update check failed, remote file is absent.");			
+			ReBindMain.LOGGER.error("Update check failed, remote file is absent.");			
 		}
 		
 		catch (IOException exception) {

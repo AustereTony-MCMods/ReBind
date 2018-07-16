@@ -21,11 +21,11 @@ import org.objectweb.asm.tree.VarInsnNode;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.launchwrapper.IClassTransformer;
-import ru.austeretony.rebind.main.ReBindMain;
+import ru.austeretony.rebind.main.ConfigLoader;
 
 public class ReBindClassTransformer implements IClassTransformer {
 
-	public static final Logger LOGGER = LogManager.getLogger("ReBind Core");
+	public static final Logger CORE_LOGGER = LogManager.getLogger("ReBind Core");
 	
 	private static final String HOOKS_CLASS = "ru/austeretony/rebind/coremod/ReBindHooks";
 
@@ -33,17 +33,17 @@ public class ReBindClassTransformer implements IClassTransformer {
 		
 		try {
 			
-			ReBindMain.CONFIG_LOADER.loadConfiguration();
+			ConfigLoader.loadConfiguration();
 		}
 		
 		catch (JsonSyntaxException exception) {
 			
-			LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix syntax errors!");
+			CORE_LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix syntax errors!");
 			
 			exception.printStackTrace();
 		}
 	}
-	
+	 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {    	
     	
@@ -51,72 +51,60 @@ public class ReBindClassTransformer implements IClassTransformer {
     	
 			case "bbj":					
 				return patchGameSettings(basicClass, true);
-
 			case "net.minecraft.client.settings.GameSettings":							
 				return patchGameSettings(basicClass, false);
 				
 			
 			case "bal":									
 				return patchKeyBinding(basicClass, true);
-
 			case "net.minecraft.client.settings.KeyBinding":		
 				return patchKeyBinding(basicClass, false);
     	
 			
 			case "bes":					
 				return patchGuiKeyBindingList(basicClass, true, false);
-
 			case "net.minecraft.client.gui.GuiKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false, false);	
-				
+				return patchGuiKeyBindingList(basicClass, false, false);					
 			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
 				return patchGuiKeyBindingList(basicClass, true, true);
 				
 			
 			case "bev":									
 				return patchKeyEntry(basicClass, true, false);
-
 			case "net.minecraft.client.gui.GuiKeyBindingList$KeyEntry":		
-				return patchKeyEntry(basicClass, false, false);	
-				
+				return patchKeyEntry(basicClass, false, false);					
 			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList$KeyEntry":		
 				return patchKeyEntry(basicClass, true, true);	
 					
 					
 			case "bew":									
 				return patchGuiControls(basicClass, true, false);
-
 			case "net.minecraft.client.gui.GuiControls":		
-				return patchGuiControls(basicClass, false, false);	
-				
+				return patchGuiControls(basicClass, false, false);					
 			case "us.getfluxed.controlsearch.client.gui.GuiNewControls":		
 				return patchGuiControls(basicClass, true, true);	
 				
 			
 			case "bao":					
-				return patchMinecraft(basicClass, true);
-		
+				return patchMinecraft(basicClass, true);		
 			case "net.minecraft.client.Minecraft":							
 	    		return patchMinecraft(basicClass, false);	
 	    		
 			
 			case "bdw":					
-				return patchGuiScreen(basicClass, true);
-		
+				return patchGui(basicClass, true, true);		
 			case "net.minecraft.client.gui.GuiScreen":							
-	    		return patchGuiScreen(basicClass, false);	
+	    		return patchGui(basicClass, false, true);	
 	    		
 			
 			case "bex":					
-				return patchGuiContainer(basicClass, true);
-		
+				return patchGui(basicClass, true, false);		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
-	    		return patchGuiContainer(basicClass, false);
+	    		return patchGui(basicClass, false, false);
 	    		
 	    		
 			case "blk":					
-				return patchEntityPlayerSP(basicClass, true);
-		
+				return patchEntityPlayerSP(basicClass, true);		
 			case "net.minecraft.client.entity.EntityPlayerSP":							
 	    		return patchEntityPlayerSP(basicClass, false);
     	}
@@ -212,7 +200,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    	LOGGER.info("<GameSettings.class> patched!");   
+	    	CORE_LOGGER.info("<GameSettings.class> patched!");   
 	    	    
 	    return writer.toByteArray();	
 	}
@@ -227,6 +215,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	 	onTickMethodName = obfuscated ? "a" : "onTick",
 	 	isKeyPressedMethodName = obfuscated ? "d" : "getIsKeyPressed",
 	 	setKeyBindStateMethodName = obfuscated ? "a" : "setKeyBindState",
+	 	isPressedMethodName = obfuscated ? "f" : "isPressed",
 	 	stringClassName = "java/lang/String",
 	 	keyBindingClassName = obfuscated ? "bal" : "net/minecraft/client/settings/KeyBinding";
 
@@ -246,13 +235,13 @@ public class ReBindClassTransformer implements IClassTransformer {
                 	
                     currentInsn = insnIterator.next(); 
                     
-                    if (currentInsn.getOpcode() == Opcodes.IFNULL) {    
+                    if (currentInsn.getOpcode() == Opcodes.ILOAD) {    
                     	
                     	InsnList nodesList = new InsnList();
 
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 0));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "lookupActive", "(I)L" + keyBindingClassName + ";", false));
-                    	nodesList.add(new VarInsnNode(Opcodes.ASTORE, 1));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onTick", "(I)V", false));
+                    	nodesList.add(new InsnNode(Opcodes.RETURN));
                     	
                     	methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
                     	
@@ -275,7 +264,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 0));
                     	nodesList.add(new VarInsnNode(Opcodes.ILOAD, 1));
-                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeybindingsState", "(IZ)V", false));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "setKeyBindState", "(IZ)V", false));
                     	nodesList.add(new InsnNode(Opcodes.RETURN));
                     	
                     	methodNode.instructions.insertBefore(currentInsn, nodesList); 
@@ -326,7 +315,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	break;
                     }
                 }                
-			}
+			}			
 			
 			if (methodNode.name.equals(isKeyPressedMethodName) && methodNode.desc.equals("()Z")) {
 				                
@@ -349,6 +338,30 @@ public class ReBindClassTransformer implements IClassTransformer {
                     	break;
                     }
                 }
+			}
+			
+			if (methodNode.name.equals(isPressedMethodName) && methodNode.desc.equals("()Z")) {
+                
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+               
+                while (insnIterator.hasNext()) {
+                	
+                    currentInsn = insnIterator.next(); 
+                    
+                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {    
+                    	
+                    	InsnList nodesList = new InsnList();
+
+                    	nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isPressed", "(L" + keyBindingClassName + ";)Z", false));
+                    	nodesList.add(new InsnNode(Opcodes.IRETURN));
+                    	
+                    	methodNode.instructions.insertBefore(currentInsn, nodesList); 
+                    	
+                    	break;
+                    }
+                }
+                
                 
                 isSuccessful = true;
                 
@@ -360,7 +373,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    	LOGGER.info("<KeyBinding.class> patched!");   
+	    	CORE_LOGGER.info("<KeyBinding.class> patched!");   
 	            
         return writer.toByteArray();				
 	}
@@ -412,9 +425,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 	    	
 	    	if (!flag)
-	    		LOGGER.info("<GuiKeyBindingList.class> patched!");  
+	    		CORE_LOGGER.info("<GuiKeyBindingList.class> patched!");  
 	    	else
-	    		LOGGER.info("<GuiNewKeyBindingList.class> (Controlling) patched!");  
+	    		CORE_LOGGER.info("<GuiNewKeyBindingList.class> (Controlling) patched!");  
 		}
 	            
         return writer.toByteArray();				
@@ -533,9 +546,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {	    	
 	    	
 	    	if (!flag)
-	    		LOGGER.info("<GuiKeyBindingList.KeyEntry.class> patched!");  
+	    		CORE_LOGGER.info("<GuiKeyBindingList.KeyEntry.class> patched!");  
 	    	else
-	    		LOGGER.info("<GuiNewKeyBindingList.KeyEntry.class> (Controlling) patched!");  
+	    		CORE_LOGGER.info("<GuiNewKeyBindingList.KeyEntry.class> (Controlling) patched!");  
 	    }
 	            
         return writer.toByteArray();				
@@ -744,9 +757,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    if (isSuccessful) {
 	    	
 	    	if (!flag)
-	    		LOGGER.info("<GuiControls.class> patched!");   
+	    		CORE_LOGGER.info("<GuiControls.class> patched!");   
 	    	else
-	    		LOGGER.info("<GuiNewControls.class> (Controlling) patched!");   
+	    		CORE_LOGGER.info("<GuiNewControls.class> (Controlling) patched!");   
 	    }
         
         return writer.toByteArray();				
@@ -856,12 +869,12 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    	LOGGER.info("<Minecraft.class> patched!");
+	    	CORE_LOGGER.info("<Minecraft.class> patched!");
 	            
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiScreen(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchGui(byte[] basicClass, boolean obfuscated, boolean flag) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
@@ -902,88 +915,13 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
 	    classNode.accept(writer);
 	    
-	    if (isSuccessful)
-	    	LOGGER.info("<GuiScreen.class> patched!");   
-        
-        return writer.toByteArray();				
-	}
-	
-	private byte[] patchGuiContainer(byte[] basicClass, boolean obfuscated) {
-        
-	    ClassNode classNode = new ClassNode();
-        ClassReader classReader = new ClassReader(basicClass);
-        classReader.accept(classNode, 0);
-        
-	 	String 
-	 	keyTypedMethodName = obfuscated ? "a" : "keyTyped",
-	 	handleMouseClickMethodName = obfuscated ? "a" : "handleMouseClick",
-	 	slotClassName = obfuscated ? "aay" : "net/minecraft/inventory/Slot";  
-	 	
-        boolean isSuccessful = false;
-        
-        int aloadCount = 0;
-        
-        AbstractInsnNode currentInsn;
-	 		
-		for (MethodNode methodNode : classNode.methods) {
-			
-			if (methodNode.name.equals(handleMouseClickMethodName) && methodNode.desc.equals("(L" + slotClassName + ";III)V")) {
-                
-                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
-               
-                while (insnIterator.hasNext()) {
-                	
-                    currentInsn = insnIterator.next(); 
-                    
-                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {
-                    	
-                    	aloadCount++;
-                    		
-                    	if (aloadCount == 3) {
-                    		
-	                        InsnList nodesList = new InsnList();
-	                    	
-	                        nodesList.add(new VarInsnNode(Opcodes.ILOAD, 4));
-	                    	nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "verifyClickAction", "(I)I", false));          
-	                        nodesList.add(new VarInsnNode(Opcodes.ISTORE, 4));
-	                        
-	                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
-	                    	
-	                    	break;
-                    	}
-                    }
-                }               
-			}
-			
-			if (methodNode.name.equals(keyTypedMethodName) && methodNode.desc.equals("(CI)V")) {
-                
-                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
-               
-                while (insnIterator.hasNext()) {
-                	
-                    currentInsn = insnIterator.next(); 
-                    
-                    if (currentInsn.getOpcode() == Opcodes.ICONST_1) {
-                    		
-                        methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getQuitKeyCode", "()I", false)); 
-                    		
-                    	insnIterator.remove();
-                    	
-                    	break;
-                    }
-                }
-                
-                isSuccessful = true;
-    			
-    			break;
-			}		
-		}
-		
-	    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);	    
-	    classNode.accept(writer);
-	    
-	    if (isSuccessful)
-	    	LOGGER.info("<GuiContainer.class> patched!"); 
+	    if (isSuccessful) {
+	    	
+	    	if (flag)
+	    		CORE_LOGGER.info("<GuiScreen.class> patched!");   
+	    	else
+	    		CORE_LOGGER.info("<GuiScreen.class> patched!");   
+	    }
         
         return writer.toByteArray();				
 	}
@@ -1044,7 +982,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    classNode.accept(writer);
 	    
 	    if (isSuccessful)
-	    	LOGGER.info("<EntityPlayerSP.class> patched!");   
+	    	CORE_LOGGER.info("<EntityPlayerSP.class> patched!");   
         
         return writer.toByteArray();				
 	}

@@ -33,12 +33,14 @@ import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
-		
-	private static boolean isKnownKeyBinding;
-			
-	private static String currentModid, currentModName, bindingConfigKey;
 	
-	private static KeyBindingProperty currentProperty;
+    public static final Set<String> ID_OCCURENCES = new HashSet<String>();  
+		
+	private static boolean isKnown;
+			
+	private static String modid, modName, keyBindingId;
+	
+	private static KeyBindingProperty keyBindingProperty;
 		
 	private static int keyCount;
 		
@@ -61,8 +63,13 @@ public class ReBindHooks {
 				keyBinding = iterator.next();
 				
 				property = KeyBindingProperty.get(keyBinding);
-												
-				if (!property.isEnabled()) {				
+									
+				if (property.isKeyBindingMerged()) {	
+					
+					iterator.remove();				
+				}
+									
+				else if (!property.isEnabled()) {				
 						
 					keyBinding.setKeyCode(property.getKeyCode());
 					
@@ -147,11 +154,11 @@ public class ReBindHooks {
 		
 		if (KeyBindingProperty.SORTED_KEYBINDINGS.isEmpty()) {
 															
-			for (KeyBindingProperty property : KeyBindingProperty.PROPERTIES_BY_KEYS.values()) {
+			for (KeyBindingProperty property : KeyBindingProperty.PROPERTIES_BY_IDS.values()) {
 						
 				if (property.isKnown()) {
 					 
-					if (property.isEnabled()) 
+					if (property.isEnabled() && property.isFullyLoaded() && !property.isKeyBindingMerged()) 
 						KeyBindingProperty.SORTED_KEYBINDINGS.add(property.getKeyBinding());
 				}
 				
@@ -182,70 +189,133 @@ public class ReBindHooks {
 		return KeyBindingProperty.SORTED_KEYBINDINGS.toArray(new KeyBinding[KeyBindingProperty.SORTED_KEYBINDINGS.size()]);		
 	}
 	
+    public static void onTick(int keyCode) {
+    	
+        if (keyCode != 0) {
+        	
+        	KeyBinding keybinding = KeyBindingProperty.lookup(keyCode);
+        	
+            if (keybinding != null) {
+            	
+                ++keybinding.pressTime;
+            }
+        }
+    }
+	
+	public static void setKeyBindState(int keyCode, boolean state) {
+		
+        if (keyCode != 0) {
+        	
+            for (KeyBinding key : KeyBindingProperty.lookupAll(keyCode)) {
+
+            	if (key != null)	        	
+            		key.pressed = state;  
+            }
+        }
+	}
+	
+	public static boolean isKeyPressed(KeyBinding key) {
+				
+		return KeyBindingProperty.get(key).isKeyPressed();
+	}
+	
+	public static boolean isPressed(KeyBinding keyBinding) {
+						
+		KeyBindingProperty property = KeyBindingProperty.get(keyBinding);
+		
+		if (!property.isKeyBindingMerged()) {
+					
+	        if (keyBinding.pressTime == 0) {
+	        		        		        	
+	            return false;
+	        }
+	        
+	        else {
+	        		        	
+	            --keyBinding.pressTime;
+	            
+	            return true;
+	        }
+		}
+			
+		else {			
+									
+	        if (property.getHolderKeyBinding().pressTime == 0)	        		        		        	
+	            return false;
+	        else   		        	
+	            return true;	        
+		}
+	}
+	
 	public static int getQuitKeyCode() {
 		
-		return ReBindMain.Registry.KEY_QUIT.getKeyCode();
+		return ReBindMain.keyBindingQuit.getKeyCode();
 	}
 
 	public static boolean isQuitKeyPressed(int key) {
 		
-		return KeyBindingProperty.get(ReBindMain.Registry.KEY_QUIT).isActiveAndMatch(key);
+		return KeyBindingProperty.get(ReBindMain.keyBindingQuit).isActiveAndMatches(key);
 	}
 
 	public static boolean isHideHUDKeyPressed(int key) {
 		
-		return KeyBindingProperty.get(ReBindMain.Registry.KEY_HIDE_HUD).isActiveAndMatch(key);
+		return KeyBindingProperty.get(ReBindMain.keyBindingHideHUD).isActiveAndMatches(key);
 	}
 	
 	public static int getDebugScreenKeyCode() {
 				
-		return ReBindMain.Registry.KEY_DEBUG_SCREEN.isPressed() ? ReBindMain.Registry.KEY_DEBUG_SCREEN.getKeyCode() : 0;
+		return ReBindMain.keyBindingDebugScreen.isPressed() ? ReBindMain.keyBindingDebugScreen.getKeyCode() : 0;
 	}
 	
 	public static int getDisableShaderKeyCode() {
 		
-		return ReBindMain.Registry.KEY_DISABLE_SHADER.isPressed() ? ReBindMain.Registry.KEY_DISABLE_SHADER.getKeyCode() : 0;
+		return ReBindMain.keyBindingDisableShader.isPressed() ? ReBindMain.keyBindingDisableShader.getKeyCode() : 0;
 	}
 	
 	public static String getKeyBindingName(String keyName) {
 						
 		if (Loader.instance().activeModContainer() != null) {
 									
-			currentModid = Loader.instance().activeModContainer().getModId();			
-			currentModName = Loader.instance().activeModContainer().getName();
+			modid = Loader.instance().activeModContainer().getModId();			
+			modName = Loader.instance().activeModContainer().getName();
 		}
 		
 		else {
 			
 			if (keyCount < 32) {
 				
-				currentModid = "mc";				
-				currentModName = "Minecraft";
+				modid = "mc";				
+				modName = "Minecraft";
 			}
 			
 			else {
 								
-				currentModid = "optifine";				
-				currentModName = "Optifine";
+				modid = "optifine";				
+				modName = "Optifine";
 			}
 		}
 		
-		currentModid = currentModid.toLowerCase();
+		modid = modid.toLowerCase();
 		
-		bindingConfigKey = currentModid + "_" + keyName.toLowerCase();		
-		bindingConfigKey = bindingConfigKey.replaceAll("[. ]", "_").replace("_key", "").replace("_" + currentModid, "");
+		keyBindingId = modid + "_" + keyName.toLowerCase();		
+		keyBindingId = keyBindingId.replaceAll("[. ]", "_").replace("_key", "").replace("_" + modid, "");
 				
-		isKnownKeyBinding = KeyBindingProperty.PROPERTIES_BY_KEYS.containsKey(bindingConfigKey);
+		while (ID_OCCURENCES.contains(keyBindingId)) {
+			
+			keyBindingId = keyBindingId + "_";
+		}
+		
+		isKnown = KeyBindingProperty.PROPERTIES_BY_IDS.containsKey(keyBindingId);
 		
 		//TODO Debug		
-		ReBindClassTransformer.LOGGER.info("Keybinding id: " + bindingConfigKey + ", known: " + isKnownKeyBinding);
+		ReBindClassTransformer.CORE_LOGGER.info("Keybinding id: " + keyBindingId + ", known: " + isKnown);
 		
-		if (isKnownKeyBinding) {
+		if (isKnown) {
 			
-			currentProperty = KeyBindingProperty.get(bindingConfigKey);
+			keyBindingProperty = KeyBindingProperty.get(keyBindingId);
 			
-			if (!currentProperty.getName().isEmpty())				
-				keyName = currentProperty.getName();		
+			if (!keyBindingProperty.getName().isEmpty())				
+				keyName = keyBindingProperty.getName();		
 		}
 		
 		return keyName;
@@ -253,17 +323,17 @@ public class ReBindHooks {
 	
 	public static int getKeyBindingKeyCode(int keyCode) {
 						
-		if (isKnownKeyBinding)			
-			keyCode = currentProperty.getKeyCode();    
+		if (isKnown)			
+			keyCode = keyBindingProperty.getKeyCode();    
 		
 		return keyCode;
 	}
 
 	public static String getKeyBindingCategory(String category) {
 				
-		if (isKnownKeyBinding) {
+		if (isKnown) {
 			
-			String cat = currentProperty.getCategory();
+			String cat = keyBindingProperty.getCategory();
 			
 			if (cat.equals("mc.gameplay") ||
 					cat.equals("mc.movement") ||
@@ -273,12 +343,12 @@ public class ReBindHooks {
 					cat.equals("mc.stream"))				
 				category = "key.categories." + cat.substring(3);
 			else
-				category = currentProperty.getCategory();
+				category = keyBindingProperty.getCategory();
 		}
 		
 		else {
 			
-			category = currentModName;
+			category = modName;
 		}
 		
 		return category;
@@ -288,20 +358,23 @@ public class ReBindHooks {
 		
 		keyCount++;
 		
-		if (!isKnownKeyBinding)		
-			currentProperty = new KeyBindingProperty(
-					bindingConfigKey,
-					keyBinding.getKeyDescription(),
-					currentModName,
+		if (!isKnown)		
+			keyBindingProperty = new KeyBindingProperty(
+					keyBindingId,
+					"",
+					"",
+					modName,
 					keyBinding.getKeyCodeDefault(),
 					EnumKeyModifier.NONE,
 					true,
 					false);
 		
-		currentProperty.bindKeyBinding(keyBinding);
+		keyBindingProperty.bindKeyBinding(keyBinding);
 		
-		currentProperty.setModId(currentModid);
-		currentProperty.setModName(currentModName);
+		keyBindingProperty.setModId(modid);
+		keyBindingProperty.setModName(modName);
+		
+		ID_OCCURENCES.add(keyBindingId);
 	}
 	
 	public static boolean isDoubleTapForwardSprintAllowed() {
@@ -322,30 +395,6 @@ public class ReBindHooks {
 	public static boolean isHotbarScrollingAllowed() {
 		
 		return ConfigLoader.isHotbarScrollingAllowed();
-	}
-	
-	public static int verifyClickAction(int actionId) {
-		
-		switch (actionId) {
-		
-			case 0: 
-				return 0;
-			case 1: 
-				return ConfigLoader.isGuiQuickMoveContainerAllowed() ? 1 : 0;
-			case 2: 
-				return ConfigLoader.isGuiHotbarSlotSwapAllowed() ? 2 : 0;
-			case 3: 
-				return ConfigLoader.isGuiSlotStackCloneAllowed() ? 3 : 0;
-			case 4: 
-				return ConfigLoader.isGuiThrowAllowed() ? 4 : 0;
-			case 5: 
-				return ConfigLoader.isGuiQuickCraftAllowed() ? 5 : 0;
-			case 6: 
-				return ConfigLoader.isGuiPickUpAllAllowed() ? 6 : 0;
-				
-			default:
-				return actionId;
-		}
 	}
 	
 	public static void setKeyModifierAndCode(KeyBinding key, EnumKeyModifier keyModifier, int keyCode) {
@@ -483,27 +532,5 @@ public class ReBindHooks {
 		}
         
         return false;
-	}
-	
-	public static KeyBinding lookupActive(int keyCode) {
-		
-		return KeyBindingProperty.lookupActive(keyCode);
-	}
-	
-	public static void setKeybindingsState(int keyCode, boolean state) {
-		
-        if (keyCode != 0) {
-        	
-            for (KeyBinding key : KeyBindingProperty.lookupAll(keyCode)) {
-
-            	if (key != null)	        	
-            		key.pressed = state;  
-            }
-        }
-	}
-	
-	public static boolean isKeyPressed(KeyBinding key) {
-				
-		return KeyBindingProperty.get(key).isKeyDown();
 	}
 }
