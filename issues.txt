@@ -1,0 +1,14 @@
+***300618***Incompatibility with Backpacks! mod. 
+-Reason: some core transformations conflict. 
+-ReBind versions: all
+-Game versions: 1.7.10, 1.12.2.
+
+***080718***Incompatibility with Controlling mod.
+-Reason: replaces controls menu and key combinations can’t be used.
+-ReBind versions: since 2.5.7
+-Game versions: 1.7.10.
+
+***270518***(FIXED in 2.7.0)Incompatibility with JourneyMap mod.
++Reason: has two keybindings with same name.
++ReBind versions: before 2.7.0
++Game versions: 1.7.10.

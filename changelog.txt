@@ -1,3 +1,11 @@
+2.7.0
++Ability to merge keybindings.
++Fixed incompability with mods with several keybindings with same name.
++Fixed crash if configuration file contains information about keybindings from absent mod.
++External configuration file now be used by default.
++Debug mode now disabled by default
++Removed ReBind gui options.
+
 2.6.0
 +Fixed minor errors and code clean up.
 +Fixed server crash if installed on server.

@@ -1,29 +1,32 @@
 {
 "1.7.10": {
 
-	"available": "2.6.0",
+	"available": "2.7.0",
 		
 	"changelog": [
 			
-		"Fixed minor errors and code clean up.",
-		"Fixed server crash if installed on server.",
-		"Added narrator keybinding.",
-		"Ability to disable hotbar slots scrolling with mouse wheel.",
-		"Ability to disable gui actions."
+		"Ability to merge keybindings.",
+		"Fixed incompability with mods with several keybindings with same name.",
+		"Fixed crash if configuration file contains information about keybindings from absent mod.",
+		"External configuration file now be used by default.",
+		"Debug mode now disabled by default",
+		"Removed ReBind gui options."
+
 	]
 },
 	
 "1.12.2": {
 
-	"available": "2.6.0",
+	"available": "2.7.0",
 		
 	"changelog": [
 			
-		"Fixed minor errors and code clean up.",
-		"Fixed server crash if installed on server.",
-		"Added narrator keybinding.",
-		"Ability to disable hotbar slots scrolling with mouse wheel.",
-		"Ability to disable gui actions."
+		"Ability to merge keybindings.",
+		"Fixed incompability with mods with several keybindings with same name.",
+		"Fixed crash if configuration file contains information about keybindings from absent mod.",
+		"External configuration file now be used by default.",
+		"Debug mode now disabled by default",
+		"Removed ReBind gui options."
 	]
 }
 }

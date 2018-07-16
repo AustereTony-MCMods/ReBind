@@ -1,0 +1,35 @@
+{"keybindings": [
+{"baubles_inventory": { "holder": "", "name": "", "category": "Baubles", "key": 48, "mod": "", "enabled": true}},
+
+{"betterbuilderswands_bbw_mode": { "holder": "", "name": "", "category": "Better Builder's Wands", "key": 50, "mod": "", "enabled": true}},
+{"betterbuilderswands_bbw_fluidmode": { "holder": "", "name": "", "category": "Better Builder's Wands", "key": 33, "mod": "", "enabled": true}},
+
+{"journeymap_map_toggle": { "holder": "", "name": "", "category": "JourneyMap", "key": 36, "mod": "", "enabled": true}},
+{"journeymap_zoom_in": { "holder": "", "name": "", "category": "JourneyMap", "key": 13, "mod": "", "enabled": true}},
+{"journeymap_zoom_out": { "holder": "", "name": "", "category": "JourneyMap", "key": 12, "mod": "", "enabled": true}},
+{"journeymap_minimap_type": { "holder": "", "name": "", "category": "JourneyMap", "key": 26, "mod": "", "enabled": true}},
+{"journeymap_minimap_type_": { "holder": "", "name": "", "category": "JourneyMap", "key": 27, "mod": "", "enabled": true}},
+{"journeymap_minimap_preset": { "holder": "", "name": "", "category": "JourneyMap", "key": 43, "mod": "", "enabled": true}},
+{"journeymap_create_waypoint": { "holder": "", "name": "", "category": "JourneyMap", "key": 48, "mod": "", "enabled": true}},
+
+{"mw_reload": { "holder": "", "name": "", "category": "Modern Warfare", "key": 19, "mod": "", "enabled": true}},
+{"mw_laser": { "holder": "", "name": "", "category": "Modern Warfare", "key": 38, "mod": "", "enabled": true}},
+{"mw_nightvision": { "holder": "", "name": "", "category": "Modern Warfare", "key": 49, "mod": "", "enabled": true}},
+{"mw_attachment": { "holder": "", "name": "", "category": "Modern Warfare", "key": 50, "mod": "", "enabled": true}},
+{"mw_scope": { "holder": "", "name": "", "category": "Modern Warfare", "key": 200, "mod": "", "enabled": true}},
+{"mw_recoil_fitter": { "holder": "", "name": "", "category": "Modern Warfare", "key": 208, "mod": "", "enabled": true}},
+{"mw_silencer": { "holder": "", "name": "", "category": "Modern Warfare", "key": 203, "mod": "", "enabled": true}},
+{"mw_texture_change": { "holder": "", "name": "", "category": "Modern Warfare", "key": 205, "mod": "", "enabled": true}},
+{"mw_add": { "holder": "", "name": "", "category": "Modern Warfare", "key": 23, "mod": "", "enabled": true}},
+{"mw_subtract": { "holder": "", "name": "", "category": "Modern Warfare", "key": 24, "mod": "", "enabled": true}},
+{"mw_fire_mode": { "holder": "", "name": "", "category": "Modern Warfare", "key": 54, "mod": "", "enabled": true}},
+
+{"optifine_of_zoom": { "holder": "", "name": "", "category": "Optifine", "key": 29, "mod": "", "enabled": true}},
+
+{"rpginventorymod_rpg_inventory": { "holder": "", "name": "", "category": "Rpg Inventory", "key": 19, "mod": "", "enabled": true}},
+{"rpginventorymod_rpg_special_ability": { "holder": "", "name": "", "category": "Rpg Inventory", "key": 33, "mod": "", "enabled": true}},
+
+{"thaumcraft_change_wand_focus": { "holder": "", "name": "", "category": "Thaumcraft", "key": 33, "mod": "", "enabled": true}},
+{"thaumcraft_activate_hover_harness": { "holder": "", "name": "", "category": "Thaumcraft", "key": 35, "mod": "", "enabled": true}},
+{"thaumcraft_misc_wand_toggle": { "holder": "", "name": "", "category": "Thaumcraft", "key": 34, "mod": "", "enabled": true}}
+]}
