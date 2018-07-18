@@ -1,45 +1,67 @@
 {
-"rewrite_controls": { "enabled": true},
+"main": {
 
-"controls": 
-[
-{"attack": { "name": "attack", "category": "gameplay", "key_code": -100, "enabled": true}},
-{"use_item": { "name": "use", "category": "gameplay", "key_code": -99, "enabled": true}},
-{"pick_block": { "name": "pickItem", "category": "gameplay", "key_code": -98, "enabled": true}},
+    "external_config": true,  
+    "rewrite_controls": true,  
+    "debug_mode": false,
 
-{"forward": { "name": "forward", "category": "movement", "key_code": 17, "enabled": true}},
-{"left": { "name": "left", "category": "movement", "key_code": 30, "enabled": true}},
-{"back": { "name": "back", "category": "movement", "key_code": 31, "enabled": true}},
-{"right": { "name": "right", "category": "movement", "key_code": 32, "enabled": true}},
-{"jump": { "name": "jump", "category": "movement", "key_code": 57, "enabled": true}},
-{"sneak": { "name": "sneak", "category": "movement", "key_code": 42, "enabled": true}},
-{"sprint": { "name": "sprint", "category": "movement", "key_code": 29, "enabled": true}},
+    "updates": {
+    
+        "update_checker": true,        
+        "show_changelog": false
+    }
+},
 
-{"inventory": { "name": "inventory", "category": "inventory", "key_code": 18, "enabled": true}},
-{"hotbar_1": { "name": "hotbar.1", "category": "inventory", "key_code": 2, "enabled": true}},
-{"hotbar_2": { "name": "hotbar.2", "category": "inventory", "key_code": 3, "enabled": true}},
-{"hotbar_3": { "name": "hotbar.3", "category": "inventory", "key_code": 4, "enabled": true}},
-{"hotbar_4": { "name": "hotbar.4", "category": "inventory", "key_code": 5, "enabled": true}},
-{"hotbar_5": { "name": "hotbar.5", "category": "inventory", "key_code": 6, "enabled": true}},
-{"hotbar_6": { "name": "hotbar.6", "category": "inventory", "key_code": 7, "enabled": true}},
-{"hotbar_7": { "name": "hotbar.7", "category": "inventory", "key_code": 8, "enabled": true}},
-{"hotbar_8": { "name": "hotbar.8", "category": "inventory", "key_code": 9, "enabled": true}},
-{"hotbar_9": { "name": "hotbar.9", "category": "inventory", "key_code": 10, "enabled": true}},
-{"drop": { "name": "drop", "category": "inventory", "key_code": 16, "enabled": true}},
-{"swap_hands": { "name": "swapHands", "category": "inventory", "key_code": 33, "enabled": true}},
+"game": {
 
-{"quit": { "name": "quit", "category": "misc", "key_code": 1, "enabled": true}},
-{"hide_hud": { "name": "hideHUD", "category": "misc", "key_code": 59, "enabled": true}},
-{"screenshot": { "name": "screenshot", "category": "misc", "key_code": 60, "enabled": true}},
-{"debug_screen": { "name": "debugScreen", "category": "misc", "key_code": 61, "enabled": true}},
-{"switch_shader": { "name": "switchShader", "category": "misc", "key_code": 62, "enabled": true}},
-{"toggle_perspective": { "name": "togglePerspective", "category": "misc", "key_code": 63, "enabled": true}},
-{"fullscreen": { "name": "fullscreen", "category": "misc", "key_code": 87, "enabled": true}},
-{"smooth_camera": { "name": "smoothCamera", "category": "misc", "key_code": 0, "enabled": true}},
-{"spectator_outlines": { "name": "spectatorOutlines", "category": "misc", "key_code": 0, "enabled": true}},
+    "auto_jump": false
+},
 
-{"chat": { "name": "chat", "category": "multiplayer", "key_code": 20, "enabled": true}},
-{"command": { "name": "command", "category": "multiplayer", "key_code": 53, "enabled": true}},
-{"playerlist": { "name": "playerlist", "category": "multiplayer", "key_code": 15, "enabled": true}}
-]
-}
+"controls": {
+
+    "player_sprint": true,
+    "double_tap_forward_sprint": true, 
+    "mount_sprint": true,
+    "hotbar_scrolling": true
+},
+
+"keybindings": [
+{"mc_attack": { "holder": "", "name": "", "category": "mc.gameplay", "key": -100, "mod": "", "enabled": true}},
+{"mc_use": { "holder": "", "name": "", "category": "mc.gameplay", "key": -99, "mod": "", "enabled": true}},
+{"mc_pickitem": { "holder": "", "name": "", "category": "mc.gameplay", "key": -98, "mod": "", "enabled": true}},
+
+{"mc_forward": { "holder": "", "name": "", "category": "mc.movement", "key": 17, "mod": "", "enabled": true}},
+{"mc_left": { "holder": "", "name": "", "category": "mc.movement", "key": 30, "mod": "", "enabled": true}},
+{"mc_back": { "holder": "", "name": "", "category": "mc.movement", "key": 31, "mod": "", "enabled": true}},
+{"mc_right": { "holder": "", "name": "", "category": "mc.movement", "key": 32, "mod": "", "enabled": true}},
+{"mc_jump": { "holder": "", "name": "", "category": "mc.movement", "key": 57, "mod": "", "enabled": true}},
+{"mc_sneak": { "holder": "", "name": "", "category": "mc.movement", "key": 42, "mod": "", "enabled": true}},
+{"mc_sprint": { "holder": "", "name": "", "category": "mc.movement", "key": 29, "mod": "", "enabled": true}},
+
+{"mc_inventory": { "holder": "", "name": "", "category": "mc.inventory", "key": 18, "mod": "", "enabled": true}},
+{"mc_hotbar_1": { "holder": "", "name": "", "category": "mc.inventory", "key": 2, "mod": "", "enabled": true}},
+{"mc_hotbar_2": { "holder": "", "name": "", "category": "mc.inventory", "key": 3, "mod": "", "enabled": true}},
+{"mc_hotbar_3": { "holder": "", "name": "", "category": "mc.inventory", "key": 4, "mod": "", "enabled": true}},
+{"mc_hotbar_4": { "holder": "", "name": "", "category": "mc.inventory", "key": 5, "mod": "", "enabled": true}},
+{"mc_hotbar_5": { "holder": "", "name": "", "category": "mc.inventory", "key": 6, "mod": "", "enabled": true}},
+{"mc_hotbar_6": { "holder": "", "name": "", "category": "mc.inventory", "key": 7, "mod": "", "enabled": true}},
+{"mc_hotbar_7": { "holder": "", "name": "", "category": "mc.inventory", "key": 8, "mod": "", "enabled": true}},
+{"mc_hotbar_8": { "holder": "", "name": "", "category": "mc.inventory", "key": 9, "mod": "", "enabled": true}},
+{"mc_hotbar_9": { "holder": "", "name": "", "category": "mc.inventory", "key": 10, "mod": "", "enabled": true}},
+{"mc_drop": { "holder": "", "name": "", "category": "mc.inventory", "key": 16, "mod": "", "enabled": true}},
+{"mc_swaphands": { "holder": "", "name": "", "category": "mc.inventory", "key": 33, "mod": "", "enabled": true}},
+    
+{"rebind_quit": { "holder": "", "name": "", "category": "mc.misc", "key": 1, "mod": "", "enabled": true}},
+{"rebind_hidehud": { "holder": "", "name": "", "category": "mc.misc", "key": 59, "mod": "", "enabled": true}},
+{"mc_screenshot": { "holder": "", "name": "", "category": "mc.misc", "key": 60, "mod": "", "enabled": true}},
+{"rebind_debugscreen": { "holder": "", "name": "", "category": "mc.misc", "key": 61, "mod": "", "enabled": true}},
+{"rebind_switchshader": { "holder": "", "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": false}},
+{"mc_toggleperspective": { "holder": "", "name": "", "category": "mc.misc", "key": 63, "mod": "", "enabled": true}},
+{"mc_fullscreen": { "holder": "", "name": "", "category": "mc.misc", "key": 87, "mod": "", "enabled": true}},
+{"mc_smoothcamera": { "holder": "", "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": true}},
+{"mc_spectatoroutlines": { "holder": "", "name": "", "category": "mc.misc", "key": 0, "mod": "", "enabled": true}},
+    
+{"mc_chat": { "holder": "", "name": "", "category": "mc.multiplayer", "key": 20, "mod": "", "enabled": true}},
+{"mc_command": { "holder": "", "name": "", "category": "mc.multiplayer", "key": 53, "mod": "", "enabled": true}},
+{"mc_playerlist": { "holder": "", "name": "", "category": "mc.multiplayer", "key": 15, "mod": "", "enabled": true}}
+]}
