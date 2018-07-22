@@ -17,10 +17,10 @@ import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -30,7 +30,7 @@ public class UpdateChecker {
 	@SubscribeEvent
 	public void onPlayerJoinedWorld(EntityJoinWorldEvent event) {
 		
-		if (event.getWorld().isRemote && event.getEntity() instanceof EntityPlayer) {
+		if (event.world.isRemote && event.entity instanceof EntityPlayer) {
 					
 			if (ConfigLoader.isUpdateCheckerEnabled())				
 				this.checkForUpdates();
@@ -40,12 +40,12 @@ public class UpdateChecker {
 	@SubscribeEvent
 	public void onPlayerUpdate(LivingUpdateEvent event) {
 		
-		if (event.getEntityLiving().world.isRemote && event.getEntityLiving() instanceof EntityPlayer) {
+		if (event.entityLiving.worldObj.isRemote && event.entityLiving instanceof EntityPlayer) {
 						
 			if (ConfigLoader.isAutoJumpEnabled()) {
 				
-				if (event.getEntityLiving().stepHeight != 1.0F)					
-					event.getEntityLiving().stepHeight = 1.0F;
+				if (event.entityLiving.stepHeight != 1.0F)					
+					event.entityLiving.stepHeight = 1.0F;
 			}
 		}
 	}
@@ -87,7 +87,7 @@ public class UpdateChecker {
             	
             	return;
             }
-                        
+                           
             String availableVersion = data.get("available").getAsString();
             
             if (this.compareVersions(ReBindMain.VERSION, availableVersion)) {	
@@ -97,32 +97,27 @@ public class UpdateChecker {
             	for (JsonElement element : data.get("changelog").getAsJsonArray())       		
             		changelog.add(element.getAsString());
             	
-            	EntityPlayer player = Minecraft.getMinecraft().player;
+            	EntityPlayer player = Minecraft.getMinecraft().thePlayer;
             	
-            	ITextComponent 
-            	updateMessage = new TextComponentString("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + "/" + availableVersion + "]"),
-            	pageMessage = new TextComponentString(I18n.format("rebind.update.projectPage") + ": "),
-            	urlMessage = new TextComponentString(ReBindMain.PROJECT_URL);
-            
-            	updateMessage.getStyle().setColor(TextFormatting.AQUA);
-            	pageMessage.getStyle().setColor(TextFormatting.AQUA);
-            	urlMessage.getStyle().setColor(TextFormatting.WHITE);
-            	
-            	urlMessage.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, urlMessage.getUnformattedText()));
-            	
-            	player.sendMessage(updateMessage);
-            	player.sendMessage(pageMessage.appendSibling(urlMessage));
+            	IChatComponent 
+            	updateMessage = new ChatComponentText("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + "/" + availableVersion + "]"),
+            	pageMessage = new ChatComponentText(I18n.format("rebind.update.projectPage") + ": "),
+            	urlMessage = new ChatComponentText(ReBindMain.PROJECT_URL);            
+            	updateMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
+            	pageMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
+            	urlMessage.getChatStyle().setColor(EnumChatFormatting.WHITE);            	
+            	urlMessage.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, urlMessage.getUnformattedText()));            	
+            	player.addChatMessage(updateMessage);
+            	player.addChatMessage(pageMessage.appendSibling(urlMessage));
             	
             	if (ConfigLoader.shouldShowChangeolog()) {
             		
-            		ITextComponent changelogMessage = new TextComponentString("Changelog:");
-            		
-            		changelogMessage.getStyle().setColor(TextFormatting.AQUA);
-            		
-	            	player.sendMessage(changelogMessage);
+            		IChatComponent changelogMessage = new ChatComponentText("Changelog:");            		
+            		changelogMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);          		
+	            	player.addChatMessage(changelogMessage);
 	            		            		
             		for (String line : changelog)            			            			
-    	            	player.sendMessage(new TextComponentString(" + " + line));
+    	            	player.addChatMessage(new ChatComponentText(" + " + line));
             	}
             }
 		}

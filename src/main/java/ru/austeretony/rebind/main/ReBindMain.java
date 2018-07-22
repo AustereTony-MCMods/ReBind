@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -22,24 +21,23 @@ public class ReBindMain {
 	MODID = "rebind",
     NAME = "ReBind",
     VERSION = "2.7.0",
-    GAME_VERSION = "1.12.2",
+    GAME_VERSION = "1.8.9",
     VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/rebind";
     
 	public static final Logger LOGGER = LogManager.getLogger("ReBind");
 	
     @SideOnly(Side.CLIENT)
-    public static KeyBinding keyBindingQuit, keyBindingHideHUD, keyBindingDebugScreen, keyBindingSwitchShader, keyBindingNarrator;
+    public static KeyBinding keyBindingQuit, keyBindingHideHUD, keyBindingDebugScreen, keyBindingDisableShader;
             
     @SideOnly(Side.CLIENT)
     @EventHandler
     public void init(FMLInitializationEvent event) {
 
         ClientRegistry.registerKeyBinding(keyBindingQuit = new KeyBinding("key.quit", 0, ""));
-        ClientRegistry.registerKeyBinding(keyBindingHideHUD = new KeyBinding("key.hideHUD", KeyConflictContext.IN_GAME, 0, ""));
-        ClientRegistry.registerKeyBinding(keyBindingDebugScreen = new KeyBinding("key.debugScreen", KeyConflictContext.IN_GAME, 0, ""));
-        ClientRegistry.registerKeyBinding(keyBindingSwitchShader = new KeyBinding("key.switchShader", KeyConflictContext.IN_GAME, 0, ""));
-        ClientRegistry.registerKeyBinding(keyBindingNarrator = new KeyBinding("key.narrator", KeyConflictContext.IN_GAME, 0, ""));  
+        ClientRegistry.registerKeyBinding(keyBindingHideHUD = new KeyBinding("key.hideHUD", 0, ""));
+        ClientRegistry.registerKeyBinding(keyBindingDebugScreen = new KeyBinding("key.debugScreen", 0, ""));
+        ClientRegistry.registerKeyBinding(keyBindingDisableShader = new KeyBinding("key.disableShader", 0, ""));
         	
         if (ConfigLoader.isDebugModeEnabled())
         	ClientCommandHandler.instance.registerCommand(new CommandReBind());

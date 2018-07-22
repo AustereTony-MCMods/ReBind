@@ -1,8 +1,7 @@
-key.quit=Quit
+key.exit=Quit
 key.hideHUD=Hide HUD
 key.debugScreen=Debug Screen
-key.switchShader=Switch Shader
-key.narrator=Narrator
+key.disableShader=Disable Shader
 
 rebind.command.unsupportedKeys=Unknown keybindings list
 rebind.command.none=No unknown keybindings

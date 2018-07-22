@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,21 +22,23 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.Loader;
 import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.main.EnumKeyModifier;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
 public class ReBindHooks {
-		
-    public static final Set<String> ID_OCCURENCES = new HashSet<String>();  
 	
+    public static final Set<String> ID_OCCURENCES = new HashSet<String>();  
+		
 	private static boolean isKnown;
 			
-	private static String modId, modName, keyBindingId;
+	private static String modid, modName, keyBindingId;
 	
 	private static KeyBindingProperty keyBindingProperty;
 		
@@ -53,19 +56,19 @@ public class ReBindHooks {
 			
 			KeyBinding keyBinding;
 			
-			KeyBindingProperty property, holderProperty;
+			KeyBindingProperty property;
 						
 			while (iterator.hasNext()) {
 				
 				keyBinding = iterator.next();
 				
 				property = KeyBindingProperty.get(keyBinding);
-				
+									
 				if (property.isKeyBindingMerged()) {	
-										
+					
 					iterator.remove();				
 				}
-												
+									
 				else if (!property.isEnabled()) {				
 						
 					keyBinding.setKeyCode(property.getKeyCode());
@@ -117,7 +120,7 @@ public class ReBindHooks {
 				if (!options.contains("key_key.quit") &&
 						!options.contains("key_key.hideHUD") &&
 						!options.contains("key_key.debugScreen") &&
-						!options.contains("key_key.switchShader")) {
+						!options.contains("key_key.disableShader")) {
 									
 					Iterator<String> iterator = optionsLines.iterator();
 					
@@ -186,25 +189,38 @@ public class ReBindHooks {
 		return KeyBindingProperty.SORTED_KEYBINDINGS.toArray(new KeyBinding[KeyBindingProperty.SORTED_KEYBINDINGS.size()]);		
 	}
 	
-	public static boolean isKeyDown(KeyBinding keyBinding) {
+    public static void onTick(int keyCode) {
+    	
+        if (keyCode != 0) {
+        	
+        	KeyBinding keybinding = KeyBindingProperty.lookup(keyCode);
+        	
+            if (keybinding != null) {
+            	
+                ++keybinding.pressTime;
+            }
+        }
+    }
+	
+	public static void setKeyBindState(int keyCode, boolean state) {
 		
-		KeyBindingProperty property = KeyBindingProperty.get(keyBinding);
-		
-		if (!property.isKeyBindingMerged()) {
-			
-			return keyBinding.pressed && keyBinding.getKeyConflictContext().isActive() && keyBinding.getKeyModifier().isActive(keyBinding.getKeyConflictContext());
-		}
-		
-		else {
-			
-			KeyBinding holder = property.getHolderKeyBinding();
-			
-			return holder.pressed && holder.getKeyConflictContext().isActive() && holder.getKeyModifier().isActive(holder.getKeyConflictContext());
-		}
+        if (keyCode != 0) {
+        	
+            for (KeyBinding key : KeyBindingProperty.lookupAll(keyCode)) {
+
+            	if (key != null)	        	
+            		key.pressed = state;  
+            }
+        }
+	}
+	
+	public static boolean isKeyDown(KeyBinding key) {
+				
+		return KeyBindingProperty.get(key).isKeyPressed();
 	}
 	
 	public static boolean isPressed(KeyBinding keyBinding) {
-		
+						
 		KeyBindingProperty property = KeyBindingProperty.get(keyBinding);
 		
 		if (!property.isKeyBindingMerged()) {
@@ -231,29 +247,19 @@ public class ReBindHooks {
 		}
 	}
 	
-	public static boolean isActiveAndMatches(KeyBinding keyBinding, int keyCode) {
-				
-		if (!KeyBindingProperty.get(keyBinding).isKeyBindingMerged()) {
-			
-			return keyCode != 0 && keyCode == keyBinding.getKeyCode() && keyBinding.getKeyConflictContext().isActive() && keyBinding.getKeyModifier().isActive(keyBinding.getKeyConflictContext());
-		}
-		
-		return false;
-	}
-	
 	public static int getQuitKeyCode() {
 		
 		return ReBindMain.keyBindingQuit.getKeyCode();
 	}
 
 	public static boolean isQuitKeyPressed(int key) {
-				
-		return ReBindMain.keyBindingQuit.isActiveAndMatches(key);
+		
+		return KeyBindingProperty.get(ReBindMain.keyBindingQuit).isActiveAndMatches(key);
 	}
 
 	public static boolean isHideHUDKeyPressed(int key) {
 		
-		return ReBindMain.keyBindingHideHUD.isActiveAndMatches(key);
+		return KeyBindingProperty.get(ReBindMain.keyBindingHideHUD).isActiveAndMatches(key);
 	}
 	
 	public static int getDebugScreenKeyCode() {
@@ -261,21 +267,16 @@ public class ReBindHooks {
 		return ReBindMain.keyBindingDebugScreen.isPressed() ? ReBindMain.keyBindingDebugScreen.getKeyCode() : 0;
 	}
 	
-	public static int getSwitchShaderKeyCode() {
+	public static int getDisableShaderKeyCode() {
 		
-		return ReBindMain.keyBindingSwitchShader.isPressed() ? ReBindMain.keyBindingSwitchShader.getKeyCode() : 0;
-	}
-	
-	public static boolean isNarratorKeyPressed(int key) {
-		
-		return ReBindMain.keyBindingNarrator.isActiveAndMatches(key);
+		return ReBindMain.keyBindingDisableShader.isPressed() ? ReBindMain.keyBindingDisableShader.getKeyCode() : 0;
 	}
 	
 	public static String getKeyBindingName(String keyName) {
 						
 		if (Loader.instance().activeModContainer() != null) {
 									
-			modId = Loader.instance().activeModContainer().getModId();			
+			modid = Loader.instance().activeModContainer().getModId();			
 			modName = Loader.instance().activeModContainer().getName();
 		}
 		
@@ -283,22 +284,22 @@ public class ReBindHooks {
 			
 			if (keyCount < 33) {
 				
-				modId = "mc";				
+				modid = "mc";				
 				modName = "Minecraft";
 			}
 			
 			else {
 								
-				modId = "optifine";				
+				modid = "optifine";				
 				modName = "Optifine";
 			}
 		}
 		
-		modId = modId.toLowerCase();
+		modid = modid.toLowerCase();
 		
-		keyBindingId = modId + "_" + keyName.toLowerCase();		
-		keyBindingId = keyBindingId.replaceAll("[. ]", "_").replace("_key", "").replace("_" + modId, "");
-					
+		keyBindingId = modid + "_" + keyName.toLowerCase();		
+		keyBindingId = keyBindingId.replaceAll("[. ]", "_").replace("_key", "").replace("_" + modid, "");
+				
 		while (ID_OCCURENCES.contains(keyBindingId)) {
 			
 			keyBindingId = keyBindingId + "_";
@@ -320,14 +321,6 @@ public class ReBindHooks {
 		return keyName;
 	}
 	
-	public static KeyModifier getKeyBindingKeyModifier(KeyModifier keyModifier) {
-		
-		if (isKnown)
-			keyModifier = KeyModifier.valueFromString(keyBindingProperty.getKeyModifier());
-		
-		return keyModifier;
-	}
-	
 	public static int getKeyBindingKeyCode(int keyCode) {
 						
 		if (isKnown)			
@@ -346,8 +339,8 @@ public class ReBindHooks {
 					cat.equals("mc.movement") ||
 					cat.equals("mc.inventory") ||
 					cat.equals("mc.misc") ||
-					cat.equals("mc.creative") ||
-					cat.equals("mc.multiplayer"))				
+					cat.equals("mc.multiplayer") ||
+					cat.equals("mc.stream"))				
 				category = "key.categories." + cat.substring(3);
 			else
 				category = keyBindingProperty.getCategory();
@@ -372,13 +365,13 @@ public class ReBindHooks {
 					"",
 					modName,
 					keyBinding.getKeyCodeDefault(),
-					keyBinding.getKeyModifierDefault() == KeyModifier.NONE ? "" : keyBinding.getKeyModifierDefault().toString(),
-					true, 
+					EnumKeyModifier.NONE,
+					true,
 					false);
 		
 		keyBindingProperty.bindKeyBinding(keyBinding);
 		
-		keyBindingProperty.setModId(modId);
+		keyBindingProperty.setModId(modid);
 		keyBindingProperty.setModName(modName);
 		
 		ID_OCCURENCES.add(keyBindingId);
@@ -391,7 +384,7 @@ public class ReBindHooks {
 	
 	public static boolean isPlayerSprintAllowed() {
 						
-		EntityPlayer player = Minecraft.getMinecraft().player;
+		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 		
 		if ((!player.isRiding() && ConfigLoader.isPlayerSprintAllowed()) || (player.isRiding() && ConfigLoader.isMountSprintAllowed()))
 			return true;
@@ -399,8 +392,145 @@ public class ReBindHooks {
 		return false;
 	}
 	
-	public static int isHotbarScrollingAllowed(int direction) {
+	public static boolean isHotbarScrollingAllowed() {
 		
-		return ConfigLoader.isHotbarScrollingAllowed() ? direction : 0;
+		return ConfigLoader.isHotbarScrollingAllowed();
+	}
+	
+	public static void setKeyModifierAndCode(KeyBinding key, EnumKeyModifier keyModifier, int keyCode) {
+				
+		KeyBindingProperty.get(key).setKeyModifierAndCode(keyModifier, keyCode);
+	}
+	
+	public static KeyBinding resetKeyBinding(KeyBinding key, int keyCode) {
+		
+		if (!EnumKeyModifier.isKeyCodeModifier(keyCode))
+			return null;
+		
+		return key;
+	}
+	
+	public static void drawCuiControlsKeyEntry(GuiButton changeKeyButton, GuiButton resetButton, KeyBinding key, boolean flag, int x, int y, int mouseX, int mouseY) {
+		
+		KeyBindingProperty 
+		property = KeyBindingProperty.get(key),
+		otherProperty;
+
+        resetButton.xPosition = x + 210;
+        resetButton.yPosition = y;
+        resetButton.enabled = !property.isSetToDefaultValue();
+        resetButton.drawButton(Minecraft.getMinecraft(), mouseX, mouseY);
+                   
+        changeKeyButton.width = 95;
+        changeKeyButton.xPosition = x + 105;
+        changeKeyButton.yPosition = y;
+        changeKeyButton.displayString = property.getDisplayName();
+        
+        boolean 
+        flag1 = false,
+		keyCodeModifierConflict = true;
+		
+        if (key.getKeyCode() != 0) {
+        	
+            for (KeyBinding keyBinding : Minecraft.getMinecraft().gameSettings.keyBindings) {
+            	
+            	otherProperty = KeyBindingProperty.get(keyBinding);
+            	
+                if (keyBinding != key && property.conflicts(otherProperty)) {
+                	
+                    flag1 = true;
+                    
+                    keyCodeModifierConflict &= property.hasKeyCodeModifierConflict(otherProperty);
+                }
+            }
+        }
+
+        if (flag)     	
+        	changeKeyButton.displayString = EnumChatFormatting.WHITE + "> " + EnumChatFormatting.YELLOW + changeKeyButton.displayString + EnumChatFormatting.WHITE + " <";
+        else if (flag1)        	
+        	changeKeyButton.displayString = (keyCodeModifierConflict ? EnumChatFormatting.GOLD : EnumChatFormatting.RED) + changeKeyButton.displayString;
+        
+        changeKeyButton.drawButton(Minecraft.getMinecraft(), mouseX, mouseY);
+	}
+
+	public static void setResetButtonState(GuiButton resetAllButton) {
+				
+		boolean state = false;
+		
+        for (KeyBinding key : Minecraft.getMinecraft().gameSettings.keyBindings) {
+        	        	
+            if (!KeyBindingProperty.get(key).isSetToDefaultValue()) {
+            	
+            	state = true;
+            	
+                break;
+            }
+        }
+        
+    	resetAllButton.enabled = state;
+	}
+	
+	public static void setToDefault(KeyBinding key) {
+				
+		KeyBindingProperty.get(key).setToDefault();
+	}
+	
+	public static void resetAllKeys() {
+		
+		KeyBindingProperty property;
+		
+        for (KeyBinding key : Minecraft.getMinecraft().gameSettings.keyBindings)       	        	
+        	KeyBindingProperty.get(key).setToDefault();
+
+        KeyBinding.resetKeyBindingArrayAndHash();
+	}
+	
+	public static boolean loadControlsFromOptionsFile(String[] data) {
+				
+		if (Minecraft.getMinecraft().gameSettings != null) {
+			
+			KeyBindingProperty property;
+
+	        for (KeyBinding key : Minecraft.getMinecraft().gameSettings.keyBindings) {
+			
+		        if (data[0].equals("key_" + key.getKeyDescription())) {
+		        	
+		        	property = KeyBindingProperty.get(key);
+		        	
+			        if (data[1].indexOf('&') != - 1) {
+			        	
+			            String[] keySettings = data[1].split("&");
+			            
+			            property.setKeyModifierAndCode(EnumKeyModifier.valueFromString(keySettings[1]), Integer.parseInt(keySettings[0]));
+			        } 
+			        
+			        else {
+			        	
+			        	property.setKeyModifierAndCode(EnumKeyModifier.NONE, Integer.parseInt(data[1]));
+			        }
+		        }
+	        }
+		}
+        
+        return false;
+	}
+	
+	public static boolean saveControlsToOptionsFile(PrintWriter writer) {
+		
+		if (Minecraft.getMinecraft().gameSettings != null) {
+			
+			KeyBindingProperty property;
+			
+	        for (KeyBinding key : Minecraft.getMinecraft().gameSettings.keyBindings) {
+	        	
+	        	property = KeyBindingProperty.get(key);
+		
+		        String keyString = "key_" + key.getKeyDescription() + ":" + key.getKeyCode();
+		        	        
+		        writer.println(property.getKeyModifier() != EnumKeyModifier.NONE ? keyString + "&" + property.getKeyModifier().toString() : keyString);
+			}
+		}
+        
+        return false;
 	}
 }

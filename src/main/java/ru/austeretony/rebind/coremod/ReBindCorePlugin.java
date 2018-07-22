@@ -7,6 +7,8 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions
 
 @TransformerExclusions({"ru.austeretony.rebind.coremod"})
 public class ReBindCorePlugin implements IFMLLoadingPlugin {
+	
+    private static boolean isObfuscated;
 		
     @Override
     public String[] getASMTransformerClass() {
@@ -27,11 +29,19 @@ public class ReBindCorePlugin implements IFMLLoadingPlugin {
     }
 
     @Override
-    public void injectData(Map<String, Object> data) {}
+    public void injectData(Map<String, Object> data) {
+    	
+    	isObfuscated = (boolean) data.get("runtimeDeobfuscationEnabled");
+    }
 
     @Override
     public String getAccessTransformerClass() {
     	
         return null;
+    }
+    
+    public static boolean isObfuscated() {
+    	
+    	return isObfuscated;
     }
 }

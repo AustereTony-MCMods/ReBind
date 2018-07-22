@@ -170,13 +170,13 @@ public class ConfigLoader {
 			rawProperty = rawProperties.get(configKey);
 			
 			property = new KeyBindingProperty(
-					configKey, 
+					configKey,
 					rawProperty.get("holder").getAsString(), 
 					rawProperty.get("name").getAsString(), 
 					rawProperty.get("category").getAsString(), 
-					rawProperty.get("key").getAsInt(),
-					rawProperty.get("mod").getAsString(),
-					rawProperty.get("enabled").getAsBoolean(), 
+					rawProperty.get("key").getAsInt(), 
+					EnumKeyModifier.valueFromString(rawProperty.get("mod").getAsString()), 
+					rawProperty.get("enabled").getAsBoolean(),
 					true);     
     	}
 	}
@@ -231,3 +231,4 @@ public class ConfigLoader {
 		return allowHotbarScrolling;
 	}
 }
+

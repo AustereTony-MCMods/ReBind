@@ -1,8 +1,7 @@
-﻿key.quit=Выход
+key.quit=Выход
 key.hideHUD=Спрятать HUD
 key.debugScreen=Экран Отладки
-key.switchShader=Сменить Шейдер
-key.narrator=Диктор
+key.disableShader=Отключить Шейдер
 
 rebind.command.unsupportedKeys=Список неизвестных биндов
 rebind.command.none=Нет неизвестных биндов
@@ -14,4 +13,3 @@ rebind.command.updated=Внешний конфиг обновлён
 
 rebind.update.newVersion=Доступна новая версия!
 rebind.update.projectPage=Сайт
-
