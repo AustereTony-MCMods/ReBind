@@ -15,6 +15,38 @@
 	]
 },
 
+"1.8.9": {
+
+	"available": "2.7.0",
+		
+	"changelog": [
+			
+		"Ability to merge keybindings.",
+		"Fixed incompability with mods with several keybindings with same name.",
+		"Fixed crash if configuration file contains information about keybindings from absent mod.",
+		"External configuration file now set as default.",
+		"Debug mode now disabled by default.",
+		"Removed ReBind gui options."
+
+	]
+},
+
+"1.9.4": {
+
+	"available": "2.7.0",
+		
+	"changelog": [
+			
+		"Ability to merge keybindings.",
+		"Fixed incompability with mods with several keybindings with same name.",
+		"Fixed crash if configuration file contains information about keybindings from absent mod.",
+		"External configuration file now set as default.",
+		"Debug mode now disabled by default.",
+		"Removed ReBind gui options."
+
+	]
+},
+
 "1.10.2": {
 
 	"available": "2.7.0",
