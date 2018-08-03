@@ -1,11 +1,11 @@
-package ru.austeretony.rebind.coremod;
+package ru.austeretony.rebind.core;
 
 import java.util.Map;
 
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
-@TransformerExclusions({"ru.austeretony.rebind.coremod"})
+@TransformerExclusions({"ru.austeretony.rebind.core"})
 public class ReBindCorePlugin implements IFMLLoadingPlugin {
 	
     private static boolean isObfuscated;

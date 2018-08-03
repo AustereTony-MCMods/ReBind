@@ -169,6 +169,11 @@ public class KeyBindingProperty {
 		return this.keyBinding != null;
 	}
 	
+	public String getHolderId() {
+		
+		return this.holderBindingId;
+	}
+	
 	public KeyBindingProperty getHolderProperty() {
 		
 		return PROPERTIES_BY_IDS.get(this.holderBindingId);

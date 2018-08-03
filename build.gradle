@@ -21,7 +21,7 @@ plugins {
 }
 */
 
-version = "1.8.9-2.7.0"
+version = "1.8.9-2.7.1"
 group= "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "rebind"
 
@@ -89,7 +89,7 @@ processResources
 
 jar {
    manifest {
-       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.coremod.ReBindCorePlugin'
+       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.core.ReBindCorePlugin'
        attributes 'FMLCorePluginContainsFMLMod': 'true'
 	   attributes 'FMLAT': 'rebind_at.cfg'
    }

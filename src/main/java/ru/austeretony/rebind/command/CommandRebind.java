@@ -1,20 +1,12 @@
 package ru.austeretony.rebind.command;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -30,8 +22,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
-import ru.austeretony.rebind.coremod.ReBindHooks;
-import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.config.ConfigLoader;
+import ru.austeretony.rebind.config.KeyBindingObject;
+import ru.austeretony.rebind.core.ReBindHooks;
 import ru.austeretony.rebind.main.EnumKeyModifier;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 
@@ -39,7 +32,7 @@ public class CommandReBind extends CommandBase {
 	
 	public static final String 
 	NAME = "rebind",
-	USAGE = "/rebind <list, save, update>";
+	USAGE = "/rebind <list, update>";
 
 	@Override
 	public String getCommandName() {
@@ -62,7 +55,7 @@ public class CommandReBind extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
     	
-		if (args.length != 1 || !(args[0].equals("list") || args[0].equals("save") || args[0].equals("update")))		
+		if (args.length != 1 || !(args[0].equals("list") || args[0].equals("update")))		
 			throw new WrongUsageException(this.getCommandUsage(sender));
     	
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;	
@@ -122,66 +115,8 @@ public class CommandReBind extends CommandBase {
 			}
 		}
 		
-		if (args[0].equals("save")) {
-																		
-			String 
-			gameDirPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath(),
-			filePath = gameDirPath + "/config/rebind/keys.json";
-
-			Path path = Paths.get(filePath);
-			
-			if (Files.exists(path)) {
-				
-				message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.exist"));				
-				message.getChatStyle().setColor(EnumChatFormatting.RED);				
-				player.addChatMessage(message);
-				
-				return;
-			}
-			
-			else {
-				
-	            try {
-	            	
-					Files.createDirectories(path.getParent());
-										
-					List<String> keybindingsData = new ArrayList<String>();
-					
-					keybindingsData.add("{/keybindings/: [".replace('/', '"'));
-							
-					keybindingsData.addAll(this.getUnknownKeybindingsData());
-					
-					keybindingsData.add("]}");	
-					
-					try {
-						
-				        PrintStream fileStream = new PrintStream(new File(filePath));
-				        
-				        for (String line : keybindingsData)				        	
-				        	fileStream.println(line);
-				        
-				        fileStream.close();
-				        
-						message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.generated"));						
-						message.getChatStyle().setColor(EnumChatFormatting.GREEN);											
-						player.addChatMessage(message);
-					}
-			        
-			        catch (IOException exception) {
-			        	
-			        	exception.printStackTrace();
-					}
-				} 
-	            
-	            catch (IOException exception) {
-	            	
-	            	exception.printStackTrace();
-				}	
-			}
-		}
-		
 		if (args[0].equals("update")) {
-						
+			
 			if (!ConfigLoader.isExternalConfigEnabled()) {
 				
 				message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.noExternal"));				
@@ -191,116 +126,76 @@ public class CommandReBind extends CommandBase {
 				return;
 			}
 			
-			try {
+			Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
 			
-				String configPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/config/rebind/rebind.json";
-		
-				InputStream inputStream = new FileInputStream(new File(configPath));
+			Set<String> sortedModNames = new TreeSet<String>();
+			
+			for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
 
-				List<String> configData = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
-
-				List<String> modsKeybindingsData = this.getUnknownKeybindingsData();
-				
-				String 
-				lastConfigLine = configData.get(configData.size() - 2),
-				lastModsLine = modsKeybindingsData.get(modsKeybindingsData.size() - 1);
-				
-				if (lastConfigLine.equals(lastModsLine)) {
-					
-					message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.alreadyUpdated"));					
-					message.getChatStyle().setColor(EnumChatFormatting.RED);					
-					player.addChatMessage(message);
-					
-					return;
-				}
-				
-				configData.remove("]}");
-								
-				configData.remove(lastConfigLine);
-				
-				configData.add(lastConfigLine + ",");
-								
-				configData.add("");
-				
-				configData.addAll(modsKeybindingsData);
-				
-				configData.add("]}");
-				
-				try {
-					
-			        PrintStream fileStream = new PrintStream(new File(configPath));
-			        
-			        for (String line : configData)			        	
-			        	fileStream.println(line);
-			        
-			        fileStream.close();
-			        
-					message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.updated"));					
-					message.getChatStyle().setColor(EnumChatFormatting.GREEN);					
-					player.addChatMessage(message);
-				}
-		        
-		        catch (IOException exception) {
-		        	
-		        	exception.printStackTrace();
-				}
-			}
-	        
-	        catch (IOException exception) {
-	        	
-	        	exception.printStackTrace();
-			}
-		}
-    }
-    
-    private List<String> getUnknownKeybindingsData() {
-    	
-		List<String> data = new ArrayList<String>();
-								
-		Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
-		
-		Set<String> sortedModNames = new TreeSet<String>();
-		
-		for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
-
-			propsByModnames.put(property.getModName(), property);
-			
-			sortedModNames.add(property.getModName());
-		}
-		
-		int 
-		modNameIndex = 0,
-		keyIndex = 0;
-		
-		String line, keyModifier;
-				
-		for (String modName : sortedModNames) {
-				
-			modNameIndex++;
-			
-			for (KeyBindingProperty property : propsByModnames.get(modName)) {
-				
-				keyIndex++;
-				
-				keyModifier = property.getDefaultKeyModifier() == EnumKeyModifier.NONE ? "" : property.getDefaultKeyModifier().toString();
-				
-				line = "{/" + property.getKeyBindingId() + "/: { /holder/: //, /name/: //, /category/: /" + property.getModName() + "/, /key/: " + property.getKeyBinding().getKeyCodeDefault() + ", /mod/: /" + keyModifier + "/, /enabled/: true}}";
-			
-				if (keyIndex < propsByModnames.get(modName).size())				
-					line += ",";				
-				else if (modNameIndex < sortedModNames.size())					
-					line += ",";
-				
-				data.add(line.replace('/', '"'));
+				propsByModnames.put(property.getModName(), property);				
+				sortedModNames.add(property.getModName());
 			}
 			
-			keyIndex = 0;
-									
-			if (modNameIndex < sortedModNames.size())				
-				data.add("");
-		}
+			for (String modName : sortedModNames) {
+								
+				for (KeyBindingProperty property : propsByModnames.get(modName)) {
+
+					ConfigLoader.properties.getMap().put(property.getKeyBindingId(), new KeyBindingObject(
+							property.getHolderId(),
+							property.getName(),
+							property.getCategory(),
+							property.getKeyCode(),
+							property.getKeyModifier() == EnumKeyModifier.NONE ? "" : property.getKeyModifier().toString(),
+							property.isEnabled()));
+				}
+			}
+			
+			Map<String, String> lines = new LinkedHashMap<String, String>();
+			
+			String line, l, prevCategory = "";
+			
+			for (Map.Entry<String, KeyBindingObject> entry : ConfigLoader.properties.getMap().entrySet()) {
+					
+				line = "/" + entry.getKey() + "/: { /holder/: /" + entry.getValue().holder + "/, /name/: /" + entry.getValue().name + "/, /category/: /" + entry.getValue().category + "/, /key/: " + entry.getValue().keyCode + ", /mod/: /" + entry.getValue().keyModifier + "/, /enabled/: " + entry.getValue().isEnabled + "}";
 				
-		return data;
+				lines.put(line.replace('/', '"'), entry.getValue().category);
+			}
+			
+			int index = 0;
+			
+			try (PrintStream printStream = new PrintStream(new File(ConfigLoader.EXT_KEYBINDINGS_FILE_PATH))) {
+				
+				printStream.println("{");
+				
+				for (Map.Entry<String, String> entry : lines.entrySet()) {
+					
+					index++;
+					
+					if (index != 1 && !entry.getValue().equals(prevCategory))
+						printStream.println("");
+										
+					l = entry.getKey();
+										
+					if (index < lines.size())						
+						l = l + ",";
+					
+					printStream.println(l);
+					
+					prevCategory = entry.getValue();
+				}
+				
+				printStream.println("}");
+			}
+			
+			catch (IOException exception) {
+				
+				exception.printStackTrace();
+			}
+            
+			message = new ChatComponentText("[ReBind] " + I18n.format("rebind.command.updated"));				
+			message.getChatStyle().setColor(EnumChatFormatting.GREEN);				
+			player.addChatMessage(message);
+		}
     }
 }
 
