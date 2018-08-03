@@ -5,10 +5,7 @@ key.switchShader=Switch Shader
 
 rebind.command.unsupportedKeys=Unknown keybindings list
 rebind.command.none=No unknown keybindings
-rebind.command.exist=File keys.json already exist
-rebind.command.generated=File keys.json created in config folder
 rebind.command.noExternal=External config disabled
-rebind.command.alreadyUpdated=External config already updated
 rebind.command.updated=External config updated
 
 rebind.update.newVersion=New version available!

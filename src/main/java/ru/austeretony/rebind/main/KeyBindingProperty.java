@@ -60,6 +60,11 @@ public class KeyBindingProperty {
 		return this.keyBindingId;
 	}
 	
+	public String getHolderId() {
+		
+		return this.holderBindingId;
+	}
+	
 	public KeyBinding getHolderKeyBinding() {
 		
 		return PROPERTIES_BY_IDS.get(this.holderBindingId).getKeyBinding();
