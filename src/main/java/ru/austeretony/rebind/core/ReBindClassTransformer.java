@@ -1,4 +1,4 @@
-package ru.austeretony.rebind.coremod;
+package ru.austeretony.rebind.core;
 
 import java.util.Iterator;
 
@@ -20,13 +20,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.launchwrapper.IClassTransformer;
-import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.config.ConfigLoader;
 
 public class ReBindClassTransformer implements IClassTransformer {
 
 	public static final Logger CORE_LOGGER = LogManager.getLogger("ReBind Core");
 	
-	private static final String HOOKS_CLASS = "ru/austeretony/rebind/coremod/ReBindHooks";
+	private static final String HOOKS_CLASS = "ru/austeretony/rebind/core/ReBindHooks";
 	
 	public ReBindClassTransformer() {
 				
@@ -46,54 +46,30 @@ public class ReBindClassTransformer implements IClassTransformer {
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {    	
     	
-    	switch (name) { 	
+    	switch (transformedName) { 	
     	
     		case "net.minecraftforge.fml.client.FMLClientHandler":									
-    			return patchFMLClientHandler(basicClass, true);
-				
-    						
-			case "bhy":									
-				return patchKeyBinding(basicClass, true);
+    			return patchFMLClientHandler(basicClass);
 			case "net.minecraft.client.settings.KeyBinding":		
-				return patchKeyBinding(basicClass, false);
-				
-				
-			case "bmd":					
-				return patchGuiKeyBindingList(basicClass, true, false);
+				return patchKeyBinding(basicClass);
 			case "net.minecraft.client.gui.GuiKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false, false);		
+				return patchGuiKeyBindingList(basicClass, false);		
 			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, false, true);
-				
-				
-			case "bib":					
-				return patchMinecraft(basicClass, true);		
+				return patchGuiKeyBindingList(basicClass, true);	
 			case "net.minecraft.client.Minecraft":							
-	    		return patchMinecraft(basicClass, false);	
-	    	
-	    		
-			case "blk":					
-				return patchGui(basicClass, true, true);		
+	    		return patchMinecraft(basicClass);			
 			case "net.minecraft.client.gui.GuiScreen":							
-	    		return patchGui(basicClass, false, true);	
-	    	
-	    		
-			case "bmg":					
-				return patchGui(basicClass, true, false);		
+	    		return patchGui(basicClass, true);		
 			case "net.minecraft.client.gui.inventory.GuiContainer":							
-	    		return patchGui(basicClass, false, false);	
-	    		
-	    		
-			case "bud":					
-				return patchEntityPlayerSP(basicClass, true);		
+	    		return patchGui(basicClass, false);		
 			case "net.minecraft.client.entity.EntityPlayerSP":							
-	    		return patchEntityPlayerSP(basicClass, false);
+	    		return patchEntityPlayerSP(basicClass);
     	}
     	
 		return basicClass;
     }
     
-	private byte[] patchFMLClientHandler(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchFMLClientHandler(byte[] basicClass) {
 		
 	    ClassNode classNode = new ClassNode();
 	    ClassReader classReader = new ClassReader(basicClass);
@@ -141,7 +117,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 	    return writer.toByteArray();	
 	}
 	
-	private byte[] patchKeyBinding(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchKeyBinding(byte[] basicClass) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
@@ -149,10 +125,10 @@ public class ReBindClassTransformer implements IClassTransformer {
         
 	 	String 
 	 	stringClassName = "java/lang/String",
-	 	isKeyDownMethodName = obfuscated ? "e" : "isKeyDown",
-	 	isPressedMethodName = obfuscated ? "g" : "isPressed",
+	 	isKeyDownMethodName = ReBindCorePlugin.isObfuscated() ? "e" : "isKeyDown",
+	 	isPressedMethodName = ReBindCorePlugin.isObfuscated() ? "g" : "isPressed",
 	 	isActiveAndMatchesMethodName = "isActiveAndMatches", 
-	 	keyBindingClassName = obfuscated ? "bhy" : "net/minecraft/client/settings/KeyBinding",
+	 	keyBindingClassName = ReBindCorePlugin.isObfuscated() ? "bhy" : "net/minecraft/client/settings/KeyBinding",
 	 	iKeyConflictContextClassName = "net/minecraftforge/client/settings/IKeyConflictContext",
 	 	keyConflictContextClassName = "net/minecraftforge/client/settings/KeyConflictContext",
 	 	keyModifierClassName = "net/minecraftforge/client/settings/KeyModifier";
@@ -320,17 +296,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGuiKeyBindingList(byte[] basicClass, boolean obfuscated, boolean flag) {
+	private byte[] patchGuiKeyBindingList(byte[] basicClass, boolean flag) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String 
-	 	listEntriesFieldName = obfuscated ? "w" : "listEntries",
-	 	guiKeyBindingListClassName = obfuscated ? "bmd" : "net/minecraft/client/gui/GuiKeyBindingList",
-	 	iGuiListEntryClassName = obfuscated ? "bjm$a" : "net/minecraft/client/gui/GuiListExtended$IGuiListEntry",
-	 	keyBindingClassName = obfuscated ? "bhy" : "net/minecraft/client/settings/KeyBinding";
+	 	String keyBindingClassName = ReBindCorePlugin.isObfuscated() ? "bhy" : "net/minecraft/client/settings/KeyBinding";
         
         boolean isSuccessful = false;
         
@@ -379,16 +351,16 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 
-	private byte[] patchMinecraft(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchMinecraft(byte[] basicClass) {
 		        
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
 	 	String 
-	 	runTickKeyboardMethodName = obfuscated ? "aD" : "runTickKeyboard",
-	 	runTickMouseMethodName = obfuscated ? "aG" : "runTickMouse",
-	 	dispatchKeypressesMethodName = obfuscated ? "W" : "dispatchKeypresses";
+	 	runTickKeyboardMethodName = ReBindCorePlugin.isObfuscated() ? "aD" : "runTickKeyboard",
+	 	runTickMouseMethodName = ReBindCorePlugin.isObfuscated() ? "aG" : "runTickMouse",
+	 	dispatchKeypressesMethodName = ReBindCorePlugin.isObfuscated() ? "W" : "dispatchKeypresses";
 	 	
         int 
         bipushCount = 0,
@@ -524,13 +496,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchGui(byte[] basicClass, boolean obfuscated, boolean flag) {
+	private byte[] patchGui(byte[] basicClass, boolean flag) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String keyTypedMethodName = obfuscated ? "a" : "keyTyped"; 
+	 	String keyTypedMethodName = ReBindCorePlugin.isObfuscated() ? "a" : "keyTyped"; 
 	 	
         boolean isSuccessful = false;
         
@@ -576,13 +548,13 @@ public class ReBindClassTransformer implements IClassTransformer {
         return writer.toByteArray();				
 	}
 	
-	private byte[] patchEntityPlayerSP(byte[] basicClass, boolean obfuscated) {
+	private byte[] patchEntityPlayerSP(byte[] basicClass) {
         
 	    ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String targetMethodName = obfuscated ? "n" : "onLivingUpdate";  
+	 	String targetMethodName = ReBindCorePlugin.isObfuscated() ? "n" : "onLivingUpdate";  
 	 	
         boolean isSuccessful = false;
         
