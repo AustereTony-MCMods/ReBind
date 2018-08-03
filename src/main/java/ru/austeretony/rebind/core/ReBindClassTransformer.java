@@ -1,4 +1,4 @@
-package ru.austeretony.rebind.coremod;
+package ru.austeretony.rebind.core;
 
 import java.util.Iterator;
 
@@ -20,13 +20,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.launchwrapper.IClassTransformer;
-import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.config.ConfigLoader;
 
 public class ReBindClassTransformer implements IClassTransformer {
 
 	public static final Logger CORE_LOGGER = LogManager.getLogger("ReBind Core");
 	
-	private static final String HOOKS_CLASS = "ru/austeretony/rebind/coremod/ReBindHooks";
+	private static final String HOOKS_CLASS = "ru/austeretony/rebind/core/ReBindHooks";
 	
 	public ReBindClassTransformer() {
 				
@@ -309,11 +309,7 @@ public class ReBindClassTransformer implements IClassTransformer {
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, 0);
         
-	 	String 
-	 	listEntriesFieldName = ReBindCorePlugin.isObfuscated() ? "w" : "listEntries",
-	 	guiKeyBindingListClassName = ReBindCorePlugin.isObfuscated() ? "bgi" : "net/minecraft/client/gui/GuiKeyBindingList",
-	 	iGuiListEntryClassName = ReBindCorePlugin.isObfuscated() ? "bed$a$a" : "net/minecraft/client/gui/GuiListExtended$IGuiListEntry",
-	 	keyBindingClassName = ReBindCorePlugin.isObfuscated() ? "bcu" : "net/minecraft/client/settings/KeyBinding";
+	 	String keyBindingClassName = ReBindCorePlugin.isObfuscated() ? "bcu" : "net/minecraft/client/settings/KeyBinding";
         
         boolean isSuccessful = false;
         
