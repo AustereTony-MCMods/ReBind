@@ -1,3 +1,8 @@
+2.7.1
++Config now splitted to two files.
++Update note now will be shown once per session on first world join.
++Multiple minor fixes.
+
 2.7.0
 +Ability to merge keybindings.
 +Fixed incompability with mods with several keybindings with same name.

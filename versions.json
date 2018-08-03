@@ -1,96 +1,55 @@
 {
 "1.7.10": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 },
 
 "1.8.9": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 },
 
 "1.9.4": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 },
 
 "1.10.2": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 },
 
 "1.11.2": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 },
 	
 "1.12.2": {
-
-	"available": "2.7.0",
-		
-	"changelog": [
-			
-		"Ability to merge keybindings.",
-		"Fixed incompability with mods with several keybindings with same name.",
-		"Fixed crash if configuration file contains information about keybindings from absent mod.",
-		"External configuration file now set as default.",
-		"Debug mode now disabled by default.",
-		"Removed ReBind gui options."
-	]
+  "available": "2.7.1",		
+  "changelog": [			
+	"Config now splitted to two files.",
+	"Update note now will be shown once per session on first world join.",
+	"Multiple minor fixes."
+  ]
 }
 }
