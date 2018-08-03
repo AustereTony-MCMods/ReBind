@@ -15,132 +15,139 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import ru.austeretony.rebind.config.ConfigLoader;
 
-public class UpdateChecker {
+public class UpdateChecker implements Runnable {
 
+	private static boolean notified;
+	
+	private static String availableVersion = ReBindMain.VERSION;
+	
+	private static List<String> changelog;
+
+	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onPlayerJoinedWorld(EntityJoinWorldEvent event) {
 		
-		if (event.world.isRemote && event.entity instanceof EntityPlayer) {
-					
-			if (ConfigLoader.isUpdateCheckerEnabled())				
-				this.checkForUpdates();
-		}
-	}
-	
-	@SubscribeEvent
-	public void onPlayerUpdate(LivingUpdateEvent event) {
-		
-		if (event.entityLiving.worldObj.isRemote && event.entityLiving instanceof EntityPlayer) {
-						
-			if (ConfigLoader.isAutoJumpEnabled()) {
+		if (event.entity instanceof EntityPlayer) {
+			
+			if (!notified) {
 				
-				if (event.entityLiving.stepHeight != 1.0F)					
-					event.entityLiving.stepHeight = 1.0F;
+				notified = true;
+				
+		        if (this.compareVersions(ReBindMain.VERSION, availableVersion)) {	
+	            	
+		        	IChatComponent 
+		        	updateMessage1 = new ChatComponentText("[ReBind] "),
+		            updateMessage2 = new ChatComponentTranslation("rebind.update.newVersion"),
+		            updateMessage3 = new ChatComponentText(" [" + ReBindMain.VERSION + "/" + availableVersion + "]"),
+		        	pageMessage1 = new ChatComponentTranslation("rebind.update.projectPage"),
+		            pageMessage2 = new ChatComponentText(": "),
+		        	urlMessage = new ChatComponentText("minecraft.curseforge.com");		        
+		        	updateMessage1.getChatStyle().setColor(EnumChatFormatting.AQUA);
+		        	pageMessage1.getChatStyle().setColor(EnumChatFormatting.AQUA);
+		        	urlMessage.getChatStyle().setColor(EnumChatFormatting.WHITE);		        	
+		        	urlMessage.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, ReBindMain.PROJECT_URL));		        	
+		        	((EntityPlayer) event.entity).addChatMessage(updateMessage1.appendSibling(updateMessage2).appendSibling(updateMessage3));
+		        	((EntityPlayer) event.entity).addChatMessage(pageMessage1.appendSibling(pageMessage2).appendSibling(urlMessage));
+		        	
+		            if (ConfigLoader.shouldShowChangelog()) {
+
+		            	IChatComponent changelogMessage = new ChatComponentText("Changelog:");           		
+	            		changelogMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);            		
+	            		((EntityPlayer) event.entity).addChatMessage(changelogMessage);
+		            		            		
+	            		for (String line : changelog)            			            			
+	            			((EntityPlayer) event.entity).addChatMessage(new ChatComponentText(" + " + line));
+		            }
+		        }
+			}
+			
+			else {
+				
+				MinecraftForge.EVENT_BUS.unregister(this);
 			}
 		}
 	}
-	
-	private void checkForUpdates() {
-							
+
+	@Override
+	public void run() {
+
+		URL versionsURL;
+		
 		try {
 			
-			URL versionsURL = new URL(ReBindMain.VERSIONS_URL);
-			
-			InputStream inputStream = null;
-			
-			try {
-				
-				inputStream = versionsURL.openStream();
-			}
-			
-			catch (UnknownHostException exception) {
-														
-				ReBindMain.LOGGER.error("Update check failed, no internet connection.");
-				
-				return;
-			}
-			
-            JsonObject remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8"));  			
-			
-            inputStream.close();
-            
-            JsonObject data;  
-            
-            try {
-            	
-            	data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();      
-            }
-            
-            catch (NullPointerException exception) {
-            	
-            	ReBindMain.LOGGER.error("Update check failed, remote data is undefined for " + ReBindMain.GAME_VERSION + " version.");
-            	
-            	return;
-            }
-                           
-            String availableVersion = data.get("available").getAsString();
-            
-            if (this.compareVersions(ReBindMain.VERSION, availableVersion)) {	
-            	            	
-            	List<String> changelog = new ArrayList<String>();
-            	
-            	for (JsonElement element : data.get("changelog").getAsJsonArray())       		
-            		changelog.add(element.getAsString());
-            	
-            	EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-            	
-            	IChatComponent 
-            	updateMessage = new ChatComponentText("[ReBind] " + I18n.format("rebind.update.newVersion") + " [" + ReBindMain.VERSION + "/" + availableVersion + "]"),
-            	pageMessage = new ChatComponentText(I18n.format("rebind.update.projectPage") + ": "),
-            	urlMessage = new ChatComponentText(ReBindMain.PROJECT_URL);
-            
-            	updateMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-            	pageMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-            	urlMessage.getChatStyle().setColor(EnumChatFormatting.WHITE);
-            	
-            	urlMessage.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, urlMessage.getUnformattedText()));
-            	
-            	player.addChatMessage(updateMessage);
-            	player.addChatMessage(pageMessage.appendSibling(urlMessage));
-            	
-            	if (ConfigLoader.shouldShowChangeolog()) {
-            		
-            		IChatComponent changelogMessage = new ChatComponentText("Changelog:");
-            		
-            		changelogMessage.getChatStyle().setColor(EnumChatFormatting.AQUA);
-            		
-	            	player.addChatMessage(changelogMessage);
-	            		            		
-            		for (String line : changelog)            			            			
-    	            	player.addChatMessage(new ChatComponentText(" + " + line));
-            	}
-            }
+			versionsURL = new URL(ReBindMain.VERSIONS_URL);
 		}
 		
 		catch (MalformedURLException exception) {
 			
 			exception.printStackTrace();
+			
+			return;
+		}
+		
+		JsonObject remoteData;
+					
+		try (InputStream inputStream = versionsURL.openStream()) {
+			
+			remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8")); 
+		}
+		
+		catch (UnknownHostException exception) {
+			
+			ReBindMain.LOGGER.error("Update check failed, no internet connection.");
+			
+			return;
 		}
 		
 		catch (FileNotFoundException exception) {
 			
-			ReBindMain.LOGGER.error("Update check failed, remote file is absent.");			
+			ReBindMain.LOGGER.error("Update check failed, remote file is absent.");
+			
+			return;
 		}
 		
 		catch (IOException exception) {
-			
+						
 			exception.printStackTrace();
+			
+			return;
 		}
+				        
+        JsonObject data;  
+        
+        try {
+        	
+        	data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();      
+        }
+        
+        catch (NullPointerException exception) {
+        	
+        	ReBindMain.LOGGER.error("Update check failed, data is undefined for " + ReBindMain.GAME_VERSION + " version.");
+        	
+        	return;
+        }
+        
+        availableVersion = data.get("available").getAsString();
+        
+        if (ConfigLoader.shouldShowChangelog()) {
+        	
+        	changelog = new ArrayList<String>();
+        	
+        	for (JsonElement element : data.get("changelog").getAsJsonArray())       		
+        		changelog.add(element.getAsString());
+        }
 	}
 	
 	private boolean compareVersions(String currentVersion, String availableVersion) {

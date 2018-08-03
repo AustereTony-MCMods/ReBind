@@ -13,6 +13,8 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import ru.austeretony.rebind.command.CommandReBind;
+import ru.austeretony.rebind.config.ConfigLoader;
+import ru.austeretony.rebind.event.ReBindEvents;
 
 @Mod(modid = ReBindMain.MODID, name = ReBindMain.NAME, version = ReBindMain.VERSION)
 public class ReBindMain {
@@ -20,7 +22,7 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.7.0",
+    VERSION = "2.7.1",
     GAME_VERSION = "1.7.10",
     VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/rebind";
@@ -33,16 +35,26 @@ public class ReBindMain {
     @SideOnly(Side.CLIENT)
     @EventHandler
     public void init(FMLInitializationEvent event) {
-
+    	
         ClientRegistry.registerKeyBinding(keyBindingQuit = new KeyBinding("key.quit", 0, ""));
         ClientRegistry.registerKeyBinding(keyBindingHideHUD = new KeyBinding("key.hideHUD", 0, ""));
         ClientRegistry.registerKeyBinding(keyBindingDebugScreen = new KeyBinding("key.debugScreen", 0, ""));
-        ClientRegistry.registerKeyBinding(keyBindingDisableShader = new KeyBinding("key.disableShader", 0, ""));
+        ClientRegistry.registerKeyBinding(keyBindingDisableShader = new KeyBinding("key.disableShader", 0, "")); 
         	
         if (ConfigLoader.isDebugModeEnabled())
         	ClientCommandHandler.instance.registerCommand(new CommandReBind());
         	
-        if (ConfigLoader.isUpdateCheckerEnabled() || ConfigLoader.isAutoJumpEnabled())
-        	MinecraftForge.EVENT_BUS.register(new UpdateChecker());   	
+    	if (ConfigLoader.isUpdateCheckerEnabled()) {
+    		
+    		UpdateChecker updateChecker = new UpdateChecker();
+    		
+    		MinecraftForge.EVENT_BUS.register(updateChecker);    		
+    		new Thread(updateChecker, "ReBind Update Check").start();
+    		
+    		LOGGER.error("Update check started...");
+    	}
+        
+        if (ConfigLoader.isAutoJumpEnabled())
+        	MinecraftForge.EVENT_BUS.register(new ReBindEvents());  
     }
 }

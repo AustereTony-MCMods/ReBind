@@ -1,12 +1,14 @@
-package ru.austeretony.rebind.coremod;
+package ru.austeretony.rebind.core;
 
 import java.util.Map;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
-@TransformerExclusions({"ru.austeretony.rebind.coremod"})
+@TransformerExclusions({"ru.austeretony.rebind.core"})
 public class ReBindCorePlugin implements IFMLLoadingPlugin {
+	
+    private static boolean isObfuscated;
 		
     @Override
     public String[] getASMTransformerClass() {
@@ -27,11 +29,19 @@ public class ReBindCorePlugin implements IFMLLoadingPlugin {
     }
 
     @Override
-    public void injectData(Map<String, Object> data) {}
+    public void injectData(Map<String, Object> data) {
+    	
+    	isObfuscated = (boolean) data.get("runtimeDeobfuscationEnabled");
+    }
 
     @Override
     public String getAccessTransformerClass() {
     	
         return null;
+    }
+    
+    public static boolean isObfuscated() {
+    	
+    	return isObfuscated;
     }
 }
