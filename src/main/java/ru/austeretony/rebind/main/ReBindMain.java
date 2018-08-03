@@ -14,14 +14,16 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.austeretony.rebind.command.CommandReBind;
+import ru.austeretony.rebind.config.ConfigLoader;
+import ru.austeretony.rebind.event.ReBindEvents;
 
 @Mod(modid = ReBindMain.MODID, name = ReBindMain.NAME, version = ReBindMain.VERSION)
 public class ReBindMain {
 	
     public static final String 
 	MODID = "rebind",
-    NAME = "ReBind",
-    VERSION = "2.7.0",
+    NAME = "ReBind", 
+    VERSION = "2.7.1",
     GAME_VERSION = "1.9.4",
     VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/rebind";
@@ -31,7 +33,7 @@ public class ReBindMain {
     @SideOnly(Side.CLIENT)
     public static KeyBinding keyBindingQuit, keyBindingHideHUD, keyBindingDebugScreen, keyBindingSwitchShader;
             
-    @SideOnly(Side.CLIENT)
+    @SideOnly(Side.CLIENT) 
     @EventHandler
     public void init(FMLInitializationEvent event) {
 
@@ -43,7 +45,17 @@ public class ReBindMain {
         if (ConfigLoader.isDebugModeEnabled())
         	ClientCommandHandler.instance.registerCommand(new CommandReBind());
         	
-        if (ConfigLoader.isUpdateCheckerEnabled() || ConfigLoader.isAutoJumpEnabled())
-        	MinecraftForge.EVENT_BUS.register(new UpdateChecker());   	  	
+    	if (ConfigLoader.isUpdateCheckerEnabled()) {
+    		
+    		UpdateChecker updateChecker = new UpdateChecker();
+    		
+    		MinecraftForge.EVENT_BUS.register(updateChecker);    		
+    		new Thread(updateChecker, "ReBind Update Check").start();
+    		
+    		LOGGER.error("Update check started...");
+    	}
+        
+        if (ConfigLoader.isAutoJumpEnabled())
+        	MinecraftForge.EVENT_BUS.register(new ReBindEvents());  
     }
 }

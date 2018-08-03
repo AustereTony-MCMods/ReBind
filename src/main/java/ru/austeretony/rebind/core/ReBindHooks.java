@@ -1,4 +1,4 @@
-package ru.austeretony.rebind.coremod;
+package ru.austeretony.rebind.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +25,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.common.Loader;
-import ru.austeretony.rebind.main.ConfigLoader;
+import ru.austeretony.rebind.config.ConfigLoader;
 import ru.austeretony.rebind.main.KeyBindingProperty;
 import ru.austeretony.rebind.main.ReBindMain;
 
