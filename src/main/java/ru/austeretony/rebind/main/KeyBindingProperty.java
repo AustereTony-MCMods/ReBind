@@ -12,7 +12,7 @@ public class KeyBindingProperty {
 	
 	public static final Map<String, KeyBindingProperty> PROPERTIES_BY_IDS = new LinkedHashMap<String, KeyBindingProperty>();
 	
-	private static final Map<KeyBinding, KeyBindingProperty> PROPERTIES_BY_KEYBINDINGS = new HashMap<KeyBinding, KeyBindingProperty>();
+	public static final Map<KeyBinding, KeyBindingProperty> PROPERTIES_BY_KEYBINDINGS = new HashMap<KeyBinding, KeyBindingProperty>();
 	
     public static final Set<KeyBinding> SORTED_KEYBINDINGS = new LinkedHashSet<KeyBinding>();  
     
