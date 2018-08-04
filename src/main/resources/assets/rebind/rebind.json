@@ -1,7 +1,7 @@
 {
   "main": {
     "external_config": true,
-    "rewrite_controls": true,
+    "rewrite_controls": false,
     "debug_mode": false,
     "updates": {
       "update_checker": true,

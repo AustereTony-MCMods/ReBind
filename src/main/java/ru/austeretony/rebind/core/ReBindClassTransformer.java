@@ -765,7 +765,7 @@ public class ReBindClassTransformer implements IClassTransformer {
                     		}
                     	}
                     	
-                    	if (bipushCount == 14) {
+                    	if (bipushCount == 7) {
                     		
                             methodNode.instructions.insertBefore(currentInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getDisableShaderKeyCode", "()I", false)); 
                     		

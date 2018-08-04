@@ -21,7 +21,7 @@ plugins {
 }
 */
 
-version = "1.8.9-2.7.1"
+version = "1.8.9-2.7.2"
 group= "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "rebind"
 
