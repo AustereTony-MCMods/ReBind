@@ -62,9 +62,11 @@ public class ConfigLoader {
     
 	private static void loadExternalConfig(JsonObject intMainConf, JsonObject intKeybindingsConf) {
 
-		Path path = Paths.get(EXT_REBIND_FILE_PATH);
+		Path 
+		mainPath = Paths.get(EXT_REBIND_FILE_PATH),
+		keybindingsPath = Paths.get(EXT_KEYBINDINGS_FILE_PATH);
 		
-		if (Files.exists(path)) {
+		if (Files.exists(mainPath) && Files.exists(keybindingsPath)) {
 			
 	        JsonObject extMainConf, extKeybindingsConf;  
 			
@@ -88,7 +90,8 @@ public class ConfigLoader {
 			
             try {
             	
-				Files.createDirectories(path.getParent());															
+				Files.createDirectories(mainPath.getParent());		
+				Files.createDirectories(keybindingsPath.getParent());															
 			} 
             
             catch (IOException exception) {
