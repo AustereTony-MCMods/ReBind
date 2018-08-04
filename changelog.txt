@@ -1,3 +1,9 @@
+2.7.2
++Fixed Debug Screen (F3) key combinations.
++"Rewrite Settings" option now disabled by default.
++Configs generation fix.
++Some code optimizations.
+
 2.7.1
 +Config now splitted to two files.
 +Update note now will be shown once per session on first world join.
