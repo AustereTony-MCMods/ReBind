@@ -22,7 +22,7 @@ public class ReBindMain {
     public static final String 
 	MODID = "rebind",
     NAME = "ReBind",
-    VERSION = "2.7.1",
+    VERSION = "2.7.2",
     GAME_VERSION = "1.7.10",
     VERSIONS_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/versions.json",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/rebind";
@@ -51,7 +51,7 @@ public class ReBindMain {
     		MinecraftForge.EVENT_BUS.register(updateChecker);    		
     		new Thread(updateChecker, "ReBind Update Check").start();
     		
-    		LOGGER.error("Update check started...");
+    		LOGGER.info("Update check started...");
     	}
         
         if (ConfigLoader.isAutoJumpEnabled())

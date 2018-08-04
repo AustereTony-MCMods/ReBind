@@ -55,8 +55,8 @@ public class ReBindClassTransformer implements IClassTransformer {
 				return patchKeyBinding(basicClass);
 			case "net.minecraft.client.gui.GuiKeyBindingList":							
 				return patchGuiKeyBindingList(basicClass, false);					
-			case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":							
-				return patchGuiKeyBindingList(basicClass, true);				
+			/*case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList"://TODO Solve Controlling incompatibility							
+				return patchGuiKeyBindingList(basicClass, true);*/				
 			case "net.minecraft.client.gui.GuiKeyBindingList$KeyEntry":		
 				return patchKeyEntry(basicClass, false);					
 			/*case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList$KeyEntry":		

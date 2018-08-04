@@ -47,9 +47,13 @@ public class ReBindHooks {
 	public static void removeHiddenKeyBindings() {
 		
 		if (Minecraft.getMinecraft().gameSettings != null) {
-			
+						
 			List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(Minecraft.getMinecraft().gameSettings.keyBindings));
-			
+
+			for (KeyBinding keyBinding : KeyBindingProperty.PROPERTIES_BY_KEYBINDINGS.keySet())
+				if (!bindingsList.contains(keyBinding))
+					bindingsList.add(keyBinding);
+						
 	    	Set<String> occurrences = new HashSet<String>();
 			
 			Iterator<KeyBinding> iterator = bindingsList.iterator();
@@ -92,61 +96,65 @@ public class ReBindHooks {
 		
 		if (ConfigLoader.isControllsSettingsRewritingEnabled()) {
 
-	    	try {
-	    		
-	    		String optionsPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/options.txt";
-	    		
-				InputStream inputStream = new FileInputStream(new File(optionsPath));
+    		String optionsPath = Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/options.txt";
+			
+			List<String> optionsLines;
+			
+			try (InputStream inputStream = new FileInputStream(new File(optionsPath))) {
 				
-				List<String> optionsLines = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
-				
-				inputStream.close();
-				
-				Set<String> options = new HashSet<String>();
-							
-				Splitter splitter = Splitter.on(':');
-				
-				Iterator<String> splitIterator;
-				
-				for (String option : optionsLines) {
-					
-					splitIterator = splitter.split(option).iterator();
-					
-					options.add(splitIterator.next());
-					
-					splitIterator.next();
-				}
-								
-				if (!options.contains("key_key.quit") &&
-						!options.contains("key_key.hideHUD") &&
-						!options.contains("key_key.debugScreen") &&
-						!options.contains("key_key.disableShader")) {
-									
-					Iterator<String> iterator = optionsLines.iterator();
-					
-					String curLine;
-					
-					while (iterator.hasNext()) {
-						
-						curLine = iterator.next();
-						
-						if (curLine.length() > 4 && curLine.substring(0, 4).equals("key_"))							
-							iterator.remove();
-					}
-					
-		            PrintStream fileStream = new PrintStream(new File(optionsPath));
-					
-		            for (String line : optionsLines)	            	
-		            	fileStream.println(line);
-		            
-		            fileStream.close();
-				}
-			} 
-	    	
+				optionsLines = IOUtils.readLines(new InputStreamReader(inputStream, "UTF-8"));
+			}
+			
 	    	catch (IOException exception) {
 	    		
 	    		exception.printStackTrace();
+	    		
+	    		return;
 			}
+			
+			Set<String> options = new HashSet<String>();
+			
+			Splitter splitter = Splitter.on(':');
+			
+			Iterator<String> splitIterator;
+			
+			for (String option : optionsLines) {
+				
+				splitIterator = splitter.split(option).iterator();
+				
+				options.add(splitIterator.next());
+				
+				splitIterator.next();
+			}
+							
+			if (!options.contains("key_key.quit") &&
+					!options.contains("key_key.hideHUD") &&
+					!options.contains("key_key.debugScreen") &&
+					!options.contains("key_key.disableShader")) {
+								
+				Iterator<String> iterator = optionsLines.iterator();
+				
+				String curLine;
+				
+				while (iterator.hasNext()) {
+					
+					curLine = iterator.next();
+					
+					if (curLine.length() > 4 && curLine.substring(0, 4).equals("key_"))							
+						iterator.remove();
+				}
+				
+	            try (PrintStream printStream = new PrintStream(new File(optionsPath))) {
+				
+	            	for (String line : optionsLines)	            	
+	            		printStream.println(line);
+	            }
+	            
+		    	catch (IOException exception) {
+		    		
+		    		exception.printStackTrace();
+				}
+			}		
 		}
 	}
 
@@ -264,7 +272,7 @@ public class ReBindHooks {
 	
 	public static int getDebugScreenKeyCode() {
 				
-		return ReBindMain.keyBindingDebugScreen.isPressed() ? ReBindMain.keyBindingDebugScreen.getKeyCode() : 0;
+		return KeyBindingProperty.get(ReBindMain.keyBindingDebugScreen).isActiveAndMatches(ReBindMain.keyBindingDebugScreen.getKeyCode()) ? ReBindMain.keyBindingDebugScreen.getKeyCode() : 0;
 	}
 	
 	public static int getDisableShaderKeyCode() {
@@ -295,10 +303,19 @@ public class ReBindHooks {
 			}
 		}
 		
+		if (modid.equals("rebind")) {
+			
+			if (keyName.equals("key.macro_override") || keyName.equals("key.macros")) {
+				
+				modid = "macrosmod";				
+				modName = "Macros Mod";
+			}				
+		}
+		
 		modid = modid.toLowerCase();
 		
 		keyBindingId = modid + "_" + keyName.toLowerCase();		
-		keyBindingId = keyBindingId.replaceAll("[. ]", "_").replace("_key", "").replace("_" + modid, "");
+		keyBindingId = keyBindingId.replaceAll("[()?:!.,;{} |]+", "_").replace("_key", "").replace("_" + modid, "");
 				
 		while (ID_OCCURENCES.contains(keyBindingId)) {
 			
