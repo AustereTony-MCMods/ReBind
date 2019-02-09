@@ -1,3 +1,5 @@
+2.7.3b
++Mod essentially rewritten. Coremod signed.
 2.7.2
 +Fixed Debug Screen (F3) key combinations.
 +"Rewrite Settings" option now disabled by default.
