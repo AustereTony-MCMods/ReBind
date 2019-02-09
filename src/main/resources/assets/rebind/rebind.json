@@ -4,8 +4,7 @@
     "rewrite_controls": false,
     "debug_mode": false,
     "updates": {
-      "update_checker": true,
-      "show_changelog": false
+      "update_checker": true
     }
   },
   "game": {

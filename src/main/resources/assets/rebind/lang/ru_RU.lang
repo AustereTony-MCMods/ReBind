@@ -4,11 +4,15 @@ key.debugScreen=Экран Отладки
 key.switchShader=Сменить Шейдер
 key.narrator=Диктор
 
-rebind.command.unsupportedKeys=Список неизвестных биндов
-rebind.command.none=Нет неизвестных биндов
-rebind.command.noExternal=Внешний конфиг неактивен
-rebind.command.updated=Внешний конфиг обновлён
+rebind.command.help.title=Доступные команды:
+rebind.command.help.list=показать список неизвестных биндов
+rebind.command.help.update=добавить неизвестные бинды в конфиг
+
+rebind.command.err.noUnknownKeys=Нет неизвестных биндов
+rebind.command.list=Список неизвестных биндов:
+rebind.command.err.externalConfigDisabled=Внешний конфиг неактивен
+rebind.command.update=Внешний конфиг обновлён
 
 rebind.update.newVersion=Доступна новая версия!
-rebind.update.projectPage=Сайт
+rebind.update.projectPage=Ссылка
 

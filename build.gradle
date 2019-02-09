@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.12.2-2.7.2"
+version = "1.12.2-2.7.3"
 group = "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "rebind"
 
@@ -21,9 +21,10 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.4.2705"
+    version = "1.12.2-14.23.5.2768"
     runDir = "run"
     
+	replace '@FINGERPRINT@', project.findProperty('sign')
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
     // stable_#            stables are built at the discretion of the MCP team.
@@ -78,7 +79,7 @@ processResources {
 
 jar {
    manifest {
-       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.core.ReBindCorePlugin'
+       attributes 'FMLCorePlugin': 'austeretony.rebind.common.core.ReBindCorePlugin'
        attributes 'FMLCorePluginContainsFMLMod': 'true'
 	   attributes 'FMLAT': 'rebind_at.cfg'
    }
