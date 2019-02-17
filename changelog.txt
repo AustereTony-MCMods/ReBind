@@ -1,3 +1,10 @@
+2.7.3
++Fixed controls menu size calculation. This should solve rare crashes.
++Fixed crash on controls menu open if settings file contained information 
+about modded keybindings, which absent in current session.
++Custom update checker disabled by default.
++Debug mode enabled by default.
++Code cleanup.
 2.7.3b
 +Mod essentially rewritten. Coremod signed.
 2.7.2

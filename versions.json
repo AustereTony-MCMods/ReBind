@@ -47,7 +47,8 @@
   "1.12.2": {
     "available": "2.7.3",		
     "changelog": [			
-	  "Mod essentially rewritten and fixed a bit... Probably now it has even more bugs."
+	  "Mod fully rewritten.",
+	  "Fixed rare crashes."
     ]
   }
 }

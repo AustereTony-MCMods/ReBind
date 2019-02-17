@@ -1,12 +1,9 @@
 {
   "main": {
     "external_config": true,
-    "rewrite_controls": true,
+    "rewrite_controls": false,
     "debug_mode": true,
-    "updates": {
-      "update_checker": true,
-      "show_changelog": true
-    }
+    "custom_update_checker": false
   },
   "game": {
     "auto_jump": false

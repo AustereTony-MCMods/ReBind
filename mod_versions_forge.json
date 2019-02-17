@@ -1,0 +1,10 @@
+{
+  "homepage": "https://minecraft.curseforge.com/projects/rebind",
+  "1.12.2": {
+    "2.7.3": "All information available on the homepage." 
+  },
+  "promos": {
+    "1.12.2-latest": "2.7.3",
+    "1.12.2-recommended": "2.7.3"
+  }
+}
