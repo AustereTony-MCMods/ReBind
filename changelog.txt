@@ -1,3 +1,7 @@
+2.7.4
++Added fix for MineMenu keybinding behavior, it will work properly if combined with 
+SHIFT, CTRL or ALT (solution for issue #4). Fix can be disabled in config file (if MM author 
+will fix it on his own).
 2.7.3
 +Fixed controls menu size calculation. This should solve rare crashes.
 +Fixed crash on controls menu open if settings file contained information 

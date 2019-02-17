@@ -45,10 +45,9 @@
     ]
   },
   "1.12.2": {
-    "available": "2.7.3",		
+    "available": "2.7.4",		
     "changelog": [			
-	  "Mod fully rewritten.",
-	  "Fixed rare crashes."
+	  "MineMenu keybinding fix."
     ]
   }
 }
