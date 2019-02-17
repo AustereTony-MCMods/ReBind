@@ -1,6 +1,7 @@
 package austeretony.rebind.client.reference;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +26,16 @@ public class ClientReference {
     @SideOnly(Side.CLIENT)
     public static Minecraft getMinecraft() {
         return Minecraft.getMinecraft();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static GameSettings getGameSettings() {
+        return Minecraft.getMinecraft().gameSettings;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static KeyBinding[] getKeyBindings() {
+        return Minecraft.getMinecraft().gameSettings.keyBindings;
     }
 
     @SideOnly(Side.CLIENT)

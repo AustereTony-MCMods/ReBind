@@ -13,5 +13,5 @@ rebind.command.list=Unknown keybindings list:
 rebind.command.err.externalConfigDisabled=External config disabled
 rebind.command.update=External config updated
 
-rebind.update.newVersion=New version available!
+rebind.update.newVersion=New version!
 rebind.update.projectPage=Link

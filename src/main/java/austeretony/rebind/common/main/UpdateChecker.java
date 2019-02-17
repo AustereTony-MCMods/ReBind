@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class UpdateChecker implements Runnable {
 
-    private static String availableVersion = ReBindMain.VERSION;
+    private static String availableVersion = ReBindMain.VERSION_CUSTOM;
 
     private static boolean notified;
 
@@ -28,7 +28,7 @@ public class UpdateChecker implements Runnable {
         if (event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {
             if (!notified) {
                 notified = true;
-                if (ReBindUtils.isOutdated(ReBindMain.VERSION, availableVersion))
+                if (isOutdated(ReBindMain.VERSION_CUSTOM, availableVersion))
                     EnumChatMessages.UPDATE_MESSAGE.showMessage(availableVersion);
             } else {
                 MinecraftForge.EVENT_BUS.unregister(this);
@@ -41,7 +41,7 @@ public class UpdateChecker implements Runnable {
         ReBindMain.LOGGER.info("Update check started...");
         URL versionsURL;                
         try {                   
-            versionsURL = new URL(ReBindMain.VERSIONS_URL);
+            versionsURL = new URL(ReBindMain.VERSIONS_CUSTOM_URL);
         } catch (MalformedURLException exception) {                     
             exception.printStackTrace();                        
             return;
@@ -49,16 +49,10 @@ public class UpdateChecker implements Runnable {
         JsonObject remoteData;                                  
         try (InputStream inputStream = versionsURL.openStream()) {                      
             remoteData = (JsonObject) new JsonParser().parse(new InputStreamReader(inputStream, "UTF-8")); 
-        } catch (UnknownHostException exception) {              
-            ReBindMain.LOGGER.error("Update check failed, no internet connection.");               
+        } catch (IOException exception) {               
+            ReBindMain.LOGGER.error("Update check failed!");               
             return;
-        } catch (FileNotFoundException exception) {                     
-            ReBindMain.LOGGER.error("Update check failed, remote file is absent.");                        
-            return;
-        } catch (IOException exception) {                                               
-            exception.printStackTrace();                        
-            return;
-        }                                       
+        }                               
         JsonObject data;          
         try {           
             data = remoteData.get(ReBindMain.GAME_VERSION).getAsJsonObject();      
@@ -67,6 +61,46 @@ public class UpdateChecker implements Runnable {
             return;
         }        
         availableVersion = data.get("available").getAsString();
-        ReBindMain.LOGGER.info("Update check ended. Current/available: " + ReBindMain.VERSION + "/" + availableVersion);
+        ReBindMain.LOGGER.info("Update check ended. Current/available: " + ReBindMain.VERSION_CUSTOM + "/" + availableVersion);
+    }
+
+    public static boolean isOutdated(String currentVersion, String availableVersion) {        
+        try {
+            String[] 
+                    cSplitted = currentVersion.split("[:]"),
+                    aSplitted = availableVersion.split("[:]");    
+            String 
+            cVer = cSplitted[0],
+            cType = cSplitted[1],
+            cRev = cSplitted[2],
+            aVer = aSplitted[0],
+            aType = aSplitted[1],
+            aRev = aSplitted[2];
+            String[]
+                    cVerSplitted = cVer.split("[.]"),
+                    aVerSplitted = aVer.split("[.]");
+            int verDiff, revDiff;               
+            for (int i = 0; i < 3; i++) {                                                             
+                verDiff = Integer.parseInt(aVerSplitted[i]) - Integer.parseInt(cVerSplitted[i]);                                                                                           
+                if (verDiff > 0)
+                    return true;                                
+                if (verDiff < 0)
+                    return false;
+            }  
+            if (aType.equals("release") && (cType.equals("beta") || cType.equals("alpha")))
+                return true;
+            if (aType.equals("beta") && cType.equals("alpha"))
+                return true;
+            revDiff = Integer.parseInt(aRev) - Integer.parseInt(cRev);                                                                                           
+            if (revDiff > 0)
+                return true;                                
+            if (revDiff < 0)
+                return false;
+            return false;
+        } catch (Exception exception) {
+            ReBindMain.LOGGER.error("Versions comparison failed!");               
+            exception.printStackTrace();
+        }
+        return false;
     }
 }

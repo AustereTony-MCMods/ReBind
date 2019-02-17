@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +16,14 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
-import austeretony.rebind.client.keybinding.KeyBindingProperty;
+import austeretony.rebind.client.keybinding.KeyBindingWrapper;
+import austeretony.rebind.common.core.ReBindClassTransformer;
 import austeretony.rebind.common.main.ReBindMain;
+import austeretony.rebind.common.main.UpdateChecker;
 import austeretony.rebind.common.reference.CommonReference;
 import austeretony.rebind.common.util.ReBindUtils;
 
@@ -27,9 +32,6 @@ public class ConfigLoader {
     public static final String
     EXT_CONFIGURATION_FILE = CommonReference.getGameFolder() + "/config/rebind/rebind.json",
     EXT_DATA_FILE = CommonReference.getGameFolder() + "/config/rebind/keybindings.json";
-
-    private static boolean checkForUpdates, useExternalConfig, rewriteControls, enableDebugMode,
-    enableAutoJump, allowDoubleTapForwardSprint, allowPlayerSprint, allowMountSprint, allowHotbarScrolling;
 
     public static void load() {
         JsonObject internalConfig, internalSettings;
@@ -40,12 +42,11 @@ public class ConfigLoader {
             ReBindMain.LOGGER.error("Internal configuration files damaged!");
             exception.printStackTrace();
             return;
-        }
-        useExternalConfig = internalConfig.get("main").getAsJsonObject().get("external_config").getAsBoolean();
-        if (!useExternalConfig)
-            loadData(internalConfig, internalSettings);
-        else
+        } 
+        if (EnumConfigSettings.EXTERNAL_CONFIG.initBoolean(internalConfig))
             loadExternalConfig(internalConfig, internalSettings);
+        else
+            loadData(internalConfig, internalSettings);
     }
 
     private static void loadExternalConfig(JsonObject internalConfig, JsonObject internalSettings) {
@@ -56,7 +57,7 @@ public class ConfigLoader {
                 && Files.exists(settingsPath)) {
             JsonObject externalConfig, externalSettings;
             try {
-                externalConfig = (JsonObject) ReBindUtils.getExternalJsonData(EXT_CONFIGURATION_FILE);
+                externalConfig = updateConfig(internalConfig);  
                 externalSettings = (JsonObject) ReBindUtils.getExternalJsonData(EXT_DATA_FILE);
             } catch (IOException exception) {
                 ReBindMain.LOGGER.error("External configuration file damaged!");
@@ -75,6 +76,56 @@ public class ConfigLoader {
         }
     }
 
+    private static JsonObject updateConfig(JsonObject internalConfig) throws IOException {
+        JsonObject externalConfigOld, externalConfigNew, externalGroupNew;
+        try {                   
+            externalConfigOld = (JsonObject) ReBindUtils.getExternalJsonData(EXT_CONFIGURATION_FILE);       
+        } catch (IOException exception) {  
+            ReBindClassTransformer.CORE_LOGGER.info("External configuration file damaged!");
+            exception.printStackTrace();
+            return null;
+        }
+        JsonElement versionElement = externalConfigOld.get("version");
+        if (versionElement == null || UpdateChecker.isOutdated(versionElement.getAsString(), ReBindMain.VERSION_CUSTOM)) {
+            ReBindClassTransformer.CORE_LOGGER.info("Updating external config file...");
+            externalConfigNew = new JsonObject();
+            externalConfigNew.add("version", new JsonPrimitive(ReBindMain.VERSION_CUSTOM));
+            Map<String, JsonElement> 
+            internalData = new LinkedHashMap<String, JsonElement>(),
+            externlDataOld = new HashMap<String, JsonElement>(),
+            internalGroup, externlGroupOld;
+            for (Map.Entry<String, JsonElement> entry : internalConfig.entrySet())
+                internalData.put(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, JsonElement> entry : externalConfigOld.entrySet())
+                externlDataOld.put(entry.getKey(), entry.getValue());      
+            for (String key : internalData.keySet()) {
+                internalGroup = new LinkedHashMap<String, JsonElement>();
+                externlGroupOld = new HashMap<String, JsonElement>();
+                externalGroupNew = new JsonObject();
+                for (Map.Entry<String, JsonElement> entry : internalData.get(key).getAsJsonObject().entrySet())
+                    internalGroup.put(entry.getKey(), entry.getValue());
+                if (externlDataOld.containsKey(key)) {                    
+                    for (Map.Entry<String, JsonElement> entry : externlDataOld.get(key).getAsJsonObject().entrySet())
+                        externlGroupOld.put(entry.getKey(), entry.getValue());   
+                    for (String k : internalGroup.keySet()) {
+                        if (externlGroupOld.containsKey(k))
+                            externalGroupNew.add(k, externlGroupOld.get(k));
+                        else 
+                            externalGroupNew.add(k, internalGroup.get(k));
+                    }
+                } else {
+                    for (String k : internalGroup.keySet())
+                        externalGroupNew.add(k, internalGroup.get(k));
+                }
+                externalConfigNew.add(key, externalGroupNew);
+                ReBindUtils.createExternalJsonFile(EXT_CONFIGURATION_FILE, externalConfigNew);
+            }
+            return externalConfigNew;
+        }
+        ReBindClassTransformer.CORE_LOGGER.info("External config up-to-date!");
+        return externalConfigOld;
+    }
+
     private static void createExternalCopyAndLoad(JsonObject internalConfig, JsonObject internalSettings) {
         try {
             ReBindUtils.createExternalJsonFile(EXT_CONFIGURATION_FILE, internalConfig);
@@ -86,24 +137,21 @@ public class ConfigLoader {
     }
 
     private static void loadData(JsonObject configFile, JsonObject settingsFile) {
-        JsonObject mainSettings = configFile.get("main").getAsJsonObject();
-        rewriteControls = mainSettings.get("rewrite_controls").getAsBoolean();
-        enableDebugMode = mainSettings.get("debug_mode").getAsBoolean();
-        checkForUpdates = mainSettings.get("updates").getAsJsonObject().get("update_checker").getAsBoolean();
-        JsonObject ingameSettings = configFile.get("game").getAsJsonObject();
-        enableAutoJump = ingameSettings.get("auto_jump").getAsBoolean();
-        JsonObject controlsSettings = configFile.get("controls").getAsJsonObject();
-        allowPlayerSprint = controlsSettings.get("player_sprint").getAsBoolean();
-        allowDoubleTapForwardSprint = controlsSettings.get("double_tap_forward_sprint").getAsBoolean();
-        allowMountSprint = controlsSettings.get("mount_sprint").getAsBoolean();
-        allowHotbarScrolling = controlsSettings.get("hotbar_scrolling").getAsBoolean();
+        EnumConfigSettings.REWRITE_CONTROLS.initBoolean(configFile);
+        EnumConfigSettings.DEBUG_MODE.initBoolean(configFile);
+        EnumConfigSettings.CHECK_UPDATES.initBoolean(configFile);
+        EnumConfigSettings.AUTO_JUMP.initBoolean(configFile);
+        EnumConfigSettings.PLAYER_SPRINT.initBoolean(configFile);
+        EnumConfigSettings.DOUBLE_TAP_FORWARD_SPRINT.initBoolean(configFile);
+        EnumConfigSettings.MOUNT_SPRINT.initBoolean(configFile);
+        EnumConfigSettings.HOTBAR_SCROLLING.initBoolean(configFile);
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(KeyBindingsObject.class, new KeyBindingsDeserializer())
                 .registerTypeAdapter(KeyBindingObject.class, new KeyBindingDeserializer())
                 .create();
         KeyBindingsObject properties = gson.fromJson(settingsFile, KeyBindingsObject.class);
         for (Map.Entry<String, KeyBindingObject> entry : properties.getMap().entrySet()) {
-            new KeyBindingProperty(
+            new KeyBindingWrapper(
                     entry.getKey(), 
                     entry.getValue().holder, 
                     entry.getValue().name,
@@ -116,15 +164,15 @@ public class ConfigLoader {
     }
 
     public static void updateSettingsFile() {
-        Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
+        Multimap<String, KeyBindingWrapper> propsByModnames = LinkedHashMultimap.<String, KeyBindingWrapper>create();
         Set<String> sortedModNames = new TreeSet<String>();
-        for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
+        for (KeyBindingWrapper property : KeyBindingWrapper.UNKNOWN) {
             propsByModnames.put(property.getModName(), property);
             sortedModNames.add(property.getModName());
         }
         KeyBindingsObject properties = new KeyBindingsObject();
         for (String modName : sortedModNames) {
-            for (KeyBindingProperty property : propsByModnames.get(modName)) {
+            for (KeyBindingWrapper property : propsByModnames.get(modName)) {
                 properties.getMap().put(property.getKeyBindingId(), new KeyBindingObject(
                         property.getHolderId(), 
                         property.getName(), 
@@ -166,41 +214,5 @@ public class ConfigLoader {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
-    }
-
-    public static boolean isUpdateCheckerEnabled() {
-        return checkForUpdates;
-    }
-
-    public static boolean isExternalConfigEnabled() {
-        return useExternalConfig;
-    }
-
-    public static boolean isControllsSettingsRewritingEnabled() {
-        return rewriteControls;
-    }
-
-    public static boolean isDebugModeEnabled() {
-        return enableDebugMode;
-    }
-
-    public static boolean isAutoJumpEnabled() {
-        return enableAutoJump;
-    }
-
-    public static boolean isPlayerSprintAllowed() {
-        return allowPlayerSprint;
-    }
-
-    public static boolean isDoubleTapForwardSprintAllowed() {
-        return allowDoubleTapForwardSprint;
-    }
-
-    public static boolean isMountSprintAllowed() {
-        return allowMountSprint;
-    }
-
-    public static boolean isHotbarScrollingAllowed() {
-        return allowHotbarScrolling;
     }
 }

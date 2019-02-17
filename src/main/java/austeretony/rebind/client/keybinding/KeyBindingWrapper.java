@@ -8,15 +8,15 @@ import java.util.Set;
 
 import net.minecraft.client.settings.KeyBinding;
 
-public class KeyBindingProperty {
+public class KeyBindingWrapper {
 
-    public static final Map<String, KeyBindingProperty> PROPERTIES_BY_IDS = new LinkedHashMap<String, KeyBindingProperty>();
+    public static final Map<String, KeyBindingWrapper> PROPERTIES_BY_IDS = new LinkedHashMap<String, KeyBindingWrapper>();
 
-    public static final Map<KeyBinding, KeyBindingProperty> PROPERTIES_BY_KEYBINDINGS = new HashMap<KeyBinding, KeyBindingProperty>();
+    public static final Map<KeyBinding, KeyBindingWrapper> PROPERTIES_BY_KEYBINDINGS = new HashMap<KeyBinding, KeyBindingWrapper>();
 
     public static final Set<KeyBinding> SORTED_KEYBINDINGS = new LinkedHashSet<KeyBinding>();
 
-    public static final Set<KeyBindingProperty> UNKNOWN = new LinkedHashSet<KeyBindingProperty>();
+    public static final Set<KeyBindingWrapper> UNKNOWN = new LinkedHashSet<KeyBindingWrapper>();
 
     private KeyBinding keyBinding;
 
@@ -28,7 +28,7 @@ public class KeyBindingProperty {
 
     private final boolean isEnabled, isKnown;
 
-    public KeyBindingProperty(String keyId, String holderId, String name, String category, int keyCode,
+    public KeyBindingWrapper(String keyId, String holderId, String name, String category, int keyCode,
             String keyModifier, boolean isEnabled, boolean isKnown) {
         this.keyBindingId = keyId;
         this.holderBindingId = holderId;
@@ -43,11 +43,11 @@ public class KeyBindingProperty {
         PROPERTIES_BY_IDS.put(keyId, this);
     }
 
-    public static KeyBindingProperty get(String keyId) {
+    public static KeyBindingWrapper get(String keyId) {
         return PROPERTIES_BY_IDS.get(keyId);
     }
 
-    public static KeyBindingProperty get(KeyBinding keyBinding) {
+    public static KeyBindingWrapper get(KeyBinding keyBinding) {
         return PROPERTIES_BY_KEYBINDINGS.get(keyBinding);
     }
 

@@ -13,6 +13,6 @@ rebind.command.list=Список неизвестных биндов:
 rebind.command.err.externalConfigDisabled=Внешний конфиг неактивен
 rebind.command.update=Внешний конфиг обновлён
 
-rebind.update.newVersion=Доступна новая версия!
+rebind.update.newVersion=Новая версия!
 rebind.update.projectPage=Ссылка
 

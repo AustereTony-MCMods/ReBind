@@ -52,23 +52,4 @@ public class ReBindUtils {
             }
         }
     }
-
-    public static boolean isOutdated(String currentVersion, String availableVersion) {                                                               
-        String[] 
-                cVer = currentVersion.split("[.]"),
-                aVer = availableVersion.split("[.]");                           
-        int diff;               
-        for (int i = 0; i < cVer.length; i++) {                                 
-            try {                               
-                diff = Integer.parseInt(aVer[i]) - Integer.parseInt(cVer[i]);                                                                                           
-                if (diff > 0)
-                    return true;                                
-                if (diff < 0)
-                    return false;
-            } catch (NumberFormatException exception) {                         
-                exception.printStackTrace();
-            }
-        }               
-        return false;
-    }
 }

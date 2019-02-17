@@ -173,7 +173,7 @@ public enum EnumInputClasses {
                     if (currentInsn.getOpcode() == Opcodes.RETURN) {
                         InsnList nodesList = new InsnList();
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "storeKeybinding", "(L" + keyBindingClassName + ";)V", false));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "wrapKeybinding", "(L" + keyBindingClassName + ";)V", false));
                         methodNode.instructions.insertBefore(currentInsn, nodesList);
                         break;
                     }
@@ -209,7 +209,12 @@ public enum EnumInputClasses {
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
                 while (insnIterator.hasNext()) {
                     currentInsn = insnIterator.next();
-                    if (currentInsn.getOpcode() == Opcodes.ACONST_NULL) {
+                    if (currentInsn.getOpcode() == Opcodes.ASTORE) {                                                
+                        InsnList nodesList = new InsnList();                       
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "sortKeyBindings", "()[L" + keyBindingClassName + ";", false));
+                        nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));                      
+                        methodNode.instructions.insert(currentInsn, nodesList);
+                    } else if (currentInsn.getOpcode() == Opcodes.ACONST_NULL) {
                         InsnList nodesList = new InsnList();
                         nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "sortKeyBindings", "()[L" + keyBindingClassName + ";", false));
                         nodesList.add(new VarInsnNode(Opcodes.ASTORE, 3));

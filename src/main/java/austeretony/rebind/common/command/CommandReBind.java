@@ -1,7 +1,8 @@
 package austeretony.rebind.common.command;
 
-import austeretony.rebind.client.keybinding.KeyBindingProperty;
+import austeretony.rebind.client.keybinding.KeyBindingWrapper;
 import austeretony.rebind.common.config.ConfigLoader;
+import austeretony.rebind.common.config.EnumConfigSettings;
 import austeretony.rebind.common.core.ReBindHooks;
 import austeretony.rebind.common.main.EnumChatMessages;
 import net.minecraft.command.CommandBase;
@@ -54,10 +55,10 @@ public class CommandReBind extends CommandBase {
 
     private boolean validAction(boolean checkExternalConfig) {
         ReBindHooks.sortKeyBindings(); 
-        if (KeyBindingProperty.UNKNOWN.isEmpty()) {
+        if (KeyBindingWrapper.UNKNOWN.isEmpty()) {
             EnumChatMessages.COMMAND_REBIND_ERR_NO_UNKNOWN_KEY_BINDINGS.showMessage();
             return false;
-        } else if (checkExternalConfig && !ConfigLoader.isExternalConfigEnabled()) {
+        } else if (checkExternalConfig && !EnumConfigSettings.EXTERNAL_CONFIG.isEnabled()) {
             EnumChatMessages.COMMAND_REBIND_ERR_EXTERNAL_CONFIG_DISABLED.showMessage();
             return false;
         }

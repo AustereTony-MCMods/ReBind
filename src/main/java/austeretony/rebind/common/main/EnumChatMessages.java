@@ -6,7 +6,7 @@ import java.util.TreeSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
-import austeretony.rebind.client.keybinding.KeyBindingProperty;
+import austeretony.rebind.client.keybinding.KeyBindingWrapper;
 import austeretony.rebind.client.reference.ClientReference;
 import austeretony.rebind.common.command.EnumCommandReBindArgs;
 import net.minecraft.client.resources.I18n;
@@ -21,15 +21,16 @@ public enum EnumChatMessages {
 
     UPDATE_MESSAGE,
     COMMAND_REBIND_HELP,
-    COMMAND_REBIND_ERR_NO_UNKNOWN_KEY_BINDINGS,
     COMMAND_REBIND_LIST,
-    COMMAND_REBIND_ERR_EXTERNAL_CONFIG_DISABLED,
-    COMMAND_REBIND_UPDATE;
+    COMMAND_REBIND_UPDATE,
+    COMMAND_REBIND_ERR_NO_UNKNOWN_KEY_BINDINGS,
+    COMMAND_REBIND_ERR_EXTERNAL_CONFIG_DISABLED;
+
 
     public static final ITextComponent PREFIX;
 
     static {
-        PREFIX = new TextComponentString("[ReBind] ");
+        PREFIX = new TextComponentString("[" + ReBindMain.NAME + "] ");
         PREFIX.getStyle().setColor(TextFormatting.AQUA);                   
     }
 
@@ -37,12 +38,22 @@ public enum EnumChatMessages {
         return PREFIX.createCopy();
     }
 
+    private String formatVersion(String input) {
+        try {  
+            String[] splitted = input.split("[:]");
+            return splitted[0] + " " + splitted[1] + " rev: " + splitted[2];
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return input;
+    }
+
     public void showMessage(String... args) {
         ITextComponent msg1, msg2, msg3;
         switch (this) {
         case UPDATE_MESSAGE:
             msg1 = new TextComponentTranslation("rebind.update.newVersion");
-            msg2 = new TextComponentString(" [" + ReBindMain.VERSION + "/" + args[0] + "]");        
+            msg2 = new TextComponentString(" " + this.formatVersion(ReBindMain.VERSION_CUSTOM) + " / " + this.formatVersion(args[0]));        
             ClientReference.showChatMessageClient(prefix().appendSibling(msg1).appendSibling(msg2));
             msg1 = new TextComponentTranslation("rebind.update.projectPage");
             msg2 = new TextComponentString(": ");
@@ -64,22 +75,17 @@ public enum EnumChatMessages {
                 }
             }
             break;
-        case COMMAND_REBIND_ERR_NO_UNKNOWN_KEY_BINDINGS:
-            msg1 = new TextComponentTranslation("rebind.command.err.noUnknownKeys");
-            msg1.getStyle().setColor(TextFormatting.RED);
-            ClientReference.showChatMessageClient(prefix().appendSibling(msg1));
-            break;
         case COMMAND_REBIND_LIST:
             ITextComponent modNameLog, modName, nameLog, name, codeLog, code;
-            Multimap<String, KeyBindingProperty> propsByModnames = LinkedHashMultimap.<String, KeyBindingProperty>create();
+            Multimap<String, KeyBindingWrapper> propsByModnames = LinkedHashMultimap.<String, KeyBindingWrapper>create();
             Set<String> sortedModNames = new TreeSet<String>();
-            for (KeyBindingProperty property : KeyBindingProperty.UNKNOWN) {
+            for (KeyBindingWrapper property : KeyBindingWrapper.UNKNOWN) {
                 propsByModnames.put(property.getModName(), property);
                 sortedModNames.add(property.getModName());
             }
             ClientReference.showChatMessageClient(prefix().appendSibling(new TextComponentTranslation("rebind.command.list")));
             for (String modNameStr : sortedModNames) {
-                for (KeyBindingProperty property : propsByModnames.get(modNameStr)) {
+                for (KeyBindingWrapper property : propsByModnames.get(modNameStr)) {
                     modNameLog = new TextComponentString("M: ");
                     modNameLog.getStyle().setColor(TextFormatting.AQUA);
                     modName = new TextComponentString(property.getModName());
@@ -96,14 +102,19 @@ public enum EnumChatMessages {
                 ClientReference.showChatMessageClient(new TextComponentString(""));
             }
             break;
-        case COMMAND_REBIND_ERR_EXTERNAL_CONFIG_DISABLED:
-            msg1 = new TextComponentTranslation("rebind.command.err.externalConfigDisabled");
-            msg1.getStyle().setColor(TextFormatting.RED);
-            ClientReference.showChatMessageClient(prefix().appendSibling(msg1));
-            break;
         case COMMAND_REBIND_UPDATE:
             msg1 = new TextComponentTranslation("rebind.command.update");
             msg1.getStyle().setColor(TextFormatting.GREEN);
+            ClientReference.showChatMessageClient(prefix().appendSibling(msg1));
+            break;
+        case COMMAND_REBIND_ERR_NO_UNKNOWN_KEY_BINDINGS:
+            msg1 = new TextComponentTranslation("rebind.command.err.noUnknownKeys");
+            msg1.getStyle().setColor(TextFormatting.RED);
+            ClientReference.showChatMessageClient(prefix().appendSibling(msg1));
+            break;
+        case COMMAND_REBIND_ERR_EXTERNAL_CONFIG_DISABLED:
+            msg1 = new TextComponentTranslation("rebind.command.err.externalConfigDisabled");
+            msg1.getStyle().setColor(TextFormatting.RED);
             ClientReference.showChatMessageClient(prefix().appendSibling(msg1));
             break;
         }
