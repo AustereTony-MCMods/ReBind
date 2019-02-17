@@ -48,6 +48,9 @@ public class ReBindClassTransformer implements IClassTransformer {
 
         case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":
             return patch(basicClass, EnumInputClasses.CONTROLING_GUI_NEW_KEY_BINDING_LIST);
+            
+        case "dmillerw.menu.handler.KeyboardHandler":
+            return patch(basicClass, EnumInputClasses.MM_KEYBOARD_HANDLER);
         }
         return basicClass;
     }

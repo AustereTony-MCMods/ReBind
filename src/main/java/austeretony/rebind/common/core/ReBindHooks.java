@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
+import org.lwjgl.input.Keyboard;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.LinkedHashMultimap;
@@ -205,6 +206,10 @@ public class ReBindHooks {
 
     public static boolean isNarratorKeyPressed(int key) {
         return ReBindMain.keyBindingNarrator.isActiveAndMatches(key);
+    }
+
+    public static boolean isMineMenuKeyPressed(KeyBinding keyBinding) {
+        return keyBinding.isActiveAndMatches(Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey());
     }
 
     public static String getKeyBindingName(String keyName) {

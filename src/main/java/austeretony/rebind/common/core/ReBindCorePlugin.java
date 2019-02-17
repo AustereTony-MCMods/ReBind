@@ -16,7 +16,7 @@ public class ReBindCorePlugin implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[] { ReBindClassTransformer.class.getName() };
+        return new String[] {ReBindClassTransformer.class.getName()};
     }
 
     @Override

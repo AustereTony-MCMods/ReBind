@@ -3,7 +3,8 @@
     "external_config": true,
     "rewrite_controls": false,
     "debug_mode": true,
-    "custom_update_checker": false
+    "custom_update_checker": false,
+    "fix_minemenu_keybinding": true
   },
   "game": {
     "auto_jump": false

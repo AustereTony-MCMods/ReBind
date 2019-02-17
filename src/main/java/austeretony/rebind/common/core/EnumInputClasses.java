@@ -14,6 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import austeretony.rebind.common.config.EnumConfigSettings;
+
 public enum EnumInputClasses {
 
     FORGE_FML_CLIENT_HANDLER("Forge", "FMLClientHandler", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
@@ -25,7 +27,9 @@ public enum EnumInputClasses {
     MC_GUI_CONTAINER("Minecraft", "GuiContainer", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),    
     MC_ENTITY_PLAYER_SP("Minecraft", "EntityPlayerSP", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
 
-    CONTROLING_GUI_NEW_KEY_BINDING_LIST("Controling", "GuiNewKeyBindingList", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+    CONTROLING_GUI_NEW_KEY_BINDING_LIST("Controling", "GuiNewKeyBindingList", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
+
+    MM_KEYBOARD_HANDLER("MineMenu", "KeyboardHandler", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
     private static final String HOOKS_CLASS = "austeretony/rebind/common/core/ReBindHooks";
 
@@ -44,6 +48,7 @@ public enum EnumInputClasses {
         switch (this) {
         case FORGE_FML_CLIENT_HANDLER:
             return patchForgeFMLClientHandler(classNode);
+
         case MC_KEY_BINDING:
             return patchMCKeyBinding(classNode);
         case MC_GUI_KEY_BINDING_LIST:
@@ -56,8 +61,12 @@ public enum EnumInputClasses {
             return patchMCGuiContainer(classNode);
         case MC_ENTITY_PLAYER_SP:
             return patchMCEntityPlayerSP(classNode);
+
         case CONTROLING_GUI_NEW_KEY_BINDING_LIST:
             return patchControlingGuiKeyBindingList(classNode);
+
+        case MM_KEYBOARD_HANDLER:
+            return EnumConfigSettings.FIX_MM_KEYBINDING.isEnabled() ? patchMMKeyboardHanndler(classNode) : false;
         }
         return false;
     }
@@ -371,5 +380,39 @@ public enum EnumInputClasses {
 
     private boolean patchControlingGuiKeyBindingList(ClassNode classNode) {
         return patchMCGuiKeyBindingList(classNode);
+    }
+
+    private boolean patchMMKeyboardHanndler(ClassNode classNode) {
+        String
+        wheelFieldName = "WHEEL",
+        onClientTickMethodName = "onClientTick",
+        keyboardHandlerClassname = "dmillerw/menu/handler/KeyboardHandler",
+        keyBindingClassName = "net/minecraft/client/settings/KeyBinding";
+        boolean isSuccessful = false;
+        AbstractInsnNode currentInsn;    
+
+        for (MethodNode methodNode : classNode.methods) {
+            if (methodNode.name.equals(onClientTickMethodName)) {
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();
+                while (insnIterator.hasNext()) {
+                    currentInsn = insnIterator.next();
+                    if (currentInsn.getOpcode() == Opcodes.IF_ICMPEQ) {
+                        InsnList nodesList = new InsnList();
+                        nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, keyboardHandlerClassname, wheelFieldName, "L" + keyBindingClassName + ";"));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isMineMenuKeyPressed", "(L" + keyBindingClassName + ";)Z", false));
+                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+                        methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious().getPrevious(), nodesList);
+                        methodNode.instructions.remove(currentInsn.getPrevious().getPrevious().getPrevious());
+                        methodNode.instructions.remove(currentInsn.getPrevious().getPrevious());
+                        methodNode.instructions.remove(currentInsn.getPrevious());
+                        methodNode.instructions.remove(currentInsn);
+                        isSuccessful = true;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        return isSuccessful;
     }
 }

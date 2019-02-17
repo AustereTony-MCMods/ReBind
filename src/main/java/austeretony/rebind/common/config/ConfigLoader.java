@@ -140,6 +140,7 @@ public class ConfigLoader {
         EnumConfigSettings.REWRITE_CONTROLS.initBoolean(configFile);
         EnumConfigSettings.DEBUG_MODE.initBoolean(configFile);
         EnumConfigSettings.CHECK_UPDATES.initBoolean(configFile);
+        EnumConfigSettings.FIX_MM_KEYBINDING.initBoolean(configFile);
         EnumConfigSettings.AUTO_JUMP.initBoolean(configFile);
         EnumConfigSettings.PLAYER_SPRINT.initBoolean(configFile);
         EnumConfigSettings.DOUBLE_TAP_FORWARD_SPRINT.initBoolean(configFile);

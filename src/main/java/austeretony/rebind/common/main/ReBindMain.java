@@ -27,7 +27,7 @@ public class ReBindMain {
     public static final String 
     MODID = "rebind", 
     NAME = "ReBind", 
-    VERSION = "2.7.3", 
+    VERSION = "2.7.4", 
     VERSION_CUSTOM = VERSION + ":release:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/ReBind/info/mod_versions_forge.json",

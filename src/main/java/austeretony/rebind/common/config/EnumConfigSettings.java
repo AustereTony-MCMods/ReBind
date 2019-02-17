@@ -9,6 +9,7 @@ public enum EnumConfigSettings {
     REWRITE_CONTROLS("main", "rewrite_controls"), 
     DEBUG_MODE("main", "debug_mode"),
     CHECK_UPDATES("main", "custom_update_checker"),
+    FIX_MM_KEYBINDING("main", "fix_minemenu_keybinding"),
     AUTO_JUMP("game", "auto_jump"),
     PLAYER_SPRINT("controls", "player_sprint"),
     DOUBLE_TAP_FORWARD_SPRINT("controls", "double_tap_forward_sprint"),
