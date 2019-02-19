@@ -1,11 +1,8 @@
 {
   "1.7.10": {
-    "available": "2.7.2",		
+    "available": "2.7.5",		
     "changelog": [			
-	  "Fixed Debug Screen (F3) key combinations.",
-	  "<Rewrite Settings> option now disabled by default.",
-	  "Configs generation fix.",
-	  "Some code optimizations."
+	  "Visit home page for information."
     ]
   },
   "1.8.9": {
@@ -45,9 +42,9 @@
     ]
   },
   "1.12.2": {
-    "available": "2.7.4",		
+    "available": "2.7.5",		
     "changelog": [			
-	  "MineMenu keybinding fix."
+	  "Visit home page for information."
     ]
   }
 }

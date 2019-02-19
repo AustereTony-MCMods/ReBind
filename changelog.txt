@@ -1,3 +1,8 @@
+2.7.5
++Added easy way to provide custom localization and absent localization for new keybindings.
+See wiki for more information.
++Fixes:
+ - Fixed crash on menu controls open if some keybindings were disabled in config.
 2.7.4
 +Added fix for MineMenu keybinding behavior, it will work properly if combined with 
 SHIFT, CTRL or ALT (solution for issue #4). Fix can be disabled in config file (if MM author 
