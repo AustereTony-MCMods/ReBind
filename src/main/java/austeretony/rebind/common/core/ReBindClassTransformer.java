@@ -15,13 +15,10 @@ public class ReBindClassTransformer implements IClassTransformer {
 
     public static final Logger CORE_LOGGER = LogManager.getLogger("ReBind Core");
 
-    private static final String HOOKS_CLASS = "austeretony/rebind/common/core/ReBindHooks";
-
     public ReBindClassTransformer() {
         try {
             ConfigLoader.load();
-        }
-        catch (JsonSyntaxException exception) {
+        } catch (JsonSyntaxException exception) {
             CORE_LOGGER.error("Config parsing failure! This will cause mess up in controls. Fix syntax errors!");
             exception.printStackTrace();
         }
@@ -33,6 +30,8 @@ public class ReBindClassTransformer implements IClassTransformer {
         case "net.minecraftforge.fml.client.FMLClientHandler":
             return patch(basicClass, EnumInputClasses.FORGE_FML_CLIENT_HANDLER);
 
+        case "net.minecraft.client.resources.Locale":                    
+            return patch(basicClass, EnumInputClasses.MC_LOCALE);
         case "net.minecraft.client.settings.KeyBinding":
             return patch(basicClass, EnumInputClasses.MC_KEY_BINDING);
         case "net.minecraft.client.gui.GuiKeyBindingList":
@@ -48,7 +47,7 @@ public class ReBindClassTransformer implements IClassTransformer {
 
         case "us.getfluxed.controlsearch.client.gui.GuiNewKeyBindingList":
             return patch(basicClass, EnumInputClasses.CONTROLING_GUI_NEW_KEY_BINDING_LIST);
-            
+
         case "dmillerw.menu.handler.KeyboardHandler":
             return patch(basicClass, EnumInputClasses.MM_KEYBOARD_HANDLER);
         }

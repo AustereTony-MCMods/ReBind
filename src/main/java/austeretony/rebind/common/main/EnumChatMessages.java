@@ -41,7 +41,7 @@ public enum EnumChatMessages {
     private String formatVersion(String input) {
         try {  
             String[] splitted = input.split("[:]");
-            return splitted[0] + " " + splitted[1] + " rev: " + splitted[2];
+            return splitted[0] + " " + splitted[1] + " r-" + splitted[2];
         } catch (Exception exception) {
             exception.printStackTrace();
         }

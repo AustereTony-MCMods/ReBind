@@ -24,6 +24,7 @@ import com.google.common.collect.Multimap;
 
 import austeretony.rebind.client.keybinding.KeyBindingWrapper;
 import austeretony.rebind.client.reference.ClientReference;
+import austeretony.rebind.common.config.ConfigLoader;
 import austeretony.rebind.common.config.EnumConfigSettings;
 import austeretony.rebind.common.main.ReBindMain;
 import austeretony.rebind.common.reference.CommonReference;
@@ -42,6 +43,10 @@ public class ReBindHooks {
     private static KeyBindingWrapper keyBindingProperty;
 
     private static int keyCount;
+
+    public static void loadCustomLocalization(List<String> languageList, Map<String, String> properties) {
+        ConfigLoader.loadCustomLocalization(languageList, properties);
+    }
 
     public static void removeHiddenKeyBindings() {
         if (ClientReference.getGameSettings() != null) {
@@ -112,8 +117,10 @@ public class ReBindHooks {
     }
 
     public static KeyBinding[] sortKeyBindings() {
-        if (KeyBindingWrapper.SORTED_KEYBINDINGS.isEmpty()) {     
-            removeHiddenKeyBindings();     
+        if (KeyBindingWrapper.SORTED_KEYBINDINGS.isEmpty()) {
+            removeHiddenKeyBindings();
+            List<KeyBinding> bindingsList = new ArrayList<KeyBinding>(Arrays.asList(ClientReference.getKeyBindings()));
+            KeyBinding keyBinding;
             Iterator<Map.Entry<String, KeyBindingWrapper>> propIterator = KeyBindingWrapper.PROPERTIES_BY_IDS.entrySet().iterator();                                      
             KeyBindingWrapper prop;                        
             while (propIterator.hasNext()) {
@@ -123,11 +130,15 @@ public class ReBindHooks {
                     continue;
                 }                                           
                 if (prop.isKnown()) {        
-                    if (prop.isEnabled() && prop.isFullyLoaded() && !prop.isKeyBindingMerged())
-                        KeyBindingWrapper.SORTED_KEYBINDINGS.add(prop.getKeyBinding());
-                } else
-                    break;
-            }         
+                    if (prop.isEnabled() && prop.isFullyLoaded() && !prop.isKeyBindingMerged()) {
+                        keyBinding = prop.getKeyBinding();                       
+                        if (bindingsList.contains(keyBinding))
+                            KeyBindingWrapper.SORTED_KEYBINDINGS.add(prop.getKeyBinding());
+                    }
+                } else {
+                    continue;
+                }
+            }
             Multimap<String, KeyBindingWrapper> propsByModnames = LinkedHashMultimap.<String, KeyBindingWrapper>create();
             Set<String> sortedModNames = new TreeSet<String>();
             for (KeyBindingWrapper property : KeyBindingWrapper.UNKNOWN) {
@@ -135,12 +146,14 @@ public class ReBindHooks {
                 sortedModNames.add(property.getModName());
             }
             for (String modName : sortedModNames) {
-                for (KeyBindingWrapper property : propsByModnames.get(modName))            
-                    KeyBindingWrapper.SORTED_KEYBINDINGS.add(property.getKeyBinding());
-
+                for (KeyBindingWrapper property : propsByModnames.get(modName)) {
+                    keyBinding = property.getKeyBinding();                       
+                    if (bindingsList.contains(keyBinding))
+                        KeyBindingWrapper.SORTED_KEYBINDINGS.add(property.getKeyBinding());
+                }
             }
         }
-        return KeyBindingWrapper.SORTED_KEYBINDINGS.toArray(new KeyBinding[KeyBindingWrapper.SORTED_KEYBINDINGS.size()]);
+        return KeyBindingWrapper.SORTED_KEYBINDINGS.toArray(new KeyBinding[KeyBindingWrapper.SORTED_KEYBINDINGS.size()]);  
     }
 
     public static boolean isKeyDown(KeyBinding keyBinding) {

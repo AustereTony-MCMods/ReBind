@@ -4,6 +4,7 @@
     "rewrite_controls": false,
     "debug_mode": true,
     "custom_update_checker": false,
+    "enable_custom_localization": false,
     "fix_minemenu_keybinding": true
   },
   "game": {

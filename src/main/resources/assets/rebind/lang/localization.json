@@ -1,0 +1,8 @@
+{
+  "en_us": [
+    {"key": "key.quit", "value":"Quit"},
+    {"key": "key.hideHUD", "value":"Hide HUD"},
+    {"key": "key.debugScreen", "value":"Debug Screen"},
+    {"key": "key.switchShader", "value":"Switch Shader"}
+  ]
+}

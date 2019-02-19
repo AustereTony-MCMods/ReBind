@@ -20,6 +20,7 @@ public enum EnumInputClasses {
 
     FORGE_FML_CLIENT_HANDLER("Forge", "FMLClientHandler", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
 
+    MC_LOCALE("Minecraft", "Locale", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_KEY_BINDING("Minecraft", "KeyBinding", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_GUI_KEY_BINDING_LIST("Minecraft", "GuiKeyBindingList", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_MINECRAFT("Minecraft", "Minecraft", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
@@ -49,6 +50,8 @@ public enum EnumInputClasses {
         case FORGE_FML_CLIENT_HANDLER:
             return patchForgeFMLClientHandler(classNode);
 
+        case MC_LOCALE:
+            return pathcMCLocale(classNode);
         case MC_KEY_BINDING:
             return patchMCKeyBinding(classNode);
         case MC_GUI_KEY_BINDING_LIST:
@@ -89,6 +92,43 @@ public enum EnumInputClasses {
                         break;
                     }
                 }
+                break;
+            }
+        }
+        return isSuccessful;
+    }
+
+    private boolean pathcMCLocale(ClassNode classNode) {
+        String
+        propertiesFieldName = ReBindCorePlugin.isObfuscated() ? "a" : "properties",
+                loadLocaleDataFilesMethodName = ReBindCorePlugin.isObfuscated() ? "a" : "loadLocaleDataFiles",
+                        localeClassName = ReBindCorePlugin.isObfuscated() ? "cfb" : "net/minecraft/client/resources/Locale",
+                                iResourceManagerClassName = ReBindCorePlugin.isObfuscated() ? "cep" : "net/minecraft/client/resources/IResourceManager",
+                                        listClassName = "java/util/List",
+                                        mapClassName = "java/util/Map";
+        boolean isSuccessful = false;   
+        int invokespecialCount = 0;
+        AbstractInsnNode currentInsn;
+
+        for (MethodNode methodNode : classNode.methods) {               
+            if (methodNode.name.equals(loadLocaleDataFilesMethodName) && methodNode.desc.equals("(L" + iResourceManagerClassName + ";L" + listClassName + ";)V")) {                         
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
+                while (insnIterator.hasNext()) {                        
+                    currentInsn = insnIterator.next();                  
+                    if (currentInsn.getOpcode() == Opcodes.INVOKESPECIAL) {    
+                        invokespecialCount++;
+                        if (invokespecialCount == 3) {
+                            InsnList nodesList = new InsnList();   
+                            nodesList.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                            nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                            nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, localeClassName, propertiesFieldName, "L" + mapClassName + ";"));
+                            nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "loadCustomLocalization", "(L" + listClassName + ";L" + mapClassName + ";)V", false));
+                            methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
+                            isSuccessful = true;                        
+                            break;
+                        }
+                    }
+                }    
                 break;
             }
         }
