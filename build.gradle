@@ -17,8 +17,8 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-2.7.2"
-group= "ru.austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = "1.7.10-2.7.5-0"
+group= "austeretony.rebind" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "rebind"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -29,6 +29,7 @@ compileJava {
 minecraft {
     version = "1.7.10-10.13.4.1558-1.7.10"
     runDir = "eclipse"
+	replace '@FINGERPRINT@', sign
 }
 
 dependencies {
@@ -69,7 +70,7 @@ processResources
 
 jar {
    manifest {
-       attributes 'FMLCorePlugin': 'ru.austeretony.rebind.core.ReBindCorePlugin'
+       attributes 'FMLCorePlugin': 'austeretony.rebind.common.core.ReBindCorePlugin'
        attributes 'FMLCorePluginContainsFMLMod': 'true'
 	   attributes 'FMLAT': 'rebind_at.cfg'
    }

@@ -2,11 +2,10 @@
   "main": {
     "external_config": true,
     "rewrite_controls": false,
-    "debug_mode": false,
-    "updates": {
-      "update_checker": true,
-      "show_changelog": false
-    }
+    "debug_mode": true,
+    "custom_update_checker": false,
+    "enable_custom_localization": false,
+    "fix_minemenu_keybinding": true
   },
   "game": {
     "auto_jump": false
